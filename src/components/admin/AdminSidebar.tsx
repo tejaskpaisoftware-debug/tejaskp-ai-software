@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const menuItems = [
     { name: "Overview", href: "/dashboard/admin", icon: "📊" },
@@ -51,7 +51,13 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
-    const [openSubmenu, setOpenSubmenu] = useState<string | null>("Users"); // Default open for visibility
+    const [openSubmenu, setOpenSubmenu] = useState<string | null>("Users");
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+    // Close mobile sidebar on route change
+    useEffect(() => {
+        setIsMobileOpen(false);
+    }, [pathname]);
 
     const toggleSubmenu = (name: string) => {
         setOpenSubmenu(openSubmenu === name ? null : name);
@@ -97,10 +103,10 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
         <>
             {/* Mobile Toggle Button */}
             <button
-                onClick={() => setOpenSubmenu(openSubmenu === 'MOBILE_OPEN' ? null : 'MOBILE_OPEN')}
+                onClick={() => setIsMobileOpen(!isMobileOpen)}
                 className="md:hidden fixed top-4 right-4 z-[60] bg-gold-theme text-black p-2 rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
             >
-                {openSubmenu === 'MOBILE_OPEN' ? (
+                {isMobileOpen ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -108,10 +114,10 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
             </button>
 
             {/* Sidebar Overlay for Mobile */}
-            {openSubmenu === 'MOBILE_OPEN' && (
+            {isMobileOpen && (
                 <div
                     className="fixed inset-0 bg-black/40 backdrop-blur-md z-[45] md:hidden"
-                    onClick={() => setOpenSubmenu(null)}
+                    onClick={() => setIsMobileOpen(false)}
                 />
             )}
 
@@ -128,7 +134,7 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
             )}
 
             <div className={`w-64 bg-background/95 backdrop-blur-xl border-r border-theme h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-transform duration-300
-                ${openSubmenu === 'MOBILE_OPEN' ? 'translate-x-0' : '-translate-x-full'}
+                ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
                 ${isDesktopOpen ? 'md:translate-x-0' : 'md:-translate-x-full'}
             `}>
                 <div className="flex items-center justify-between mb-10">
@@ -137,8 +143,8 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                         <span className="text-xl font-bold text-gold-theme tracking-wider">TEJASKP</span>
                     </div>
                     {/* Desktop Collapse Button (Inside Panel) */}
-                    <button onClick={toggleDesktop} className="hidden md:block text-gold-theme hover:bg-white/10 p-2 rounded-lg">
-                        ☰
+                    <button onClick={toggleDesktop} className="hidden md:flex text-gold-theme hover:bg-white/10 p-2 rounded-lg items-center justify-center transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                 </div>
 

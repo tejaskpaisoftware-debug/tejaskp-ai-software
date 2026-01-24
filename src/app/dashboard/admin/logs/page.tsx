@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+// AdminSidebar removed (handled by layout)
 import { motion } from "framer-motion";
 
 type UserStatus = "PENDING" | "ACTIVE" | "BLOCKED";
@@ -121,168 +121,164 @@ export default function SystemLogsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans pl-64">
-            <AdminSidebar />
-
-            <main className="p-8 max-w-6xl mx-auto relative">
-                <header className="mb-10 flex justify-between items-end">
-                    <div>
-                        <h1 className="text-3xl font-bold text-foreground tracking-widest">SYSTEM LOGS & GOVERNANCE</h1>
-                        <p className="text-gold-theme/60 mt-1">Manage user access and monitor registration activity.</p>
-                    </div>
-                    <button onClick={fetchUsers} className="text-xs text-gold-theme hover:text-foreground underline">Refresh Data</button>
-                </header>
-
-                <div className="bg-card/40 border border-theme rounded-2xl p-1 backdrop-blur-sm overflow-hidden">
-                    <table className="w-full text-left">
-                        <thead className="bg-card/40 text-xs uppercase text-gold-theme font-bold tracking-wider">
-                            <tr>
-                                <th className="p-4">User</th>
-                                <th className="p-4">Role</th>
-                                <th className="p-4">Contact (Mobile / Email)</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gold-500/10 text-sm">
-                            {loading ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-gray-500">Loading system data...</td></tr>
-                            ) : users.length === 0 ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-gray-500">No registered users found.</td></tr>
-                            ) : (
-                                users.map((user) => (
-                                    <motion.tr
-                                        key={user.mobile}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="hover:bg-foreground/5 transition-colors"
-                                    >
-                                        <td className="p-4 font-bold text-foreground">{user.name || "N/A"}</td>
-                                        <td className="p-4 text-gray-400">{user.role}</td>
-                                        <td className="p-4">
-                                            <div className="font-mono text-gold-200">{user.mobile}</div>
-                                            <div className="text-xs text-gray-500">{user.email}</div>
-                                        </td>
-                                        <td className="p-4">
-                                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${user.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
-                                                user.status === 'BLOCKED' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
-                                                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'
-                                                }`}>
-                                                {user.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 flex justify-center gap-2">
-                                            <button
-                                                onClick={() => handleEditClick(user)}
-                                                className="p-2 hover:bg-blue-500/20 text-blue-400 rounded transition-colors"
-                                                title="Edit Details"
-                                            >
-                                                ✏️
-                                            </button>
-                                            {user.status !== "ACTIVE" && (
-                                                <button
-                                                    onClick={() => updateStatus(user.mobile, "ACTIVE")}
-                                                    className="p-2 hover:bg-green-500/20 text-green-500 rounded transition-colors"
-                                                    title="Approve / Activate"
-                                                >
-                                                    ✅
-                                                </button>
-                                            )}
-                                            {user.status !== "PENDING" && user.role !== "ADMIN" && (
-                                                <button
-                                                    onClick={() => updateStatus(user.mobile, "PENDING")}
-                                                    className="p-2 hover:bg-yellow-500/20 text-yellow-500 rounded transition-colors"
-                                                    title="Pause / Set Pending"
-                                                >
-                                                    ⏸
-                                                </button>
-                                            )}
-                                            {user.status !== "BLOCKED" && user.role !== "ADMIN" && (
-                                                <button
-                                                    onClick={() => updateStatus(user.mobile, "BLOCKED")}
-                                                    className="p-2 hover:bg-red-500/20 text-red-500 rounded transition-colors"
-                                                    title="Stop / Block"
-                                                >
-                                                    ⛔
-                                                </button>
-                                            )}
-                                            {user.role !== "ADMIN" && (
-                                                <button
-                                                    onClick={() => deleteUser(user.mobile)}
-                                                    className="p-2 hover:bg-red-900/40 text-red-400 rounded transition-colors border border-red-500/10 ml-2"
-                                                    title="Permanently Delete"
-                                                >
-                                                    🗑️
-                                                </button>
-                                            )}
-                                        </td>
-                                    </motion.tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+        <div className="max-w-6xl mx-auto relative">
+            <header className="mb-10 flex justify-between items-end">
+                <div>
+                    <h1 className="text-3xl font-bold text-foreground tracking-widest">SYSTEM LOGS & GOVERNANCE</h1>
+                    <p className="text-gold-theme/60 mt-1">Manage user access and monitor registration activity.</p>
                 </div>
+                <button onClick={fetchUsers} className="text-xs text-gold-theme hover:text-foreground underline">Refresh Data</button>
+            </header>
 
-                {/* EDIT MODAL */}
-                {editingUser && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-                        <div className="bg-card border border-gold-500/30 p-8 rounded-2xl w-full max-w-md shadow-2xl relative">
-                            <button onClick={() => setEditingUser(null)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
-                            <h2 className="text-2xl font-bold text-foreground mb-6">Edit User Details</h2>
-                            <form onSubmit={handleEditSave} className="space-y-4">
-                                <div>
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Full Name</label>
-                                    <input
-                                        className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-foreground focus:border-gold-500 focus:outline-none"
-                                        value={editingUser.name}
-                                        onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="opacity-50 cursor-not-allowed">
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Mobile (ID) - Cannot Change</label>
-                                    <input
-                                        className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-gray-400 focus:outline-none"
-                                        value={editingUser.mobile}
-                                        readOnly
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Role</label>
-                                    <select
-                                        className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-foreground focus:border-gold-500 focus:outline-none"
-                                        value={editingUser.role}
-                                        // @ts-ignore
-                                        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                                    >
-                                        <option value="STUDENT">STUDENT</option>
-                                        <option value="EMPLOYEE">EMPLOYEE</option>
-                                        <option value="CLIENT">CLIENT</option>
-                                        <option value="ADMIN">ADMIN</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Email (Compulsory)</label>
-                                    <input
-                                        type="email"
-                                        className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-foreground focus:border-gold-500 focus:outline-none"
-                                        value={editingUser.email || ""}
-                                        // @ts-ignore
-                                        onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                                        required
-                                        placeholder="Required Email Address"
-                                    />
-                                </div>
-                                <div className="pt-4 flex gap-4">
-                                    <button type="button" onClick={() => setEditingUser(null)} className="flex-1 py-3 bg-gray-700 text-foreground rounded hover:bg-gray-600 font-bold">CANCEL</button>
-                                    <button type="submit" className="flex-1 py-3 bg-gold-500 text-obsidian rounded hover:bg-gold-400 font-bold">SAVE CHANGES</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div >
-                )
-                }
-            </main >
-        </div >
+            <div className="bg-card/40 border border-theme rounded-2xl p-1 backdrop-blur-sm overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-card/40 text-xs uppercase text-gold-theme font-bold tracking-wider">
+                        <tr>
+                            <th className="p-4">User</th>
+                            <th className="p-4">Role</th>
+                            <th className="p-4">Contact (Mobile / Email)</th>
+                            <th className="p-4">Status</th>
+                            <th className="p-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gold-500/10 text-sm">
+                        {loading ? (
+                            <tr><td colSpan={5} className="p-8 text-center text-gray-500">Loading system data...</td></tr>
+                        ) : users.length === 0 ? (
+                            <tr><td colSpan={5} className="p-8 text-center text-gray-500">No registered users found.</td></tr>
+                        ) : (
+                            users.map((user) => (
+                                <motion.tr
+                                    key={user.mobile}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="hover:bg-foreground/5 transition-colors"
+                                >
+                                    <td className="p-4 font-bold text-foreground">{user.name || "N/A"}</td>
+                                    <td className="p-4 text-gray-400">{user.role}</td>
+                                    <td className="p-4">
+                                        <div className="font-mono text-gold-200">{user.mobile}</div>
+                                        <div className="text-xs text-gray-500">{user.email}</div>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${user.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                                            user.status === 'BLOCKED' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
+                                                'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'
+                                            }`}>
+                                            {user.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 flex justify-center gap-2">
+                                        <button
+                                            onClick={() => handleEditClick(user)}
+                                            className="p-2 hover:bg-blue-500/20 text-blue-400 rounded transition-colors"
+                                            title="Edit Details"
+                                        >
+                                            ✏️
+                                        </button>
+                                        {user.status !== "ACTIVE" && (
+                                            <button
+                                                onClick={() => updateStatus(user.mobile, "ACTIVE")}
+                                                className="p-2 hover:bg-green-500/20 text-green-500 rounded transition-colors"
+                                                title="Approve / Activate"
+                                            >
+                                                ✅
+                                            </button>
+                                        )}
+                                        {user.status !== "PENDING" && user.role !== "ADMIN" && (
+                                            <button
+                                                onClick={() => updateStatus(user.mobile, "PENDING")}
+                                                className="p-2 hover:bg-yellow-500/20 text-yellow-500 rounded transition-colors"
+                                                title="Pause / Set Pending"
+                                            >
+                                                ⏸
+                                            </button>
+                                        )}
+                                        {user.status !== "BLOCKED" && user.role !== "ADMIN" && (
+                                            <button
+                                                onClick={() => updateStatus(user.mobile, "BLOCKED")}
+                                                className="p-2 hover:bg-red-500/20 text-red-500 rounded transition-colors"
+                                                title="Stop / Block"
+                                            >
+                                                ⛔
+                                            </button>
+                                        )}
+                                        {user.role !== "ADMIN" && (
+                                            <button
+                                                onClick={() => deleteUser(user.mobile)}
+                                                className="p-2 hover:bg-red-900/40 text-red-400 rounded transition-colors border border-red-500/10 ml-2"
+                                                title="Permanently Delete"
+                                            >
+                                                🗑️
+                                            </button>
+                                        )}
+                                    </td>
+                                </motion.tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* EDIT MODAL */}
+            {editingUser && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-card border border-gold-500/30 p-8 rounded-2xl w-full max-w-md shadow-2xl relative">
+                        <button onClick={() => setEditingUser(null)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
+                        <h2 className="text-2xl font-bold text-foreground mb-6">Edit User Details</h2>
+                        <form onSubmit={handleEditSave} className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Full Name</label>
+                                <input
+                                    className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-foreground focus:border-gold-500 focus:outline-none"
+                                    value={editingUser.name}
+                                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="opacity-50 cursor-not-allowed">
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Mobile (ID) - Cannot Change</label>
+                                <input
+                                    className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-gray-400 focus:outline-none"
+                                    value={editingUser.mobile}
+                                    readOnly
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Role</label>
+                                <select
+                                    className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-foreground focus:border-gold-500 focus:outline-none"
+                                    value={editingUser.role}
+                                    // @ts-ignore
+                                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                                >
+                                    <option value="STUDENT">STUDENT</option>
+                                    <option value="EMPLOYEE">EMPLOYEE</option>
+                                    <option value="CLIENT">CLIENT</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-1 block">Email (Compulsory)</label>
+                                <input
+                                    type="email"
+                                    className="w-full bg-background/50 border border-gray-700 rounded px-4 py-2 text-foreground focus:border-gold-500 focus:outline-none"
+                                    value={editingUser.email || ""}
+                                    // @ts-ignore
+                                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                                    required
+                                    placeholder="Required Email Address"
+                                />
+                            </div>
+                            <div className="pt-4 flex gap-4">
+                                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 py-3 bg-gray-700 text-foreground rounded hover:bg-gray-600 font-bold">CANCEL</button>
+                                <button type="submit" className="flex-1 py-3 bg-gold-500 text-obsidian rounded hover:bg-gold-400 font-bold">SAVE CHANGES</button>
+                            </div>
+                        </form>
+                    </div>
+                </div >
+            )
+            }
+        </div>
     );
 }

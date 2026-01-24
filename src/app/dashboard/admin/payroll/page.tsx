@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+// AdminSidebar removed (handled by layout)
 import { motion } from "framer-motion";
 import SalarySlipTemplate from "@/components/documents/SalarySlipTemplate";
 import { toPng, toJpeg } from "html-to-image";
@@ -301,122 +301,118 @@ export default function PayrollPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground pl-64 font-sans relative z-10">
-            <AdminSidebar />
+        <>
+            <header className="flex justify-between items-center mb-8 border-b border-theme pb-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-foreground tracking-wider">PAYROLL AUTOMATION</h1>
+                    <p className="text-gold-theme/60">Batch Process Salary Slips</p>
+                </div>
+                <div className="flex gap-4">
+                    <select value={month} onChange={e => setMonth(e.target.value)} className="bg-card border border-gold-500/30 rounded p-2 text-foreground outline-none">
+                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                            <option key={m} value={m}>{m}</option>
+                        ))}
+                    </select>
+                    <select value={year} onChange={e => setYear(e.target.value)} className="bg-card border border-gold-500/30 rounded p-2 text-foreground outline-none">
+                        {[2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                    <button onClick={fetchEmployees} className="text-sm bg-gray-800 px-4 py-2 rounded text-foreground">Refresh</button>
+                </div>
+            </header>
 
-            <main className="p-8">
-                <header className="flex justify-between items-center mb-8 border-b border-theme pb-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-foreground tracking-wider">PAYROLL AUTOMATION</h1>
-                        <p className="text-gold-theme/60">Batch Process Salary Slips</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <select value={month} onChange={e => setMonth(e.target.value)} className="bg-card border border-gold-500/30 rounded p-2 text-foreground outline-none">
-                            {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
-                                <option key={m} value={m}>{m}</option>
-                            ))}
-                        </select>
-                        <select value={year} onChange={e => setYear(e.target.value)} className="bg-card border border-gold-500/30 rounded p-2 text-foreground outline-none">
-                            {[2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
-                        </select>
-                        <button onClick={fetchEmployees} className="text-sm bg-gray-800 px-4 py-2 rounded text-foreground">Refresh</button>
-                    </div>
-                </header>
+            {/* STATS */}
+            <div className="grid grid-cols-3 gap-6 mb-8">
+                <div className="bg-card/50 border border-theme p-6 rounded-xl">
+                    <h3 className="text-muted-foreground text-xs uppercase">Total Active Employees</h3>
+                    <p className="text-3xl font-bold text-foreground">{employees.length}</p>
+                </div>
+                <div className="bg-card/50 border border-green-500/20 p-6 rounded-xl">
+                    <h3 className="text-muted-foreground text-xs uppercase">Paid This Month</h3>
+                    <p className="text-3xl font-bold text-green-400">{employees.filter(e => e.paymentStatus === 'PAID').length}</p>
+                </div>
+                <div className="bg-card/50 border border-red-500/20 p-6 rounded-xl">
+                    <h3 className="text-muted-foreground text-xs uppercase">Pending Payment</h3>
+                    <p className="text-3xl font-bold text-red-400">{employees.filter(e => e.paymentStatus === 'PENDING').length}</p>
+                </div>
+            </div>
 
-                {/* STATS */}
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                    <div className="bg-card/50 border border-theme p-6 rounded-xl">
-                        <h3 className="text-muted-foreground text-xs uppercase">Total Active Employees</h3>
-                        <p className="text-3xl font-bold text-foreground">{employees.length}</p>
-                    </div>
-                    <div className="bg-card/50 border border-green-500/20 p-6 rounded-xl">
-                        <h3 className="text-muted-foreground text-xs uppercase">Paid This Month</h3>
-                        <p className="text-3xl font-bold text-green-400">{employees.filter(e => e.paymentStatus === 'PAID').length}</p>
-                    </div>
-                    <div className="bg-card/50 border border-red-500/20 p-6 rounded-xl">
-                        <h3 className="text-muted-foreground text-xs uppercase">Pending Payment</h3>
-                        <p className="text-3xl font-bold text-red-400">{employees.filter(e => e.paymentStatus === 'PENDING').length}</p>
-                    </div>
+            <div className="bg-card/30 border border-gold-500/10 rounded-xl overflow-hidden p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                        <span>📋</span> Disbursement List
+                    </h3>
+                    <button
+                        onClick={runBatchProcess}
+                        disabled={processing || employees.filter(e => e.paymentStatus === 'PENDING').length === 0}
+                        className={`px-8 py-3 rounded-lg font-bold shadow-lg transition-all ${processing ? 'bg-gray-600 text-gray-300 cursor-not-allowed' :
+                            employees.filter(e => e.paymentStatus === 'PENDING').length === 0 ? 'bg-gray-700 text-gray-500' :
+                                'bg-gold-500 hover:bg-gold-400 text-obsidian hover:scale-105'
+                            }`}
+                    >
+                        {processing ? processStatus : "🚀 Process All Pending Slips"}
+                    </button>
                 </div>
 
-                <div className="bg-card/30 border border-gold-500/10 rounded-xl overflow-hidden p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-bold flex items-center gap-2">
-                            <span>📋</span> Disbursement List
-                        </h3>
-                        <button
-                            onClick={runBatchProcess}
-                            disabled={processing || employees.filter(e => e.paymentStatus === 'PENDING').length === 0}
-                            className={`px-8 py-3 rounded-lg font-bold shadow-lg transition-all ${processing ? 'bg-gray-600 text-gray-300 cursor-not-allowed' :
-                                employees.filter(e => e.paymentStatus === 'PENDING').length === 0 ? 'bg-gray-700 text-gray-500' :
-                                    'bg-gold-500 hover:bg-gold-400 text-obsidian hover:scale-105'
-                                }`}
-                        >
-                            {processing ? processStatus : "🚀 Process All Pending Slips"}
-                        </button>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="text-xs uppercase text-gray-500 border-b border-gray-700">
-                                    <th className="p-4">Employee</th>
-                                    <th className="p-4">Role</th>
-                                    <th className="p-4">Salary Config</th>
-                                    <th className="p-4">Leaves (Excess)</th>
-                                    <th className="p-4">Balance Rem.</th>
-                                    <th className="p-4">Deduction</th>
-                                    <th className="p-4">Email</th>
-                                    <th className="p-4 text-center">Payment Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-theme/20">
-                                {loading ? (
-                                    <tr><td colSpan={5} className="p-8 text-center text-muted-foreground animate-pulse">Loading payroll data...</td></tr>
-                                ) : (
-                                    employees.map((emp) => (
-                                        <tr key={emp.id} className={`hover:bg-foreground/5 transition-colors cursor-pointer group ${emp.hasPendingLeaves ? 'animate-pulse bg-red-900/10' : ''}`} onClick={() => handleManageLeaves(emp)}>
-                                            <td className="p-4 font-bold text-foreground group-hover:text-gold-400 transition-colors flex items-center gap-3">
-                                                <div className={`w-2 h-2 rounded-full ${emp.hasPendingLeaves ? 'bg-red-500 animate-ping' : 'bg-green-500/50'}`}></div>
-                                                <div>
-                                                    {emp.name}
-                                                    <span className="block text-[10px] text-gray-600 font-normal">Click to Manage Leaves</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 text-sm text-muted-foreground">{emp.designation || 'Employee'}</td>
-                                            <td className="p-4">
-                                                {emp.salaryDetails ? (
-                                                    <span className="text-xs bg-green-900/30 text-green-400 px-2 py-1 rounded">Configured</span>
-                                                ) : (
-                                                    <span className="text-xs bg-red-900/30 text-red-400 px-2 py-1 rounded">Missing</span>
-                                                )}
-                                            </td>
-                                            <td className="p-4">
-                                                <div className="text-sm text-gray-300">
-                                                    {emp.leavesTaken} <span className="text-gray-500">({emp.extraLeaveDays > 0 ? `+${emp.extraLeaveDays}` : '0'})</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 text-xs text-gray-400">
-                                                CL: {emp.balances?.cl} | SL: {emp.balances?.sl}
-                                            </td>
-                                            <td className="p-4 text-red-400 font-bold">
-                                                {emp.leaveDeduction > 0 ? `-₹${emp.leaveDeduction}` : '-'}
-                                            </td>
-                                            <td className="p-4 text-sm text-gray-400">{emp.email || '-'}</td>
-                                            <td className="p-4 text-center">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${emp.paymentStatus === 'PAID' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                                                    }`}>
-                                                    {emp.paymentStatus}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="text-xs uppercase text-gray-500 border-b border-gray-700">
+                                <th className="p-4">Employee</th>
+                                <th className="p-4">Role</th>
+                                <th className="p-4">Salary Config</th>
+                                <th className="p-4">Leaves (Excess)</th>
+                                <th className="p-4">Balance Rem.</th>
+                                <th className="p-4">Deduction</th>
+                                <th className="p-4">Email</th>
+                                <th className="p-4 text-center">Payment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-theme/20">
+                            {loading ? (
+                                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground animate-pulse">Loading payroll data...</td></tr>
+                            ) : (
+                                employees.map((emp) => (
+                                    <tr key={emp.id} className={`hover:bg-foreground/5 transition-colors cursor-pointer group ${emp.hasPendingLeaves ? 'animate-pulse bg-red-900/10' : ''}`} onClick={() => handleManageLeaves(emp)}>
+                                        <td className="p-4 font-bold text-foreground group-hover:text-gold-400 transition-colors flex items-center gap-3">
+                                            <div className={`w-2 h-2 rounded-full ${emp.hasPendingLeaves ? 'bg-red-500 animate-ping' : 'bg-green-500/50'}`}></div>
+                                            <div>
+                                                {emp.name}
+                                                <span className="block text-[10px] text-gray-600 font-normal">Click to Manage Leaves</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-sm text-muted-foreground">{emp.designation || 'Employee'}</td>
+                                        <td className="p-4">
+                                            {emp.salaryDetails ? (
+                                                <span className="text-xs bg-green-900/30 text-green-400 px-2 py-1 rounded">Configured</span>
+                                            ) : (
+                                                <span className="text-xs bg-red-900/30 text-red-400 px-2 py-1 rounded">Missing</span>
+                                            )}
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="text-sm text-gray-300">
+                                                {emp.leavesTaken} <span className="text-gray-500">({emp.extraLeaveDays > 0 ? `+${emp.extraLeaveDays}` : '0'})</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-400">
+                                            CL: {emp.balances?.cl} | SL: {emp.balances?.sl}
+                                        </td>
+                                        <td className="p-4 text-red-400 font-bold">
+                                            {emp.leaveDeduction > 0 ? `-₹${emp.leaveDeduction}` : '-'}
+                                        </td>
+                                        <td className="p-4 text-sm text-gray-400">{emp.email || '-'}</td>
+                                        <td className="p-4 text-center">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${emp.paymentStatus === 'PAID' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                                }`}>
+                                                {emp.paymentStatus}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-            </main>
+            </div>
 
             {/* Hidden Container for Batch Rendering */}
             <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-100]">
@@ -427,77 +423,79 @@ export default function PayrollPage() {
                 )}
             </div>
             {/* Leave Management Modal */}
-            {isLeaveModalOpen && selectedEmployeeLeaves && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-card border border-gold-500/30 p-8 rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-hidden flex flex-col"
-                    >
-                        <div className="flex justify-between items-center mb-6 shrink-0">
-                            <div>
-                                <h2 className="text-2xl font-bold text-foreground mb-1">Manage Leaves</h2>
-                                <p className="text-gray-400 text-sm">Reviewing leaves for <span className="text-gold-400">{selectedEmployeeLeaves.name}</span></p>
+            {
+                isLeaveModalOpen && selectedEmployeeLeaves && (
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-card border border-gold-500/30 p-8 rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-hidden flex flex-col"
+                        >
+                            <div className="flex justify-between items-center mb-6 shrink-0">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-foreground mb-1">Manage Leaves</h2>
+                                    <p className="text-gray-400 text-sm">Reviewing leaves for <span className="text-gold-400">{selectedEmployeeLeaves.name}</span></p>
+                                </div>
+                                <button onClick={() => setIsLeaveModalOpen(false)} className="text-gray-500 hover:text-foreground text-xl">✕</button>
                             </div>
-                            <button onClick={() => setIsLeaveModalOpen(false)} className="text-gray-500 hover:text-foreground text-xl">✕</button>
-                        </div>
 
-                        <div className="overflow-y-auto flex-1 space-y-4 pr-2">
-                            {selectedEmployeeLeaves.leaves && selectedEmployeeLeaves.leaves.length > 0 ? (
-                                selectedEmployeeLeaves.leaves
-                                    .sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-                                    .map((leave: any) => (
-                                        <div key={leave.id} className="bg-background/50 border border-gray-700 p-4 rounded-xl flex justify-between items-center md:flex-row flex-col gap-4">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${leave.type?.includes('SL') ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'}`}>
-                                                        {leave.type?.replace(/_HALF.*/, '') || 'CL'}
-                                                        {leave.type?.includes('_HALF') && (
-                                                            <span className="text-[8px] bg-white/20 px-1 rounded ml-1">
-                                                                {leave.type.includes('_1') ? '1st HALF' : leave.type.includes('_2') ? '2nd HALF' : 'HALF'}
-                                                            </span>
-                                                        )}
-                                                    </span>
-                                                    <span className={`text-[10px] px-2 py-0.5 rounded border ${leave.status === 'APPROVED' ? 'text-green-500 border-green-500' :
-                                                        leave.status === 'REJECTED' ? 'text-red-500 border-red-500' :
-                                                            'text-yellow-500 border-yellow-500'
-                                                        }`}>
-                                                        {leave.status}
-                                                    </span>
+                            <div className="overflow-y-auto flex-1 space-y-4 pr-2">
+                                {selectedEmployeeLeaves.leaves && selectedEmployeeLeaves.leaves.length > 0 ? (
+                                    selectedEmployeeLeaves.leaves
+                                        .sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                                        .map((leave: any) => (
+                                            <div key={leave.id} className="bg-background/50 border border-gray-700 p-4 rounded-xl flex justify-between items-center md:flex-row flex-col gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${leave.type?.includes('SL') ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'}`}>
+                                                            {leave.type?.replace(/_HALF.*/, '') || 'CL'}
+                                                            {leave.type?.includes('_HALF') && (
+                                                                <span className="text-[8px] bg-white/20 px-1 rounded ml-1">
+                                                                    {leave.type.includes('_1') ? '1st HALF' : leave.type.includes('_2') ? '2nd HALF' : 'HALF'}
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                        <span className={`text-[10px] px-2 py-0.5 rounded border ${leave.status === 'APPROVED' ? 'text-green-500 border-green-500' :
+                                                            leave.status === 'REJECTED' ? 'text-red-500 border-red-500' :
+                                                                'text-yellow-500 border-yellow-500'
+                                                            }`}>
+                                                            {leave.status}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-foreground font-bold text-sm">
+                                                        {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-gray-400 text-xs italic mt-1">"{leave.reason}"</p>
                                                 </div>
-                                                <p className="text-foreground font-bold text-sm">
-                                                    {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
-                                                </p>
-                                                <p className="text-gray-400 text-xs italic mt-1">"{leave.reason}"</p>
-                                            </div>
 
-                                            <div className="flex gap-2">
-                                                {leave.status !== 'APPROVED' && (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'APPROVED'); }}
-                                                        className="px-4 py-2 bg-green-600 hover:bg-green-500 text-foreground text-xs font-bold rounded shadow"
-                                                    >
-                                                        {leave.status === 'REJECTED' ? 'Re-Approve' : 'Approve'}
-                                                    </button>
-                                                )}
-                                                {leave.status !== 'REJECTED' && (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'REJECTED'); }}
-                                                        className="px-4 py-2 bg-red-600 hover:bg-red-500 text-foreground text-xs font-bold rounded shadow"
-                                                    >
-                                                        {leave.status === 'APPROVED' ? 'Revoke (Reject)' : 'Reject'}
-                                                    </button>
-                                                )}
+                                                <div className="flex gap-2">
+                                                    {leave.status !== 'APPROVED' && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'APPROVED'); }}
+                                                            className="px-4 py-2 bg-green-600 hover:bg-green-500 text-foreground text-xs font-bold rounded shadow"
+                                                        >
+                                                            {leave.status === 'REJECTED' ? 'Re-Approve' : 'Approve'}
+                                                        </button>
+                                                    )}
+                                                    {leave.status !== 'REJECTED' && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'REJECTED'); }}
+                                                            className="px-4 py-2 bg-red-600 hover:bg-red-500 text-foreground text-xs font-bold rounded shadow"
+                                                        >
+                                                            {leave.status === 'APPROVED' ? 'Revoke (Reject)' : 'Reject'}
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                            ) : (
-                                <p className="text-center text-gray-500 italic py-8">No leave history found.</p>
-                            )}
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-        </div>
+                                        ))
+                                ) : (
+                                    <p className="text-center text-gray-500 italic py-8">No leave history found.</p>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+            }
+        </>
     );
 }

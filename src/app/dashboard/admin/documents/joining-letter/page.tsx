@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+// AdminSidebar removed (handled by layout)
 import jsPDF from "jspdf";
 import { toPng } from "html-to-image";
 import JoiningLetterTemplate from "@/components/documents/JoiningLetterTemplate";
@@ -217,8 +217,7 @@ export default function JoiningLetterPage() {
 
     if (step === 'verify') {
         return (
-            <div className="min-h-screen bg-background text-foreground font-sans pl-64 flex items-center justify-center">
-                <AdminSidebar />
+            <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
                 <div className="bg-card/40 border border-theme rounded-xl p-8 backdrop-blur-sm w-[400px] text-center">
                     <h2 className="text-2xl font-bold text-foreground mb-6">Verify Candidate</h2>
                     <p className="text-gray-400 mb-6 text-sm">Enter the registered mobile number to proceed.</p>
@@ -246,134 +245,132 @@ export default function JoiningLetterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans pl-64">
-            <AdminSidebar />
-            <main className="p-8 max-w-[1700px] mx-auto flex gap-8 items-start">
+        <div className="max-w-[1700px] mx-auto flex gap-8 items-start">
 
-                {/* LEFT: FORM INPUTS */}
-                <div className="w-[400px] bg-card/40 border border-theme rounded-xl p-6 backdrop-blur-sm sticky top-8 shrink-0">
-                    <div className="flex justify-between items-center mb-6 border-b border-theme pb-4">
-                        <h2 className="text-xl font-bold text-foreground">Letter Details</h2>
-                        <button onClick={() => setStep('verify')} className="text-xs text-gray-500 hover:text-gold-theme">Change User</button>
+            {/* LEFT: FORM INPUTS */}
+            <div className="w-[400px] bg-card/40 border border-theme rounded-xl p-6 backdrop-blur-sm sticky top-8 shrink-0">
+                <div className="flex justify-between items-center mb-6 border-b border-theme pb-4">
+                    <h2 className="text-xl font-bold text-foreground">Letter Details</h2>
+                    <button onClick={() => setStep('verify')} className="text-xs text-gray-500 hover:text-gold-theme">Change User</button>
+                </div>
+
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                    {/* Inputs */}
+                    <div>
+                        <label className="block text-xs uppercase text-gray-500 mb-1">Candidate Name</label>
+                        <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                            value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-xs uppercase text-gray-500 mb-1">University / College</label>
+                        <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                            value={formData.university} onChange={e => setFormData({ ...formData, university: e.target.value })} placeholder="e.g. GTU" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs uppercase text-gray-500 mb-1">Email</label>
+                            <input type="email" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                                value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-xs uppercase text-gray-500 mb-1">Mobile</label>
+                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                                value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} />
+                        </div>
                     </div>
 
-                    <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                        {/* Inputs */}
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Candidate Name</label>
-                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                        </div>
-                        <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">University / College</label>
-                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                value={formData.university} onChange={e => setFormData({ ...formData, university: e.target.value })} placeholder="e.g. GTU" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs uppercase text-gray-500 mb-1">Email</label>
-                                <input type="email" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-xs uppercase text-gray-500 mb-1">Mobile</label>
-                                <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs uppercase text-gray-500 mb-1">Start Date</label>
-                                <input type="date" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-xs uppercase text-gray-500 mb-1">End Date</label>
-                                <input type="date" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
-                            </div>
-                        </div>
-
-                        {/* Calculated Duration Display */}
-                        <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Calculated Duration</label>
-                            <input
-                                type="text"
-                                readOnly
-                                className="w-full bg-background/50 border border-theme rounded p-2 text-gold-400 focus:border-gold-500 outline-none font-bold"
-                                value={
-                                    (formData.startDate && formData.endDate)
-                                        ? formatDistanceStrict(new Date(formData.startDate), new Date(formData.endDate))
-                                        : "Select Dates..."
-                                }
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Designation</label>
-                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                value={formData.designation} onChange={e => setFormData({ ...formData, designation: e.target.value })} />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Internship Type</label>
-                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                value={formData.internshipType} onChange={e => setFormData({ ...formData, internshipType: e.target.value })} />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs uppercase text-gray-500 mb-1">Stipend</label>
-                                <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    value={formData.stipend} onChange={e => setFormData({ ...formData, stipend: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-xs uppercase text-gray-500 mb-1">Location</label>
-                                <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Letter Date</label>
+                            <label className="block text-xs uppercase text-gray-500 mb-1">Start Date</label>
                             <input type="date" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                                value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
                         </div>
+                        <div>
+                            <label className="block text-xs uppercase text-gray-500 mb-1">End Date</label>
+                            <input type="date" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                                value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                        </div>
+                    </div>
 
-                        {/* Buttons */}
-                        <div className="flex gap-4 mt-6">
-                            <button onClick={handleSave} disabled={isSaving || isGenerating} className="flex-1 bg-green-600 hover:bg-green-700 text-foreground font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50">
-                                {isSaving ? "Saving..." : "Save"}
-                            </button>
-                            <button onClick={handleDownload} disabled={isGenerating} className="flex-1 bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50">
-                                {isGenerating ? "Gen PDF" : "Download"}
-                            </button>
+                    {/* Calculated Duration Display */}
+                    <div>
+                        <label className="block text-xs uppercase text-gray-500 mb-1">Calculated Duration</label>
+                        <input
+                            type="text"
+                            readOnly
+                            className="w-full bg-background/50 border border-theme rounded p-2 text-gold-400 focus:border-gold-500 outline-none font-bold"
+                            value={
+                                (formData.startDate && formData.endDate)
+                                    ? formatDistanceStrict(new Date(formData.startDate), new Date(formData.endDate))
+                                    : "Select Dates..."
+                            }
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs uppercase text-gray-500 mb-1">Designation</label>
+                        <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                            value={formData.designation} onChange={e => setFormData({ ...formData, designation: e.target.value })} />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs uppercase text-gray-500 mb-1">Internship Type</label>
+                        <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                            value={formData.internshipType} onChange={e => setFormData({ ...formData, internshipType: e.target.value })} />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs uppercase text-gray-500 mb-1">Stipend</label>
+                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                                value={formData.stipend} onChange={e => setFormData({ ...formData, stipend: e.target.value })} />
                         </div>
-                        <button onClick={handleEmail} disabled={isSendingEmail || isGenerating} className={`w-full mt-4 font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50 ${isSendingEmail ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500 text-foreground"}`}>
-                            {isSendingEmail ? "Sending..." : "Send Email to User"}
+                        <div>
+                            <label className="block text-xs uppercase text-gray-500 mb-1">Location</label>
+                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                                value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs uppercase text-gray-500 mb-1">Letter Date</label>
+                        <input type="date" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                            value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-4 mt-6">
+                        <button onClick={handleSave} disabled={isSaving || isGenerating} className="flex-1 bg-green-600 hover:bg-green-700 text-foreground font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50">
+                            {isSaving ? "Saving..." : "Save"}
                         </button>
-                        <button onClick={handleReset} className="w-full mt-4 border border-theme text-gold-theme hover:bg-gold-500/10 font-medium py-2 rounded transition-colors">
-                            + Add New Letter
+                        <button onClick={handleDownload} disabled={isGenerating} className="flex-1 bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50">
+                            {isGenerating ? "Gen PDF" : "Download"}
                         </button>
                     </div>
+                    <button onClick={handleEmail} disabled={isSendingEmail || isGenerating} className={`w-full mt-4 font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50 ${isSendingEmail ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500 text-foreground"}`}>
+                        {isSendingEmail ? "Sending..." : "Send Email to User"}
+                    </button>
+                    <button onClick={handleReset} className="w-full mt-4 border border-theme text-gold-theme hover:bg-gold-500/10 font-medium py-2 rounded transition-colors">
+                        + Add New Letter
+                    </button>
                 </div>
+            </div>
 
-                {/* RIGHT: LIVE PREVIEW (A4) */}
-                <div className="flex-1 flex justify-center bg-gray-900/50 p-8 rounded-xl border border-white/5 overflow-auto">
-                    <JoiningLetterTemplate
-                        ref={letterRef}
-                        formData={formData}
-                        formatDate={formatDate}
-                        duration={
-                            (formData.startDate && formData.endDate)
-                                ? formatDistanceStrict(new Date(formData.startDate), new Date(formData.endDate))
-                                : "3 months"
-                        }
-                    />
-                </div>
+            {/* RIGHT: LIVE PREVIEW (A4) */}
+            <div className="flex-1 flex justify-center bg-gray-900/50 p-8 rounded-xl border border-white/5 overflow-auto">
+                <JoiningLetterTemplate
+                    ref={letterRef}
+                    formData={formData}
+                    formatDate={formatDate}
+                    duration={
+                        (formData.startDate && formData.endDate)
+                            ? formatDistanceStrict(new Date(formData.startDate), new Date(formData.endDate))
+                            : "3 months"
+                    }
+                />
+            </div>
 
-            </main>
         </div>
     );
+
 }

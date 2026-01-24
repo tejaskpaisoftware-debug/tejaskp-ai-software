@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+// AdminSidebar removed (handled by layout)
 import { useRouter } from "next/navigation";
 
 // Updated type to include ID
@@ -205,242 +205,239 @@ export default function BillingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans pl-64">
-            <AdminSidebar />
-            <main className="p-8 max-w-5xl mx-auto">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-bold text-foreground tracking-widest uppercase">Billing & Invoicing</h1>
-                </header>
+        <>
+            <header className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground tracking-widest uppercase">Billing & Invoicing</h1>
+            </header>
 
-                <div className="max-w-4xl mx-auto">
-                    <div className="bg-card/40 border border-theme rounded-2xl p-6 backdrop-blur-sm">
-                        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-                            {/* Customer Selection */}
-                            <div className="relative">
-                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Select Student / Client</label>
-                                <input
-                                    type="text"
-                                    placeholder="Search by Name or Mobile..."
-                                    className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-gold-500"
-                                    value={selectedUser ? (users.find(u => u.id === selectedUser)?.name + " - " + users.find(u => u.id === selectedUser)?.mobile) : ""}
-                                    onChange={(e) => {
-                                        // If user tries to type here, we should probably clear the selection to let them search fresh?
-                                        // Or better: This input is read-only for display, and we use a separate search input inside the dropdown?
-                                        // Actually, standard pattern is: Input IS the search.
-                                        // Let's implement a proper "search term" state.
-                                        // Re-thinking: I'll use a local search state.
-                                    }}
-                                    onClick={() => setShowUserDropdown(!showUserDropdown)}
-                                    readOnly // Start with readonly to act as "Select", toggle dropdown on click
-                                />
+            <div className="max-w-4xl mx-auto">
+                <div className="bg-card/40 border border-theme rounded-2xl p-6 backdrop-blur-sm">
+                    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+                        {/* Customer Selection */}
+                        <div className="relative">
+                            <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Select Student / Client</label>
+                            <input
+                                type="text"
+                                placeholder="Search by Name or Mobile..."
+                                className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-gold-500"
+                                value={selectedUser ? (users.find(u => u.id === selectedUser)?.name + " - " + users.find(u => u.id === selectedUser)?.mobile) : ""}
+                                onChange={(e) => {
+                                    // If user tries to type here, we should probably clear the selection to let them search fresh?
+                                    // Or better: This input is read-only for display, and we use a separate search input inside the dropdown?
+                                    // Actually, standard pattern is: Input IS the search.
+                                    // Let's implement a proper "search term" state.
+                                    // Re-thinking: I'll use a local search state.
+                                }}
+                                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                                readOnly // Start with readonly to act as "Select", toggle dropdown on click
+                            />
 
-                                {/* Dropdown List */}
-                                {showUserDropdown && (
-                                    <div
-                                        style={{ backgroundColor: 'var(--background)' }}
-                                        className="absolute top-full left-0 right-0 mt-2 border border-theme rounded-xl shadow-2xl z-[100] max-h-60 overflow-y-auto"
-                                    >
-                                        <div className="p-2 sticky top-0 bg-background border-b border-gold-theme/10 z-10">
-                                            <input
-                                                autoFocus
-                                                type="text"
-                                                placeholder="Type to search..."
-                                                className="w-full bg-background border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none"
-                                                value={userSearch}
-                                                onChange={(e) => setUserSearch(e.target.value)}
-                                            />
-                                        </div>
-                                        {users.filter(u =>
+                            {/* Dropdown List */}
+                            {showUserDropdown && (
+                                <div
+                                    style={{ backgroundColor: 'var(--background)' }}
+                                    className="absolute top-full left-0 right-0 mt-2 border border-theme rounded-xl shadow-2xl z-[100] max-h-60 overflow-y-auto"
+                                >
+                                    <div className="p-2 sticky top-0 bg-background border-b border-gold-theme/10 z-10">
+                                        <input
+                                            autoFocus
+                                            type="text"
+                                            placeholder="Type to search..."
+                                            className="w-full bg-background border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none"
+                                            value={userSearch}
+                                            onChange={(e) => setUserSearch(e.target.value)}
+                                        />
+                                    </div>
+                                    {users.filter(u =>
+                                        u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                                        u.mobile.includes(userSearch)
+                                    ).length === 0 ? (
+                                        <div className="p-4 text-center text-gray-500 text-sm">No match found</div>
+                                    ) : (
+                                        users.filter(u =>
                                             u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
                                             u.mobile.includes(userSearch)
-                                        ).length === 0 ? (
-                                            <div className="p-4 text-center text-gray-500 text-sm">No match found</div>
-                                        ) : (
-                                            users.filter(u =>
-                                                u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-                                                u.mobile.includes(userSearch)
-                                            ).map(u => (
-                                                <div
-                                                    key={u.id}
-                                                    onClick={() => {
-                                                        setSelectedUser(u.id);
-                                                        setShowUserDropdown(false);
-                                                        setUserSearch(""); // Reset search
-                                                    }}
-                                                    className={`px-4 py-3 text-sm cursor-pointer hover:bg-gold-500/10 transition-colors ${selectedUser === u.id ? 'bg-gold-500/20 text-gold-theme' : 'text-gray-300'}`}
-                                                >
-                                                    <div className="font-bold">{u.name}</div>
-                                                    <div className="text-xs opacity-60">{u.role} • {u.mobile}</div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                )}
-                                {/* Overlay to close when clicking outside */}
-                                {showUserDropdown && (
-                                    <div className="fixed inset-0 z-40" onClick={() => setShowUserDropdown(false)} />
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Invoice Type</label>
-                                    <select
-                                        className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none"
-                                        value={formData.type}
-                                        // @ts-ignore
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                    >
-                                        <option value="TRAINING">Training / Course</option>
-                                        <option value="INTERNSHIP">Internship Program</option>
-                                        <option value="PROJECT">Project Development</option>
-                                    </select>
+                                        ).map(u => (
+                                            <div
+                                                key={u.id}
+                                                onClick={() => {
+                                                    setSelectedUser(u.id);
+                                                    setShowUserDropdown(false);
+                                                    setUserSearch(""); // Reset search
+                                                }}
+                                                className={`px-4 py-3 text-sm cursor-pointer hover:bg-gold-500/10 transition-colors ${selectedUser === u.id ? 'bg-gold-500/20 text-gold-theme' : 'text-gray-300'}`}
+                                            >
+                                                <div className="font-bold">{u.name}</div>
+                                                <div className="text-xs opacity-60">{u.role} • {u.mobile}</div>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
-                                <div>
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Due Date</label>
+                            )}
+                            {/* Overlay to close when clicking outside */}
+                            {showUserDropdown && (
+                                <div className="fixed inset-0 z-40" onClick={() => setShowUserDropdown(false)} />
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Invoice Type</label>
+                                <select
+                                    className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none"
+                                    value={formData.type}
+                                    // @ts-ignore
+                                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                >
+                                    <option value="TRAINING">Training / Course</option>
+                                    <option value="INTERNSHIP">Internship Program</option>
+                                    <option value="PROJECT">Project Development</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Due Date</label>
+                                <input
+                                    type="date"
+                                    required
+                                    className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none [color-scheme:dark]"
+                                    value={formData.dueDate}
+                                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Items */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider">Line Items (Courses / Projects)</label>
+                                <button type="button" onClick={handleAddItem} className="text-xs text-green-400 font-bold hover:underline">+ Add Row</button>
+                            </div>
+                            <div className="flex gap-2 text-[10px] text-gray-500 uppercase tracking-widest px-1">
+                                <span className="flex-1">Description</span>
+                                <span className="w-36">Starts On</span>
+                                <span className="w-24">Duration</span>
+                                <span className="w-36">Ends On</span>
+                                <span className="w-28 text-right">Fees</span>
+                                <span className="w-6"></span>
+                            </div>
+                            {formData.items.map((item, idx) => (
+                                <div key={idx} className="flex gap-2 items-center">
+                                    {formData.type === "INTERNSHIP" ? (
+                                        <select
+                                            className="flex-1 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none min-w-0"
+                                            value={item.description}
+                                            onChange={(e) => handleItemChange(idx, "description", e.target.value)}
+                                            required
+                                        >
+                                            <option value="">Select Domain</option>
+                                            {DOMAINS.map(domain => (
+                                                <option key={domain} value={domain}>{domain}</option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <input
+                                            placeholder="Description (e.g. React Training)"
+                                            className="flex-1 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none min-w-0"
+                                            value={item.description}
+                                            onChange={(e) => handleItemChange(idx, "description", e.target.value)}
+                                            required
+                                        />
+                                    )}
                                     <input
                                         type="date"
+                                        className="w-36 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none [color-scheme:dark]"
+                                        value={item.startDate || ""}
+                                        onChange={(e) => handleItemChange(idx, "startDate", e.target.value)}
                                         required
-                                        className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none [color-scheme:dark]"
-                                        value={formData.dueDate}
-                                        onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                                     />
-                                </div>
-                            </div>
-
-                            {/* Items */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider">Line Items (Courses / Projects)</label>
-                                    <button type="button" onClick={handleAddItem} className="text-xs text-green-400 font-bold hover:underline">+ Add Row</button>
-                                </div>
-                                <div className="flex gap-2 text-[10px] text-gray-500 uppercase tracking-widest px-1">
-                                    <span className="flex-1">Description</span>
-                                    <span className="w-36">Starts On</span>
-                                    <span className="w-24">Duration</span>
-                                    <span className="w-36">Ends On</span>
-                                    <span className="w-28 text-right">Fees</span>
-                                    <span className="w-6"></span>
-                                </div>
-                                {formData.items.map((item, idx) => (
-                                    <div key={idx} className="flex gap-2 items-center">
-                                        {formData.type === "INTERNSHIP" ? (
-                                            <select
-                                                className="flex-1 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none min-w-0"
-                                                value={item.description}
-                                                onChange={(e) => handleItemChange(idx, "description", e.target.value)}
-                                                required
-                                            >
-                                                <option value="">Select Domain</option>
-                                                {DOMAINS.map(domain => (
-                                                    <option key={domain} value={domain}>{domain}</option>
-                                                ))}
-                                            </select>
-                                        ) : (
-                                            <input
-                                                placeholder="Description (e.g. React Training)"
-                                                className="flex-1 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none min-w-0"
-                                                value={item.description}
-                                                onChange={(e) => handleItemChange(idx, "description", e.target.value)}
-                                                required
-                                            />
+                                    <input
+                                        placeholder="e.g. 3 Months"
+                                        className="w-24 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none"
+                                        value={item.duration}
+                                        onChange={(e) => handleItemChange(idx, "duration", e.target.value)}
+                                        required
+                                    />
+                                    <input
+                                        readOnly
+                                        placeholder="End Date"
+                                        className="w-36 bg-gray-700/50 border border-gray-600 rounded px-3 py-2 text-sm text-gray-400 focus:outline-none cursor-not-allowed"
+                                        value={item.endDate || ""}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="0.00"
+                                        className="w-28 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none text-right"
+                                        value={item.amount}
+                                        onChange={(e) => handleItemChange(idx, "amount", Number(e.target.value))}
+                                        required
+                                    />
+                                    <div className="w-6 flex justify-center">
+                                        {idx > 0 && (
+                                            <button type="button" onClick={() => handleRemoveItem(idx)} className="text-red-500 hover:text-red-400 font-bold text-xl leading-none">×</button>
                                         )}
-                                        <input
-                                            type="date"
-                                            className="w-36 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none [color-scheme:dark]"
-                                            value={item.startDate || ""}
-                                            onChange={(e) => handleItemChange(idx, "startDate", e.target.value)}
-                                            required
-                                        />
-                                        <input
-                                            placeholder="e.g. 3 Months"
-                                            className="w-24 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none"
-                                            value={item.duration}
-                                            onChange={(e) => handleItemChange(idx, "duration", e.target.value)}
-                                            required
-                                        />
-                                        <input
-                                            readOnly
-                                            placeholder="End Date"
-                                            className="w-36 bg-gray-700/50 border border-gray-600 rounded px-3 py-2 text-sm text-gray-400 focus:outline-none cursor-not-allowed"
-                                            value={item.endDate || ""}
-                                        />
-                                        <input
-                                            type="number"
-                                            placeholder="0.00"
-                                            className="w-28 bg-background/50 border border-theme rounded px-3 py-2 text-sm text-foreground focus:outline-none text-right"
-                                            value={item.amount}
-                                            onChange={(e) => handleItemChange(idx, "amount", Number(e.target.value))}
-                                            required
-                                        />
-                                        <div className="w-6 flex justify-center">
-                                            {idx > 0 && (
-                                                <button type="button" onClick={() => handleRemoveItem(idx)} className="text-red-500 hover:text-red-400 font-bold text-xl leading-none">×</button>
-                                            )}
-                                        </div>
                                     </div>
-                                ))}
-                            </div>
-
-                            <div className="flex items-center gap-4 py-2 border-t border-gold-500/10">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.applyTax}
-                                        onChange={(e) => setFormData({ ...formData, applyTax: e.target.checked })}
-                                    />
-                                    <span className="text-sm text-gray-300">Apply GST (18%)</span>
-                                </label>
-                                <div className="flex items-center gap-2 ml-auto">
-                                    <span className="text-sm text-gray-300">Discount (%)</span>
-                                    <input
-                                        type="number"
-                                        className="w-20 bg-background/50 border border-theme rounded px-2 py-1 text-sm text-foreground focus:outline-none text-right"
-                                        value={formData.discount}
-                                        onChange={(e) => setFormData({ ...formData, discount: Number(e.target.value) })}
-                                        placeholder="0"
-                                    />
                                 </div>
-                            </div>
+                            ))}
+                        </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Payment For This Invoice (₹)</label>
-                                    <input
-                                        type="number"
-                                        className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none"
-                                        value={formData.paidAmount}
-                                        onChange={(e) => setFormData({ ...formData, paidAmount: Number(e.target.value) })}
-                                    />
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-xs text-gray-500">Total Payable</p>
-                                    <p className="text-3xl font-bold text-gold-theme">₹{total.toLocaleString()}</p>
-                                </div>
+                        <div className="flex items-center gap-4 py-2 border-t border-gold-500/10">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.applyTax}
+                                    onChange={(e) => setFormData({ ...formData, applyTax: e.target.checked })}
+                                />
+                                <span className="text-sm text-gray-300">Apply GST (18%)</span>
+                            </label>
+                            <div className="flex items-center gap-2 ml-auto">
+                                <span className="text-sm text-gray-300">Discount (%)</span>
+                                <input
+                                    type="number"
+                                    className="w-20 bg-background/50 border border-theme rounded px-2 py-1 text-sm text-foreground focus:outline-none text-right"
+                                    value={formData.discount}
+                                    onChange={(e) => setFormData({ ...formData, discount: Number(e.target.value) })}
+                                    placeholder="0"
+                                />
                             </div>
+                        </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <button
-                                    type="button"
-                                    disabled={isSubmitting}
-                                    onClick={(e) => handleSubmit(e, 'SAVE')}
-                                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-foreground font-bold py-4 rounded-lg transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
-                                >
-                                    {isSubmitting ? "SAVING..." : "SAVE PAYMENT ONLY"}
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={isSubmitting}
-                                    onClick={(e) => handleSubmit(e, 'GENERATE')}
-                                    className="w-full bg-gold-500 hover:bg-gold-400 text-black font-bold py-4 rounded-lg transition-all shadow-[0_0_20px_rgba(255,215,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
-                                >
-                                    {isSubmitting ? "GENERATING..." : "GENERATE INVOICE"}
-                                </button>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold text-gold-theme/80 uppercase tracking-wider mb-2 block">Payment For This Invoice (₹)</label>
+                                <input
+                                    type="number"
+                                    className="w-full bg-background/50 border border-theme rounded-lg px-4 py-3 text-foreground focus:outline-none"
+                                    value={formData.paidAmount}
+                                    onChange={(e) => setFormData({ ...formData, paidAmount: Number(e.target.value) })}
+                                />
                             </div>
-                        </form>
-                    </div>
+                            <div className="text-right">
+                                <p className="text-xs text-gray-500">Total Payable</p>
+                                <p className="text-3xl font-bold text-gold-theme">₹{total.toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                type="button"
+                                disabled={isSubmitting}
+                                onClick={(e) => handleSubmit(e, 'SAVE')}
+                                className="w-full bg-emerald-600 hover:bg-emerald-500 text-foreground font-bold py-4 rounded-lg transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+                            >
+                                {isSubmitting ? "SAVING..." : "SAVE PAYMENT ONLY"}
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isSubmitting}
+                                onClick={(e) => handleSubmit(e, 'GENERATE')}
+                                className="w-full bg-gold-500 hover:bg-gold-400 text-black font-bold py-4 rounded-lg transition-all shadow-[0_0_20px_rgba(255,215,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+                            >
+                                {isSubmitting ? "GENERATING..." : "GENERATE INVOICE"}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </main>
-        </div>
+            </div>
+        </>
     );
 }

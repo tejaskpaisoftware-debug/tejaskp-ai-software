@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+// AdminSidebar removed (handled by layout)
 
 export default function RevenuePage() {
     const [data, setData] = useState<any>(null);
@@ -150,7 +150,7 @@ TEJASKP AI SOFTWARE`;
 
     if (loading && !data) {
         return (
-            <div className="min-h-screen bg-background text-foreground pl-64 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center min-h-[60vh]">
                 <div className="text-gold-theme animate-pulse">Loading Financial Data...</div>
             </div>
         );
@@ -158,7 +158,7 @@ TEJASKP AI SOFTWARE`;
 
     if (error) {
         return (
-            <div className="min-h-screen bg-background text-foreground pl-64 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center min-h-[60vh]">
                 <div className="text-red-500 bg-red-500/10 border border-red-500/20 p-6 rounded-xl text-center">
                     <p className="font-bold mb-2">Error</p>
                     <p>{error}</p>
@@ -234,380 +234,381 @@ TEJASKP AI SOFTWARE`;
     }, 0);
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans pl-64 relative z-10">
-            <AdminSidebar />
-
-            <main className="p-8 space-y-8">
-                <header className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-3xl font-bold text-foreground tracking-widest mb-2">REVENUE & EXPENSES</h1>
-                        <p className="text-gray-400">Financial performance and profit analysis.</p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        {/* Year Selector */}
-                        {activeTab !== 'custom' && (
-                            <div className="flex items-center gap-2 bg-card border border-theme px-3 py-1 rounded-lg">
-                                <span className="text-xs text-gray-400 uppercase tracking-widest">Fiscal Year</span>
-                                <select
-                                    value={selectedYear}
-                                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                                    className="bg-transparent text-gold-400 font-bold focus:outline-none cursor-pointer"
-                                >
-                                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                                        <option key={y} value={y} className="bg-card text-foreground">{y}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-
-                        <button
-                            onClick={() => setIsPurchaseModalOpen(true)}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-all"
-                        >
-                            + Add Expense
-                        </button>
-                    </div>
-                </header>
-
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                    <RevenueCard title="Total Revenue" amount={data?.overview?.selectedYearTotal ?? data?.overview?.total ?? 0} sub="All Time" isHighlight />
-                    <RevenueCard title="Total Expenses" amount={data?.overview?.selectedYearExpenses ?? 0} sub="All Time" color="red" />
-                    <RevenueCard
-                        title="Net Profit"
-                        amount={data?.overview?.netProfit ?? 0}
-                        sub="All Time"
-                        color={(data?.overview?.netProfit || 0) >= 0 ? "green" : "red"}
-                    />
-                    <RevenueCard title="Margin" amount={`${((data?.overview?.netProfit / (data?.overview?.selectedYearTotal || 1)) * 100).toFixed(1)}%`} sub="Profit Margin" isText />
-                    <RevenueCard title="Pending Amount" amount={data?.overview?.pendingAmount || 0} sub="Uncollected Fees" color="custom-blue" onClick={handleViewPendingDues} />
+        <>
+            <header className="flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-bold text-foreground tracking-widest mb-2">REVENUE & EXPENSES</h1>
+                    <p className="text-gray-400">Financial performance and profit analysis.</p>
                 </div>
 
-                {/* Main Analytics Section */}
-                <div className="bg-card/40 border border-theme rounded-2xl p-6 backdrop-blur-sm">
-                    <div className="flex justify-between items-center mb-8">
-                        <div className="flex items-center gap-4">
-                            <h2 className="text-xl font-bold text-foreground">Financial Trends</h2>
-                            <div className="flex gap-4 text-xs">
-                                <span className="flex items-center gap-1 text-gold-400"><div className="w-2 h-2 rounded-full bg-gold-400" /> Revenue</span>
-                                <span className="flex items-center gap-1 text-red-400"><div className="w-2 h-2 rounded-full bg-red-400" /> Expenses</span>
-                                <span className="flex items-center gap-1 text-green-400"><div className="w-2 h-2 rounded-full bg-green-400" /> Profit</span>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-4 items-center">
-                            {activeTab === 'custom' && (
-                                <div className="flex gap-2 animate-in fade-in slide-in-from-right-4">
-                                    <input
-                                        type="date"
-                                        value={dateRange.from}
-                                        onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                                        style={{ colorScheme: 'dark' }}
-                                        className="bg-card border border-gold-500/30 rounded px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
-                                    />
-                                    <span className="text-gray-400">-</span>
-                                    <input
-                                        type="date"
-                                        value={dateRange.to}
-                                        onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                                        style={{ colorScheme: 'dark' }}
-                                        className="bg-card border border-gold-500/30 rounded px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="flex bg-card rounded-lg p-1 border border-theme">
-                                {['yearly', 'monthly', 'weekly', 'daily', 'custom'].map((tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab as any)}
-                                        className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === tab
-                                            ? 'bg-gold-500 text-obsidian'
-                                            : 'text-gray-400 hover:text-foreground'
-                                            }`}
-                                    >
-                                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Chart Area */}
-                    <div className="h-80 w-full relative p-4 border-b border-white/5">
-                        {loading ? (
-                            <div className="w-full h-full flex items-center justify-center text-gold-theme animate-pulse">
-                                Updating Data...
-                            </div>
-                        ) : currentGraphData.length === 0 ? (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                {activeTab === 'custom' ? 'Select a date range.' : `No financial data found for ${selectedYear}.`}
-                            </div>
-                        ) : (
-                            <div className="w-full h-full relative">
-                                <RevenueAreaChart data={currentGraphData} />
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Detailed Transactions List */}
-                <div className="bg-card/40 border border-theme rounded-2xl overflow-hidden">
-                    <div className="p-6 border-b border-gold-500/10 flex justify-between items-center">
-                        <div className="flex items-baseline gap-4">
-                            <h3 className="font-bold text-foreground">Full Financial History</h3>
-                            <div className="text-sm font-normal text-gray-400">
-                                Total: <span className="text-foreground font-mono font-bold mr-3">{filteredTransactions.length}</span>
-                                Amount: <span className={`font-mono font-bold ${filteredTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatCurrency(filteredTotal)}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {/* Filter Type Selector */}
+                <div className="flex items-center gap-4">
+                    {/* Year Selector */}
+                    {activeTab !== 'custom' && (
+                        <div className="flex items-center gap-2 bg-card border border-theme px-3 py-1 rounded-lg">
+                            <span className="text-xs text-gray-400 uppercase tracking-widest">Fiscal Year</span>
                             <select
-                                value={filterType}
-                                onChange={(e) => {
-                                    setFilterType(e.target.value as any);
-                                    setFilterValue(''); // Reset value on type change
-                                }}
-                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-gold-400 focus:outline-none focus:border-gold-500 cursor-pointer"
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                                className="bg-transparent text-gold-400 font-bold focus:outline-none cursor-pointer"
                             >
-                                <option value="all">All Time</option>
-                                <option value="day">By Day</option>
-                                <option value="week">By Week</option>
-                                <option value="month">By Month</option>
-                                <option value="year">By Year</option>
+                                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                                    <option key={y} value={y} className="bg-card text-foreground">{y}</option>
+                                ))}
                             </select>
+                        </div>
+                    )}
 
-                            {/* Dynamic Input based on Filter Type */}
-                            {filterType === 'day' && (
+                    <button
+                        onClick={() => setIsPurchaseModalOpen(true)}
+                        className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                    >
+                        + Add Expense
+                    </button>
+                </div>
+            </header>
+
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                <RevenueCard title="Total Revenue" amount={data?.overview?.selectedYearTotal ?? data?.overview?.total ?? 0} sub="All Time" isHighlight />
+                <RevenueCard title="Total Expenses" amount={data?.overview?.selectedYearExpenses ?? 0} sub="All Time" color="red" />
+                <RevenueCard
+                    title="Net Profit"
+                    amount={data?.overview?.netProfit ?? 0}
+                    sub="All Time"
+                    color={(data?.overview?.netProfit || 0) >= 0 ? "green" : "red"}
+                />
+                <RevenueCard title="Margin" amount={`${((data?.overview?.netProfit / (data?.overview?.selectedYearTotal || 1)) * 100).toFixed(1)}%`} sub="Profit Margin" isText />
+                <RevenueCard title="Pending Amount" amount={data?.overview?.pendingAmount || 0} sub="Uncollected Fees" color="custom-blue" onClick={handleViewPendingDues} />
+            </div>
+
+            {/* Main Analytics Section */}
+            <div className="bg-card/40 border border-theme rounded-2xl p-6 backdrop-blur-sm">
+                <div className="flex justify-between items-center mb-8">
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-xl font-bold text-foreground">Financial Trends</h2>
+                        <div className="flex gap-4 text-xs">
+                            <span className="flex items-center gap-1 text-gold-400"><div className="w-2 h-2 rounded-full bg-gold-400" /> Revenue</span>
+                            <span className="flex items-center gap-1 text-red-400"><div className="w-2 h-2 rounded-full bg-red-400" /> Expenses</span>
+                            <span className="flex items-center gap-1 text-green-400"><div className="w-2 h-2 rounded-full bg-green-400" /> Profit</span>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                        {activeTab === 'custom' && (
+                            <div className="flex gap-2 animate-in fade-in slide-in-from-right-4">
                                 <input
                                     type="date"
-                                    value={filterValue}
-                                    onChange={(e) => setFilterValue(e.target.value)}
+                                    value={dateRange.from}
+                                    onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
                                     style={{ colorScheme: 'dark' }}
-                                    className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                                    className="bg-card border border-gold-500/30 rounded px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
                                 />
-                            )}
-
-                            {filterType === 'week' && (
+                                <span className="text-gray-400">-</span>
                                 <input
-                                    type="week"
-                                    value={filterValue}
-                                    onChange={(e) => setFilterValue(e.target.value)}
+                                    type="date"
+                                    value={dateRange.to}
+                                    onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
                                     style={{ colorScheme: 'dark' }}
-                                    className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                                    className="bg-card border border-gold-500/30 rounded px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
                                 />
-                            )}
+                            </div>
+                        )}
 
-                            {filterType === 'month' && (
-                                <input
-                                    type="month"
-                                    value={filterValue}
-                                    onChange={(e) => setFilterValue(e.target.value)}
-                                    style={{ colorScheme: 'dark' }}
-                                    className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
-                                />
-                            )}
-
-                            {filterType === 'year' && (
-                                <select
-                                    value={filterValue}
-                                    onChange={(e) => setFilterValue(e.target.value)}
-                                    className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500 cursor-pointer"
+                        <div className="flex bg-card rounded-lg p-1 border border-theme">
+                            {['yearly', 'monthly', 'weekly', 'daily', 'custom'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab as any)}
+                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === tab
+                                        ? 'bg-gold-500 text-obsidian'
+                                        : 'text-gray-400 hover:text-foreground'
+                                        }`}
                                 >
-                                    <option value="">Select Year</option>
-                                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                                        <option key={y} value={y}>{y}</option>
-                                    ))}
-                                </select>
-                            )}
-
-                            <input
-                                type="text"
-                                placeholder="Search student..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500 w-48"
-                            />
+                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                </button>
+                            ))}
                         </div>
-                    </div>
-                    <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-white/5 text-gold-theme/80 text-xs uppercase tracking-wider sticky top-0 backdrop-blur-md">
-                                <tr>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4">Description / Student</th>
-                                    <th className="px-6 py-4">Type</th>
-                                    <th className="px-6 py-4 text-right">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5 text-sm text-gray-300">
-                                {filteredTransactions.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={4} className="px-6 py-8 text-center text-gray-500 italic">No transactions found.</td>
-                                    </tr>
-                                ) : (
-                                    filteredTransactions.map((tx: any, i: number) => (
-                                        <tr key={i} className="hover:bg-white/5 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="text-foreground font-mono">{new Date(tx.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-                                                <div className="text-xs text-gray-500 font-mono mt-0.5">{new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="font-bold text-foreground">{tx.name}</div>
-                                                {tx.details && <div className="text-xs text-gray-500">{tx.details}</div>}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded text-[10px] font-bold border ${tx.type === 'REVENUE' ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-red-400 border-red-400/30 bg-red-400/10'
-                                                    }`}>
-                                                    {tx.type}
-                                                </span>
-                                            </td>
-                                            <td className={`px-6 py-4 text-right font-bold ${tx.type === 'REVENUE' ? 'text-green-400' : 'text-red-400'}`}>
-                                                {tx.type === 'EXPENSE' ? '-' : '+'}{formatCurrency(tx.amount)}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
-            </main>
+                {/* Chart Area */}
+                <div className="h-80 w-full relative p-4 border-b border-white/5">
+                    {loading ? (
+                        <div className="w-full h-full flex items-center justify-center text-gold-theme animate-pulse">
+                            Updating Data...
+                        </div>
+                    ) : currentGraphData.length === 0 ? (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                            {activeTab === 'custom' ? 'Select a date range.' : `No financial data found for ${selectedYear}.`}
+                        </div>
+                    ) : (
+                        <div className="w-full h-full relative">
+                            <RevenueAreaChart data={currentGraphData} />
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Detailed Transactions List */}
+            <div className="bg-card/40 border border-theme rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-gold-500/10 flex justify-between items-center">
+                    <div className="flex items-baseline gap-4">
+                        <h3 className="font-bold text-foreground">Full Financial History</h3>
+                        <div className="text-sm font-normal text-gray-400">
+                            Total: <span className="text-foreground font-mono font-bold mr-3">{filteredTransactions.length}</span>
+                            Amount: <span className={`font-mono font-bold ${filteredTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatCurrency(filteredTotal)}</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {/* Filter Type Selector */}
+                        <select
+                            value={filterType}
+                            onChange={(e) => {
+                                setFilterType(e.target.value as any);
+                                setFilterValue(''); // Reset value on type change
+                            }}
+                            className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-gold-400 focus:outline-none focus:border-gold-500 cursor-pointer"
+                        >
+                            <option value="all">All Time</option>
+                            <option value="day">By Day</option>
+                            <option value="week">By Week</option>
+                            <option value="month">By Month</option>
+                            <option value="year">By Year</option>
+                        </select>
+
+                        {/* Dynamic Input based on Filter Type */}
+                        {filterType === 'day' && (
+                            <input
+                                type="date"
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                style={{ colorScheme: 'dark' }}
+                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                            />
+                        )}
+
+                        {filterType === 'week' && (
+                            <input
+                                type="week"
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                style={{ colorScheme: 'dark' }}
+                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                            />
+                        )}
+
+                        {filterType === 'month' && (
+                            <input
+                                type="month"
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                style={{ colorScheme: 'dark' }}
+                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                            />
+                        )}
+
+                        {filterType === 'year' && (
+                            <select
+                                value={filterValue}
+                                onChange={(e) => setFilterValue(e.target.value)}
+                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500 cursor-pointer"
+                            >
+                                <option value="">Select Year</option>
+                                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                                    <option key={y} value={y}>{y}</option>
+                                ))}
+                            </select>
+                        )}
+
+                        <input
+                            type="text"
+                            placeholder="Search student..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500 w-48"
+                        />
+                    </div>
+                </div>
+                <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-white/5 text-gold-theme/80 text-xs uppercase tracking-wider sticky top-0 backdrop-blur-md">
+                            <tr>
+                                <th className="px-6 py-4">Date</th>
+                                <th className="px-6 py-4">Description / Student</th>
+                                <th className="px-6 py-4">Type</th>
+                                <th className="px-6 py-4 text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+                            {filteredTransactions.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500 italic">No transactions found.</td>
+                                </tr>
+                            ) : (
+                                filteredTransactions.map((tx: any, i: number) => (
+                                    <tr key={i} className="hover:bg-white/5 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="text-foreground font-mono">{new Date(tx.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                                            <div className="text-xs text-gray-500 font-mono mt-0.5">{new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-foreground">{tx.name}</div>
+                                            {tx.details && <div className="text-xs text-gray-500">{tx.details}</div>}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 rounded text-[10px] font-bold border ${tx.type === 'REVENUE' ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-red-400 border-red-400/30 bg-red-400/10'
+                                                }`}>
+                                                {tx.type}
+                                            </span>
+                                        </td>
+                                        <td className={`px-6 py-4 text-right font-bold ${tx.type === 'REVENUE' ? 'text-green-400' : 'text-red-400'}`}>
+                                            {tx.type === 'EXPENSE' ? '-' : '+'}{formatCurrency(tx.amount)}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
 
             {/* Purchase Modal - Keep existing code ... */}
             <AnimatePresence>
-                {isPurchaseModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-card border border-gold-500/30 rounded-2xl p-8 w-full max-w-md relative"
-                        >
-                            <button onClick={() => setIsPurchaseModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
-                            <h2 className="text-2xl font-bold text-foreground mb-6">Add Expense</h2>
-                            <form onSubmit={handleAddPurchase} className="space-y-4">
-                                <div>
-                                    <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Amount (INR)</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        value={purchaseForm.amount}
-                                        onChange={e => setPurchaseForm({ ...purchaseForm, amount: e.target.value })}
-                                        className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
-                                        placeholder="0.00"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Date</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        value={purchaseForm.date}
-                                        onChange={e => setPurchaseForm({ ...purchaseForm, date: e.target.value })}
-                                        style={{ colorScheme: 'dark' }}
-                                        className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Description</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={purchaseForm.description}
-                                        onChange={e => setPurchaseForm({ ...purchaseForm, description: e.target.value })}
-                                        className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
-                                        placeholder="e.g. Office Supplies"
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={submittingPurchase}
-                                    className="w-full bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-3 rounded-lg transition-colors mt-4"
-                                >
-                                    {submittingPurchase ? 'Saving...' : 'Add Expense'}
-                                </button>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                {
+                    isPurchaseModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-card border border-gold-500/30 rounded-2xl p-8 w-full max-w-md relative"
+                            >
+                                <button onClick={() => setIsPurchaseModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
+                                <h2 className="text-2xl font-bold text-foreground mb-6">Add Expense</h2>
+                                <form onSubmit={handleAddPurchase} className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Amount (INR)</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            value={purchaseForm.amount}
+                                            onChange={e => setPurchaseForm({ ...purchaseForm, amount: e.target.value })}
+                                            className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Date</label>
+                                        <input
+                                            type="date"
+                                            required
+                                            value={purchaseForm.date}
+                                            onChange={e => setPurchaseForm({ ...purchaseForm, date: e.target.value })}
+                                            style={{ colorScheme: 'dark' }}
+                                            className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Description</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={purchaseForm.description}
+                                            onChange={e => setPurchaseForm({ ...purchaseForm, description: e.target.value })}
+                                            className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
+                                            placeholder="e.g. Office Supplies"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={submittingPurchase}
+                                        className="w-full bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-3 rounded-lg transition-colors mt-4"
+                                    >
+                                        {submittingPurchase ? 'Saving...' : 'Add Expense'}
+                                    </button>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </AnimatePresence >
 
             {/* Pending Dues Modal */}
             <AnimatePresence>
-                {isPendingModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-card border border-gold-500/30 rounded-2xl p-8 w-full max-w-4xl relative max-h-[90vh] flex flex-col"
-                        >
-                            <button onClick={() => setIsPendingModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
-                            <div className="mb-6">
-                                <h2 className="text-2xl font-bold text-foreground">Pending Dues</h2>
-                                <p className="text-gray-400 text-sm">List of users with outstanding payments.</p>
-                            </div>
+                {
+                    isPendingModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-card border border-gold-500/30 rounded-2xl p-8 w-full max-w-4xl relative max-h-[90vh] flex flex-col"
+                            >
+                                <button onClick={() => setIsPendingModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
+                                <div className="mb-6">
+                                    <h2 className="text-2xl font-bold text-foreground">Pending Dues</h2>
+                                    <p className="text-gray-400 text-sm">List of users with outstanding payments.</p>
+                                </div>
 
-                            <div className="flex-1 overflow-y-auto pr-2">
-                                {loadingPending ? (
-                                    <div className="text-center text-gold-theme py-10">Loading...</div>
-                                ) : pendingUsers.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-10">No pending dues found.</div>
-                                ) : (
-                                    <table className="w-full text-left border-collapse">
-                                        <thead className="text-xs text-gold-theme/80 uppercase tracking-widest sticky top-0 bg-card z-10">
-                                            <tr>
-                                                <th className="py-3 border-b border-white/10">User</th>
-                                                <th className="py-3 border-b border-white/10">Mobile</th>
-                                                <th className="py-3 border-b border-white/10 text-right">Total Fees</th>
-                                                <th className="py-3 border-b border-white/10 text-right">Paid</th>
-                                                <th className="py-3 border-b border-white/10 text-right text-red-400">Pending</th>
-                                                <th className="py-3 border-b border-white/10 text-center">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="text-sm text-gray-300 divide-y divide-white/5">
-                                            {pendingUsers.map((user, i) => (
-                                                <tr key={i} className="hover:bg-white/5 transition-colors">
-                                                    <td className="py-3 font-bold text-foreground">{user.name} <span className="text-xs font-normal text-gray-500 block">{user.course}</span></td>
-                                                    <td className="py-3 font-mono text-xs">{user.mobile}</td>
-                                                    <td className="py-3 text-right font-mono">{formatCurrency(user.totalFees || 0)}</td>
-                                                    <td className="py-3 text-right font-mono text-green-400">{formatCurrency(user.paidAmount || 0)}</td>
-                                                    <td className="py-3 text-right font-mono font-bold text-red-400">{formatCurrency(user.pendingAmount || 0)}</td>
-                                                    <td className="py-3 text-center">
-                                                        <button
-                                                            onClick={() => handleWhatsAppNotify(user)}
-                                                            className="bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/50 p-2 rounded-lg transition-all"
-                                                            title="Send WhatsApp Reminder"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                                                            </svg>
-                                                        </button>
-                                                    </td>
+                                <div className="flex-1 overflow-y-auto pr-2">
+                                    {loadingPending ? (
+                                        <div className="text-center text-gold-theme py-10">Loading...</div>
+                                    ) : pendingUsers.length === 0 ? (
+                                        <div className="text-center text-gray-500 py-10">No pending dues found.</div>
+                                    ) : (
+                                        <table className="w-full text-left border-collapse">
+                                            <thead className="text-xs text-gold-theme/80 uppercase tracking-widest sticky top-0 bg-card z-10">
+                                                <tr>
+                                                    <th className="py-3 border-b border-white/10">User</th>
+                                                    <th className="py-3 border-b border-white/10">Mobile</th>
+                                                    <th className="py-3 border-b border-white/10 text-right">Total Fees</th>
+                                                    <th className="py-3 border-b border-white/10 text-right">Paid</th>
+                                                    <th className="py-3 border-b border-white/10 text-right text-red-400">Pending</th>
+                                                    <th className="py-3 border-b border-white/10 text-center">Action</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                        <tfoot className="bg-white/5 font-bold text-foreground sticky bottom-0">
-                                            <tr>
-                                                <td colSpan={4} className="py-3 px-4 text-right uppercase text-xs tracking-widest text-gold-theme">Total Pending</td>
-                                                <td className="py-3 text-right text-red-500 text-lg">
-                                                    {formatCurrency(pendingUsers.reduce((sum, u) => sum + (u.pendingAmount || 0), 0))}
-                                                </td>
-                                                <td></td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                )}
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </div>
+                                            </thead>
+                                            <tbody className="text-sm text-gray-300 divide-y divide-white/5">
+                                                {pendingUsers.map((user, i) => (
+                                                    <tr key={i} className="hover:bg-white/5 transition-colors">
+                                                        <td className="py-3 font-bold text-foreground">{user.name} <span className="text-xs font-normal text-gray-500 block">{user.course}</span></td>
+                                                        <td className="py-3 font-mono text-xs">{user.mobile}</td>
+                                                        <td className="py-3 text-right font-mono">{formatCurrency(user.totalFees || 0)}</td>
+                                                        <td className="py-3 text-right font-mono text-green-400">{formatCurrency(user.paidAmount || 0)}</td>
+                                                        <td className="py-3 text-right font-mono font-bold text-red-400">{formatCurrency(user.pendingAmount || 0)}</td>
+                                                        <td className="py-3 text-center">
+                                                            <button
+                                                                onClick={() => handleWhatsAppNotify(user)}
+                                                                className="bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/50 p-2 rounded-lg transition-all"
+                                                                title="Send WhatsApp Reminder"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                            <tfoot className="bg-white/5 font-bold text-foreground sticky bottom-0">
+                                                <tr>
+                                                    <td colSpan={4} className="py-3 px-4 text-right uppercase text-xs tracking-widest text-gold-theme">Total Pending</td>
+                                                    <td className="py-3 text-right text-red-500 text-lg">
+                                                        {formatCurrency(pendingUsers.reduce((sum, u) => sum + (u.pendingAmount || 0), 0))}
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </AnimatePresence >
+        </>
     );
 }
 
