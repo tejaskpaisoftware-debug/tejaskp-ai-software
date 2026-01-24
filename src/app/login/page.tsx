@@ -111,7 +111,7 @@ export default function LoginPage() {
             {/* Background 3D Effect (Subtle) */}
             <div className="absolute inset-0 z-0 opacity-60">
                 <Canvas>
-                    <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+                    <Stars radius={50} depth={20} count={1000} factor={3} saturation={0} fade speed={1} />
                 </Canvas>
             </div>
 
