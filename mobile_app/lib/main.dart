@@ -113,7 +113,7 @@ class _MainWebViewState extends State<MainWebView> {
             // 2. Loading Indicator (Top Bar)
             if (_isLoading && _errorMessage == null)
               Positioned(
-                top: 0, 0: 0, right: 0,
+                top: 0, left: 0, right: 0,
                 child: LinearProgressIndicator(
                   value: _progress,
                   backgroundColor: Colors.transparent,
