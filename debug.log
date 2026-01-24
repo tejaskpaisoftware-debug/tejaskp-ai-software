@@ -1,0 +1,34 @@
+[2026-01-02T06:35:00.104Z] POST /ai - Prompt: hii..., SessionId: null, Mode: AI
+[2026-01-02T06:35:09.056Z] POST /ai - Prompt: hows u..., SessionId: null, Mode: AI
+[2026-01-03T06:14:03.477Z] POST /ai - Prompt: find user bhakti..., SessionId: 2d1f12df-e33d-4536-9509-7ac483bea556, Mode: COMMAND
+[2026-01-03T06:14:03.480Z] Saved USER message to session 2d1f12df-e33d-4536-9509-7ac483bea556
+[2026-01-03T06:14:19.928Z] POST /ai - Prompt: hey..., SessionId: 2d1f12df-e33d-4536-9509-7ac483bea556, Mode: AI
+[2026-01-03T06:14:19.932Z] Saved USER message to session 2d1f12df-e33d-4536-9509-7ac483bea556
+[2026-01-07T08:25:23.979Z] POST /ai - Prompt: active students..., SessionId: c33c38e5-fde0-416a-924e-f097a2fc7e6a, Mode: COMMAND
+[2026-01-07T08:25:23.984Z] Saved USER message to session c33c38e5-fde0-416a-924e-f097a2fc7e6a
+[2026-01-07T08:25:30.252Z] POST /ai - Prompt: find user Jeet..., SessionId: c33c38e5-fde0-416a-924e-f097a2fc7e6a, Mode: COMMAND
+[2026-01-07T08:25:30.256Z] Saved USER message to session c33c38e5-fde0-416a-924e-f097a2fc7e6a
+[2026-01-07T08:25:36.758Z] POST /ai - Prompt: hii..., SessionId: c33c38e5-fde0-416a-924e-f097a2fc7e6a, Mode: AI
+[2026-01-07T08:25:36.760Z] Saved USER message to session c33c38e5-fde0-416a-924e-f097a2fc7e6a
+[2026-01-11T05:11:30.900Z] POST /ai - Prompt: find user Jeet'..., SessionId: 88769660-8e64-4a08-a9db-2816dfe952c8, Mode: COMMAND
+[2026-01-11T05:11:30.902Z] Saved USER message to session 88769660-8e64-4a08-a9db-2816dfe952c8
+[2026-01-11T05:11:38.861Z] POST /ai - Prompt: show revenue..., SessionId: 88769660-8e64-4a08-a9db-2816dfe952c8, Mode: COMMAND
+[2026-01-11T05:11:38.865Z] Saved USER message to session 88769660-8e64-4a08-a9db-2816dfe952c8
+[2026-01-11T05:11:49.612Z] POST /ai - Prompt: find user Jeet..., SessionId: 88769660-8e64-4a08-a9db-2816dfe952c8, Mode: COMMAND
+[2026-01-11T05:11:49.614Z] Saved USER message to session 88769660-8e64-4a08-a9db-2816dfe952c8
+[2026-01-11T05:12:02.096Z] POST /ai - Prompt: active students..., SessionId: 88769660-8e64-4a08-a9db-2816dfe952c8, Mode: COMMAND
+[2026-01-11T05:12:02.099Z] Saved USER message to session 88769660-8e64-4a08-a9db-2816dfe952c8
+[2026-01-11T05:12:13.211Z] POST /ai - Prompt: how are you..., SessionId: 88769660-8e64-4a08-a9db-2816dfe952c8, Mode: AI
+[2026-01-11T05:12:13.214Z] Saved USER message to session 88769660-8e64-4a08-a9db-2816dfe952c8
+[2026-01-11T05:12:28.636Z] POST /ai - Prompt: i want pdf for vadod..., SessionId: 88769660-8e64-4a08-a9db-2816dfe952c8, Mode: AI
+[2026-01-11T05:12:28.638Z] Saved USER message to session 88769660-8e64-4a08-a9db-2816dfe952c8
+[2026-01-11T05:13:20.305Z] POST /ai - Prompt: give me vadodara cit..., SessionId: 88769660-8e64-4a08-a9db-2816dfe952c8, Mode: AI
+[2026-01-11T05:13:20.307Z] Saved USER message to session 88769660-8e64-4a08-a9db-2816dfe952c8
+[2026-01-11T16:25:02.658Z] POST /ai - Prompt: find user Jeet..., SessionId: dfbafa4f-d27e-4b17-9ea5-f60def0fda0e, Mode: COMMAND
+[2026-01-11T16:25:02.660Z] Saved USER message to session dfbafa4f-d27e-4b17-9ea5-f60def0fda0e
+[2026-01-11T16:25:10.222Z] POST /ai - Prompt: hii..., SessionId: dfbafa4f-d27e-4b17-9ea5-f60def0fda0e, Mode: AI
+[2026-01-11T16:25:10.225Z] Saved USER message to session dfbafa4f-d27e-4b17-9ea5-f60def0fda0e
+[2026-01-11T16:25:49.473Z] POST /ai - Prompt: give pdf to visiti a..., SessionId: dfbafa4f-d27e-4b17-9ea5-f60def0fda0e, Mode: AI
+[2026-01-11T16:25:49.476Z] Saved USER message to session dfbafa4f-d27e-4b17-9ea5-f60def0fda0e
+[2026-01-11T16:27:04.575Z] POST /ai - Prompt: give andaman nicobar..., SessionId: dfbafa4f-d27e-4b17-9ea5-f60def0fda0e, Mode: AI
+[2026-01-11T16:27:04.580Z] Saved USER message to session dfbafa4f-d27e-4b17-9ea5-f60def0fda0e

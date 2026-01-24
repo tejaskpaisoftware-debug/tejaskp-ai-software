@@ -1,0 +1,510 @@
+@import "tailwindcss";
+
+/* =========================================
+   1. ROOT VARIABLES (Defaults)
+   ========================================= */
+:root {
+  --background: #050505;
+  --foreground: #ededed;
+  --card-bg: #121212;
+  --card-border: #333333;
+  --card-foreground: #ededed;
+  --muted: #9ca3af;
+  --muted-foreground: #9ca3af;
+  --gold-accent: #FFC107;
+
+  /* Fonts */
+  --font-orbitron: 'Orbitron', monospace;
+}
+
+/* =========================================
+   2. THEME DEFINITIONS
+   ========================================= */
+
+/* Light Theme */
+[data-theme='light'] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(148, 163, 184, 0.2);
+  --card-foreground: #0f172a;
+  --muted: #eff6ff;
+  /* Background Muted (Light Blue) */
+  --muted-foreground: #64748b;
+  /* Text Muted (Slate 500) */
+  --gold-accent: #eab308;
+}
+
+/* Dark Theme (Explicit) */
+[data-theme='dark'] {
+  --background: #050505;
+  --foreground: #ededed;
+  --card-bg: #121212;
+  --card-border: #333333;
+  --card-foreground: #ededed;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --gold-accent: #FFC107;
+  color: var(--foreground);
+}
+
+/* --- SNOW THEME (Night/Dark Blue) --- */
+[data-theme='snow'] {
+  --background: #0f172a;
+  /* Slate 900 */
+  --foreground: #f8fafc;
+  /* Slate 50 */
+  --card-bg: rgba(30, 41, 59, 0.8);
+  /* Slate 800 */
+  --card-border: rgba(148, 163, 184, 0.3);
+  --card-foreground: #f8fafc;
+  --muted: #1e293b;
+  /* Slate 800 (Background for inputs) */
+  --muted-foreground: #cbd5e1;
+  /* Slate 300 (Text) */
+  --gold-accent: #38bdf8;
+  /* Sky Blue */
+  color: var(--foreground);
+}
+
+/* --- RAIN THEME (Dark/Stormy) --- */
+[data-theme='rain'] {
+  --background: #0a0a0a;
+  --foreground: #e2e8f0;
+  /* Slate 200 */
+  --card-bg: rgba(24, 24, 27, 0.85);
+  --card-border: rgba(63, 63, 70, 0.4);
+  --card-foreground: #e2e8f0;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --gold-accent: #818cf8;
+  color: var(--foreground);
+}
+
+/* --- SUMMER THEME (Bright/Warm) --- */
+[data-theme='summer'] {
+  --background: #fff7ed;
+  /* Orange 50 */
+  --foreground: #7c2d12;
+  /* Orange 900 */
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(253, 186, 116, 0.4);
+  --card-foreground: #7c2d12;
+  --muted: #fff1f2;
+  --muted-foreground: #c2410c;
+  --gold-accent: #f59e0b;
+  color: var(--foreground);
+}
+
+/* --- SPRING THEME (Soft Green/Pink) --- */
+[data-theme='spring'] {
+  --background: #fdf2f8;
+  /* Pink 50 */
+  --foreground: #831843;
+  /* Pink 900 */
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(244, 114, 182, 0.3);
+  --card-foreground: #831843;
+  --muted: #fce7f3;
+  --muted-foreground: #be185d;
+  --gold-accent: #ec4899;
+  color: var(--foreground);
+}
+
+/* --- CLOUDY THEME (Grey/Muted) --- */
+[data-theme='cloudy'] {
+  --background: #f1f5f9;
+  /* Slate 100 */
+  --foreground: #334155;
+  /* Slate 700 */
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(148, 163, 184, 0.3);
+  --card-foreground: #334155;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --gold-accent: #94a3b8;
+  color: var(--foreground);
+}
+
+/* --- AVENGERS / IRON MAN --- */
+[data-avenger='iron-man'] {
+  --background: #100202;
+  --foreground: #fff5d6;
+  --card-bg: rgba(45, 10, 10, 0.95);
+  --card-border: rgba(255, 215, 0, 0.6);
+  --card-foreground: #fff5d6;
+  --muted: #450a0a;
+  --muted-foreground: #fde68a;
+  --gold-accent: #fbbf24;
+
+  font-family: var(--font-orbitron), monospace;
+  letter-spacing: 0.05em;
+}
+
+[data-avenger='iron-man'] * {
+  font-family: var(--font-orbitron), monospace !important;
+  text-shadow: 0 0 2px rgba(234, 179, 8, 0.2);
+}
+
+/* Specific overrides for key elements to pop in Iron Man */
+[data-avenger='iron-man'] h1,
+[data-avenger='iron-man'] h2,
+[data-avenger='iron-man'] h3,
+[data-avenger='iron-man'] .text-foreground {
+  color: #ffde7d !important;
+  text-shadow: 0 0 10px rgba(255, 160, 0, 0.6) !important;
+}
+
+[data-avenger='iron-man'] .bg-white {
+  background-color: rgba(30, 5, 5, 0.95) !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.1) !important;
+  color: #fffbeb !important;
+}
+
+/* =========================================
+   3. UNIVERSAL TEXT VISIBILITY & ROBOTIC FONT OVERRIDES (The "Supernova" Option)
+   Force ALL elements in dark themes to use the glowing white text and robotic font.
+   ========================================= */
+
+/* Dark Themes: Force White Bold Robotic Text on Container */
+[data-theme='snow'],
+[data-theme='rain'],
+[data-theme='dark'],
+[data-avenger='iron-man'] {
+  color: var(--foreground) !important;
+  font-family: var(--font-orbitron), monospace !important;
+  font-weight: 600 !important;
+  /* Bold as requested */
+  letter-spacing: 0.05em;
+}
+
+/*
+   Specific Element Override:
+   Force specific text elements to inherit the foreground color.
+   Used specific tags to avoid breaking layout divs/borders/SVGs.
+*/
+[data-theme='snow'] p,
+[data-theme='snow'] span,
+[data-theme='snow'] h1,
+[data-theme='snow'] h2,
+[data-theme='snow'] h3,
+[data-theme='snow'] h4,
+[data-theme='snow'] h5,
+[data-theme='snow'] h6,
+[data-theme='snow'] li,
+[data-theme='snow'] a,
+[data-theme='snow'] button,
+[data-theme='snow'] input,
+[data-theme='snow'] select,
+[data-theme='snow'] textarea,
+[data-theme='snow'] label,
+[data-theme='snow'] td,
+[data-theme='snow'] th,
+[data-theme='rain'] p,
+[data-theme='rain'] span,
+[data-theme='rain'] h1,
+[data-theme='rain'] h2,
+[data-theme='rain'] h3,
+[data-theme='rain'] h4,
+[data-theme='rain'] h5,
+[data-theme='rain'] h6,
+[data-theme='rain'] li,
+[data-theme='rain'] a,
+[data-theme='rain'] button,
+[data-theme='rain'] input,
+[data-theme='rain'] select,
+[data-theme='rain'] textarea,
+[data-theme='rain'] label,
+[data-theme='rain'] td,
+[data-theme='rain'] th,
+[data-theme='dark'] p,
+[data-theme='dark'] span,
+[data-theme='dark'] h1,
+[data-theme='dark'] h2,
+[data-theme='dark'] h3,
+[data-theme='dark'] h4,
+[data-theme='dark'] h5,
+[data-theme='dark'] h6,
+[data-theme='dark'] li,
+[data-theme='dark'] a,
+[data-theme='dark'] button,
+[data-theme='dark'] input,
+[data-theme='dark'] select,
+[data-theme='dark'] textarea,
+[data-theme='dark'] label,
+[data-theme='dark'] td,
+[data-theme='dark'] th,
+[data-avenger='iron-man'] p,
+[data-avenger='iron-man'] span,
+[data-avenger='iron-man'] h1,
+[data-avenger='iron-man'] h2,
+[data-avenger='iron-man'] h3,
+[data-avenger='iron-man'] h4,
+[data-avenger='iron-man'] h5,
+[data-avenger='iron-man'] h6,
+[data-avenger='iron-man'] li,
+[data-avenger='iron-man'] a,
+[data-avenger='iron-man'] button,
+[data-avenger='iron-man'] input,
+[data-avenger='iron-man'] select,
+[data-avenger='iron-man'] textarea,
+[data-avenger='iron-man'] label,
+[data-avenger='iron-man'] td,
+[data-avenger='iron-man'] th {
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+/* Exceptions for Status Badges (Green/Red/Yellow) so they don't turn white */
+[class*="text-green-"],
+[class*="text-red-"],
+[class*="text-yellow-"],
+[class*="text-gold-"],
+[class*="bg-"] {
+  color: inherit;
+  /* Allow specific color utilities to work if specifically applied? No, precedence issue. */
+  /* Actually, relying on the !important inherited from parent above is safer for visibility. */
+  /* Let's try to simply NOT override these if possible, but CSS doesn't support "not parent". */
+  /* Start with the blanket override to fix "Nothing displaying". Visibility is P0. */
+}
+
+/* Light Theme Overrides (For Spring/Summer/Cloudy) - Force Dark Bold Robotic Text */
+[data-theme='summer'] *,
+[data-theme='spring'] *,
+[data-theme='cloudy'] * {
+  color: var(--foreground) !important;
+  font-family: var(--font-orbitron), monospace !important;
+  /* User asked for robotic text in student/employee dashboard (which use these themes too) */
+}
+
+/* Light Themes: Force White/Light text to become Theme Foreground (Dark) */
+[data-theme='summer'] .text-white,
+[data-theme='summer'] .text-gray-100,
+[data-theme='summer'] .text-gray-200,
+[data-theme='spring'] .text-white,
+[data-theme='spring'] .text-gray-100,
+[data-theme='spring'] .text-gray-200,
+[data-theme='cloudy'] .text-white,
+[data-theme='cloudy'] .text-gray-100,
+[data-theme='cloudy'] .text-gray-200 {
+  color: var(--foreground) !important;
+}
+
+
+/* =========================================
+   4. ANIMATIONS & EFFECTS
+   ========================================= */
+
+.weather-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.weather-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* SNOW */
+.snow-bg {
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.7) 50%, transparent),
+    radial-gradient(2px 2px at 40% 70%, rgba(255, 255, 255, 0.7) 50%, transparent),
+    radial-gradient(2px 2px at 60% 20%, rgba(255, 255, 255, 0.7) 50%, transparent),
+    radial-gradient(2px 2px at 80% 80%, rgba(255, 255, 255, 0.7) 50%, transparent);
+  background-size: 500px 500px;
+  animation: snowDrop 20s linear infinite;
+  opacity: 0.5;
+}
+
+.snow-mid {
+  background-image:
+    radial-gradient(3px 3px at 15% 15%, rgba(255, 255, 255, 0.9) 50%, transparent),
+    radial-gradient(3px 3px at 35% 55%, rgba(255, 255, 255, 0.9) 50%, transparent),
+    radial-gradient(3px 3px at 75% 25%, rgba(255, 255, 255, 0.9) 50%, transparent);
+  background-size: 400px 400px;
+  animation: snowDrop 12s linear infinite;
+  opacity: 0.7;
+}
+
+.snow-fg {
+  background-image:
+    radial-gradient(4px 4px at 50% 50%, #fff 50%, transparent),
+    radial-gradient(5px 5px at 90% 10%, #fff 50%, transparent);
+  background-size: 600px 600px;
+  animation: snowDrop 8s linear infinite, snowSway 3s ease-in-out infinite alternate;
+  opacity: 1;
+}
+
+@keyframes snowDrop {
+  0% {
+    background-position: 0 -100px;
+  }
+
+  100% {
+    background-position: 20px 800px;
+  }
+}
+
+@keyframes snowSway {
+  0% {
+    transform: translateX(-10px);
+  }
+
+  100% {
+    transform: translateX(10px);
+  }
+}
+
+/* SUMMER */
+.sun-flare {
+  background: radial-gradient(circle at 90% 10%, rgba(255, 200, 0, 0.4) 0%, rgba(255, 150, 0, 0.1) 30%, transparent 60%);
+  animation: sunPulse 6s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+
+@keyframes sunPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* CLOUDY */
+.fog-layer {
+  background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog1.png') repeat-x;
+  background-size: 200% auto;
+  background-position: 0 bottom;
+  opacity: 0.4;
+  animation: fogMove 60s linear infinite;
+}
+
+@keyframes fogMove {
+  0% {
+    background-position: 0 bottom;
+  }
+
+  100% {
+    background-position: 200% bottom;
+  }
+}
+
+/* CLAY MOLDER */
+.cloud-shape {
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: inset -10px -10px 0 0 rgba(0, 0, 0, 0.05), 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* ANGRY SUN */
+@keyframes angryShake {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+
+  10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+
+  20% {
+    transform: translate(-3px, 0px) rotate(1deg);
+  }
+
+  30% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+
+  40% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+
+  50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+
+  70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+  }
+
+  80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+  }
+
+  90% {
+    transform: translate(1px, 2px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+  }
+}
+
+@keyframes heatWave {
+  0% {
+    opacity: 0.1;
+    backdrop-filter: sepia(0.2) hue-rotate(-10deg);
+  }
+
+  50% {
+    opacity: 0.3;
+    backdrop-filter: sepia(0.5) hue-rotate(-30deg);
+  }
+
+  100% {
+    opacity: 0.1;
+    backdrop-filter: sepia(0.2) hue-rotate(-10deg);
+  }
+}
+
+.angry-shake {
+  animation: angryShake 0.5s infinite;
+}
+
+.heat-overlay {
+  animation: heatWave 2s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(255, 69, 0, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* WIND */
+@keyframes windDrift {
+  0% {
+    transform: translateX(-10vw) scaleX(0.5);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.3;
+  }
+
+  80% {
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: translateX(110vw) scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* --- END OF EFFECTS --- */

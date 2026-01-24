@@ -1,0 +1,463 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  mobile    String   @unique
+  password  String?
+  name      String?
+  role      String   @default("USER")
+  status    String   @default("PENDING")
+  details   String?  // JSON string for address, ID proof, etc.
+  
+  // Student Specific Fields
+  course        String?
+  college       String?
+  university    String?
+  paymentMode   String?
+  totalFees     Float?
+  paidAmount    Float?
+  pendingAmount Float?
+  studyMode     String?
+  duration      String?
+  joiningDate   String?
+  endDate       String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  logs       SystemLog[]
+  sessions   Session[]
+  invoices   Invoice[]
+  attendance Attendance[]
+  leaves     Leave[]
+  joiningLetters JoiningLetter[]
+  certificates   Certificate[]
+  salarySlips    SalarySlip[]
+  salaryDetails  String?  // JSON for default Basic, HRA, Deductions
+  
+  // Bank Details
+  bankName      String?
+  bankState     String?
+  bankCity      String?
+  bankArea      String?
+  bankBranch    String?
+  accountNumber String?
+  ifscCode      String?
+  panNumber     String?
+  
+  // Chat System
+  isChatEnabled Boolean @default(false)
+  conversations Conversation[] @relation("UserConversations")
+  messages      Message[]
+  submissions   Submission[]
+  notifications Notification[]
+
+  // Refer & Earn
+  referralCode  String?  @unique
+  walletBalance Float    @default(0.0)
+  referredBy    String?
+  
+  myReferrals   Referral[] // Referrals made by this user
+
+  @@map("users")
+}
+
+model Attendance {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  date        String   // YYYY-MM-DD
+  loginTime   DateTime @default(now())
+  logoutTime  DateTime?
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  adminRemarks String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
+  @@map("attendance")
+}
+
+model Leave {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  startDate String
+  endDate   String
+  reason    String
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  type      String   @default("CL")      // CL, SL, LWP
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("leaves")
+}
+
+model Certificate {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  email     String?
+  mobile    String?
+  course    String
+  startDate String
+  endDate   String
+  issueDate String
+  duration  String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("certificates")
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  invoiceNumber String   @unique
+  customerName  String
+  type          String   // INTERNSHIP, TRAINING
+  items         String   // JSON string of items
+  subtotal      Float
+  discount      Float    @default(0)
+  sgst          Float
+  cgst          Float
+  total         Float
+  paidAmount    Float
+  dueDate       String
+  status        String   @default("PENDING")
+  
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("invoices")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model SystemLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String?  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+  @@map("system_logs")
+}
+
+// Enums are not supported in SQLite, using String
+// Role: USER, ADMIN, STUDENT, EMPLOYEE, CLIENT, DEVELOPER
+// Status: PENDING, ACTIVE, BLOCKED
+
+model JoiningLetter {
+  id                String   @id @default(uuid())
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id])
+  
+  name              String
+  email             String
+  mobile            String
+  university        String?
+  date              String
+  startDate         String
+  endDate           String
+  designation       String
+  internshipType    String
+  stipend           String
+  location          String
+  reportingManager  String
+  managerDesignation String
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@map("joining_letters")
+}
+
+model Purchase {
+  id          String   @id @default(uuid())
+  amount      Float
+  description String?
+  category    String?  // e.g. "Office", "Software", "Salary"
+  date        DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("purchases")
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  type      String    @default("DIRECT") // DIRECT, GROUP
+  
+  participants User[] @relation("UserConversations")
+  messages     Message[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  
+  content        String?
+  type           String       @default("TEXT") // TEXT, IMAGE, DOC, VIDEO
+  fileUrl        String?
+  
+  createdAt      DateTime     @default(now())
+  
+  @@map("messages")
+}
+
+model AiSession {
+  id        String      @id @default(uuid())
+  userId    String?     // Optional if we can't link to User easily, but preferred
+  title     String      @default("New Chat")
+  
+  messages  AiMessage[]
+  
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt // For sorting by last activity
+
+  @@index([userId])
+  @@map("ai_sessions")
+}
+
+model AiMessage {
+  id        String    @id @default(uuid())
+  sessionId String
+  session   AiSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  role      String    // 'user', 'assistant' (or 'model')
+  content   String
+  type      String    @default("text") // text, data, image
+  data      String?   // JSON string for any structured data
+  
+  createdAt DateTime  @default(now())
+  
+  @@index([sessionId])
+  @@map("ai_messages")
+}
+
+model Submission {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  weekStartDate String // Store Monday of the week (YYYY-MM-DD)
+  
+  pdfPath   String?
+  excelPath String?
+  
+  submittedAt DateTime @default(now())
+  status      String   @default("PENDING") // PENDING, SUBMITTED, LATE
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, weekStartDate])
+  @@map("submissions")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, WARNING, SUCCESS, ERROR
+  isRead    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model Referral {
+  id             String   @id @default(uuid())
+  referrerId     String
+  referrer       User     @relation(fields: [referrerId], references: [id])
+  
+  referredUserId String?  // Optional: Linked User if type is ENROLLMENT
+  projectId      String?  // Optional: Linked Project if type is PROJECT
+  project        Project? @relation(fields: [projectId], references: [id])
+  
+  type           String   // ENROLLMENT, PROJECT
+  status         String   @default("PENDING") // PENDING, APPROVED, REJECTED, PAID
+  amount         Float    @default(0.0)
+  description    String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+model Project {
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  category       String   // Web, App, AI, etc.
+  status         String   @default("OPEN") // OPEN, CLOSED, ASSIGNED
+  commissionRate Float    @default(5.0) // Percentage
+  
+  referrals      Referral[]
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+// --- Multiplayer Racing Game ---
+
+model RacingSession {
+  id        String   @id @default(uuid())
+  code      String   @unique @default(cuid()) // Short code for joining
+  status    String   @default("WAITING") // WAITING, RACING, FINISHED
+  startTime DateTime?
+  
+  players   RacingPlayer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("racing_sessions")
+}
+
+model RacingPlayer {
+  id            String   @id @default(uuid())
+  sessionId     String
+  session       RacingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  userId        String?
+  name          String
+  carColor      String   @default("red")
+  
+  score         Int      @default(0)
+  speed         Float    @default(0.0)
+  positionX     Float    @default(0.0) // For ghost rendering
+  status        String   @default("READY") // READY, RACING, CRASHED, FINISHED
+  
+  lastHeartbeat DateTime @default(now()) // To detect disconnects
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([sessionId])
+  @@map("racing_players")
+}
+
+model RacingLeaderboard {
+  id        String   @id @default(uuid())
+  userId    String?
+  name      String
+  score     Int
+  date      DateTime @default(now())
+
+  @@map("racing_leaderboard")
+}
+
+model SalarySlip {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  month     String
+  year      String
+  
+  // Earnings
+  basicSalary Float
+  hra         Float
+  special     Float
+  conveyance  Float
+  medical     Float
+  bonus       Float
+  
+  // Deductions
+  pf          Float
+  professionalTax Float
+  tds         Float
+  loan        Float
+  otherDeductions Float
+  
+  // Details
+  bankName      String?
+  bankState     String?
+  bankCity      String?
+  bankArea      String?
+  bankBranch    String?
+  accountNumber String?
+  ifscCode      String?
+  panNumber     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("salary_slips")
+}
+
+model SystemSettings {
+  id        String   @id @default(uuid())
+  key       String   @unique @default("global") // Ensure only one row usually, or use key for diff settings
+  appTheme  String   @default("light") // light, dark, snow, summer, rain, cloudy, spring
+  
+  updatedBy String?  // User ID of admin who changed it
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_settings")
+}
