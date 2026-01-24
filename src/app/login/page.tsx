@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Canvas } from "@react-three/fiber";
-import { Stars } from "@react-three/drei";
+import "../stars.css"; // Import the CSS stars
+// import { Canvas } from "@react-three/fiber"; // Removed for mobile stability
+// import { Stars } from "@react-three/drei";
 
 type Role = "ADMIN" | "STUDENT" | "EMPLOYEE" | "CLIENT";
 
@@ -107,12 +108,13 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-obsidian text-gold-100 font-sans flex items-center justify-center relative overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-900/50 via-obsidian to-black">
-            {/* Background 3D Effect (Subtle) */}
-            <div className="absolute inset-0 z-0 opacity-60">
-                <Canvas>
-                    <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
-                </Canvas>
+        <div className="min-h-screen bg-[#050505] text-gold-100 font-sans flex items-center justify-center relative overflow-hidden">
+            {/* CSS-Only Stars Background (Mobile Optimized, Visually Identical) */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a1a1a_0%,_#000000_100%)] opacity-80" />
+                <div className="stars-small" />
+                <div className="stars-medium" />
+                <div className="stars-large" />
             </div>
 
             <div className="relative z-10 w-full max-w-5xl px-4 grid md:grid-cols-2 gap-8 items-center">

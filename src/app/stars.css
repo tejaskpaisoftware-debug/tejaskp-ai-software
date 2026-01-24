@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/* 
+   Star Field Animations (CSS Only) 
+   Replaces heavy WebGL for mobile performance while keeping the look.
+*/
+
+/* Small Stars */
+.stars-small {
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 10px 10px #FFF, 20px 50px #FFF, 100px 80px #FFF, 150px 10px #FFF, 40px 100px #FFF, 60px 150px #FFF, 200px 200px #FFF, 50px 300px #FFF, 250px 80px #FFF, 300px 40px #FFF, 350px 120px #FFF, 120px 250px #FFF, 400px 350px #FFF, 450px 100px #FFF, 10px 400px #FFF, 500px 200px #FFF, 200px 450px #FFF;
+  animation: animStar 50s linear infinite;
+}
+.stars-small:after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 10px 10px #FFF, 20px 50px #FFF, 100px 80px #FFF, 150px 10px #FFF, 40px 100px #FFF, 60px 150px #FFF, 200px 200px #FFF, 50px 300px #FFF, 250px 80px #FFF, 300px 40px #FFF, 350px 120px #FFF, 120px 250px #FFF, 400px 350px #FFF, 450px 100px #FFF, 10px 400px #FFF, 500px 200px #FFF, 200px 450px #FFF;
+}
+
+/* Medium Stars */
+.stars-medium {
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 100px 20px #FFF, 250px 150px #FFF, 50px 350px #FFF, 400px 50px #FFF, 300px 300px #FFF, 150px 450px #FFF, 50px 100px #FFF, 350px 200px #FFF;
+  animation: animStar 100s linear infinite;
+}
+.stars-medium:after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 100px 20px #FFF, 250px 150px #FFF, 50px 350px #FFF, 400px 50px #FFF, 300px 300px #FFF, 150px 450px #FFF, 50px 100px #FFF, 350px 200px #FFF;
+}
+
+/* Large Stars */
+.stars-large {
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: 50px 50px #FFF, 400px 400px #FFF, 200px 100px #FFF;
+  animation: animStar 150s linear infinite;
+}
+.stars-large:after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: 50px 50px #FFF, 400px 400px #FFF, 200px 100px #FFF;
+}
+
+@keyframes animStar {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-2000px); }
+}
+
+/* Include original globals */
+@import "./globals.css";
