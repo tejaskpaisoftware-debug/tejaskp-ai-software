@@ -7,13 +7,7 @@
 6 silly config load:file:/usr/local/etc/npmrc
 7 verbose title npm run dev
 8 verbose argv "run" "dev"
-9 verbose logfile logs-max:10 dir:/Users/tejaspatel/TEJASKPAI/npm-cache/_logs/2026-01-24T06_35_57_110Z-
-10 verbose logfile /Users/tejaspatel/TEJASKPAI/npm-cache/_logs/2026-01-24T06_35_57_110Z-debug-0.log
+9 verbose logfile logs-max:10 dir:/Users/tejaspatel/TEJASKPAI/npm-cache/_logs/2026-01-24T07_32_37_562Z-
+10 verbose logfile /Users/tejaspatel/TEJASKPAI/npm-cache/_logs/2026-01-24T07_32_37_562Z-debug-0.log
 11 silly logfile start cleaning logs, removing 1 files
 12 silly logfile done cleaning log files
-13 verbose cwd /Users/tejaspatel/TEJASKPAI
-14 verbose os Darwin 25.2.0
-15 verbose node v24.11.1
-16 verbose npm  v11.6.2
-17 verbose exit 0
-18 info ok

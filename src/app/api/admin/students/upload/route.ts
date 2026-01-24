@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import * as XLSX from 'xlsx';
-
-const prisma = new PrismaClient();
 
 // Helper to reliably parse string/number
 const parseVal = (val: any) => {

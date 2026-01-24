@@ -1,11 +1,6 @@
 
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { startOfYear, endOfYear, startOfMonth, endOfMonth, startOfWeek, endOfWeek, subMonths, subWeeks, format, parseISO } from 'date-fns';
-
-export const dynamic = 'force-dynamic';
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 function formatPeriod(period: string, type: 'yearly' | 'monthly' | 'weekly' | 'daily'): string {
     if (!period) return "";

@@ -1,9 +1,7 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
 // Instantiate a fresh client to ensure we have the latest schema in dev environment
 // without needing a server restart.
-const prisma = new PrismaClient();
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
