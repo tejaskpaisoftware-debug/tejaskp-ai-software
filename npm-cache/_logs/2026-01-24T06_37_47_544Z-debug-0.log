@@ -1,0 +1,13 @@
+0 verbose cli /usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@11.6.2
+2 info using node@v24.11.1
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/tejaspatel/TEJASKPAI/.npmrc
+5 silly config load:file:/Users/tejaspatel/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm exec vercel env add DATABASE_URL production
+8 verbose argv "exec" "--" "vercel" "env" "add" "DATABASE_URL" "production"
+9 verbose logfile logs-max:10 dir:/Users/tejaspatel/TEJASKPAI/npm-cache/_logs/2026-01-24T06_37_47_544Z-
+10 verbose logfile /Users/tejaspatel/TEJASKPAI/npm-cache/_logs/2026-01-24T06_37_47_544Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files

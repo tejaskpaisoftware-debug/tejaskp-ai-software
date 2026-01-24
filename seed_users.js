@@ -1,5 +1,12 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: process.env.DIRECT_URL,
+        },
+    },
+});
 const bcrypt = require('bcryptjs');
 
 async function main() {

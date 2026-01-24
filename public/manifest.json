@@ -1,11 +1,11 @@
 {
-    "name": "TejasKP Student Portal",
-    "short_name": "StudentPortal",
-    "start_url": "/dashboard/student",
+    "name": "TejasKP AI Software",
+    "short_name": "TejasKP AI",
+    "description": "Advanced AI Management Dashboard",
+    "start_url": "/dashboard/admin",
     "display": "standalone",
-    "background_color": "#1a1a1a",
-    "theme_color": "#1a1a1a",
-    "orientation": "portrait-primary",
+    "background_color": "#000000",
+    "theme_color": "#FFD700",
     "icons": [
         {
             "src": "/logo.jpg",

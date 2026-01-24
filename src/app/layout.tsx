@@ -14,6 +14,14 @@ const orbitron = Orbitron({
 export const metadata: Metadata = {
   title: "TejasKP AI",
   description: "Advanced dashboard for management",
+  manifest: "/manifest.json",
+  themeColor: "#FFD700",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "TejasKP AI",
+  },
 };
 
 export default function RootLayout({

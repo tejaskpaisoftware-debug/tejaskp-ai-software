@@ -49,7 +49,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans pl-64 transition-colors duration-500 relative z-10">
+        <div className="min-h-screen bg-background text-foreground font-sans md:pl-64 transition-colors duration-500 relative z-10">
             <AdminSidebar />
 
             <main className="p-8 space-y-8">
@@ -74,7 +74,13 @@ export default function AdminDashboard() {
                         onClick={() => window.location.href = '/dashboard/admin/users'}
                         className="cursor-pointer hover:border-gold-theme"
                     />
-                    <StatsCard title="Active Today" value={stats.activeSessions.toLocaleString()} change="Daily" />
+                    <StatsCard
+                        title="Active Today"
+                        value={stats.activeSessions.toLocaleString()}
+                        change="Daily"
+                        onClick={() => window.location.href = '/dashboard/admin/attendance'}
+                        className="cursor-pointer hover:border-gold-theme"
+                    />
                     <StatsCard
                         title="Total Revenue"
                         value={formatCurrency(stats.revenue)}

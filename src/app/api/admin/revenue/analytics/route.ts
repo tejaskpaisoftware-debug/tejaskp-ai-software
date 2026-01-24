@@ -204,26 +204,27 @@ export async function GET(request: Request) {
         const weekly = processView('weekly');
         const daily = processView('daily');
 
-        const yearlyPromises = [];
+        const yearlyData = [];
         const currentYearNum = year;
         for (let i = 0; i < 5; i++) {
             const y = currentYearNum - i;
             const { start, end } = getYearRange(y);
 
-            yearlyPromises.push(Promise.all([
+            const [revenueAgg, expenseAgg] = await Promise.all([
                 prisma.invoice.aggregate({
                     _sum: { paidAmount: true },
                     where: { createdAt: { gte: start, lte: end } }
                 }),
                 prisma.purchase.aggregate({ _sum: { amount: true }, where: { date: { gte: start, lte: end } } })
-            ]).then(([r, e]) => ({
+            ]);
+
+            yearlyData.push({
                 period: y.toString(),
-                revenue: r._sum.paidAmount || 0,
-                expense: e._sum.amount || 0,
-                profit: (r._sum.paidAmount || 0) - (e._sum.amount || 0)
-            })));
+                revenue: revenueAgg._sum.paidAmount || 0,
+                expense: expenseAgg._sum.amount || 0,
+                profit: (revenueAgg._sum.paidAmount || 0) - (expenseAgg._sum.amount || 0)
+            });
         }
-        const yearlyData = await Promise.all(yearlyPromises);
 
         const serializeWithFormat = (data: any[], type: any) =>
             data.map(item => ({
