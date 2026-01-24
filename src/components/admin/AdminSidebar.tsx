@@ -116,9 +116,10 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
             {!isDesktopOpen && (
                 <button
                     onClick={toggleDesktop}
-                    className="hidden md:flex fixed top-6 left-6 z-[40] bg-background/80 border border-theme p-3 rounded-xl shadow-lg hover:border-gold-theme text-gold-theme items-center justify-center backdrop-blur-md"
+                    className="hidden md:flex fixed top-4 left-4 z-[40] bg-background border border-theme p-2 rounded-lg shadow-xl hover:border-gold-theme text-gold-theme items-center justify-center transition-all hover:scale-105"
+                    title="Open Sidebar"
                 >
-                    ☰
+                    <span className="text-xl">☰</span>
                 </button>
             )}
 
