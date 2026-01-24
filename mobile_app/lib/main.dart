@@ -74,7 +74,7 @@ class _MainWebViewState extends State<MainWebView> {
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://tejaskp-ai-software-qjnli60ux-tejas-projects-62ee4952.vercel.app/dashboard/admin'));
+      ..loadRequest(Uri.parse('https://tejaskp-ai-software-qjnli60ux-tejas-projects-62ee4952.vercel.app/login'));
   }
 
   @override
