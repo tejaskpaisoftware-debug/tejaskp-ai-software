@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
 import { motion } from "framer-motion";
 
 type Role = "STUDENT" | "EMPLOYEE" | "CLIENT";
@@ -184,8 +183,7 @@ export default function RegisterUserPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans pl-64">
-            <AdminSidebar />
+        <div className="min-h-screen bg-background text-foreground font-sans w-full">
 
             <main className="p-8 max-w-4xl mx-auto">
                 <header className="mb-10">
@@ -203,7 +201,7 @@ export default function RegisterUserPage() {
                                     key={role}
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: role as Role })}
-                                    className={`py-3 rounded-lg text-sm font-bold tracking-wider transition-all border ${formData.role === role
+                                    className={`py-2 md:py-3 rounded-lg text-[10px] md:text-sm font-bold tracking-wider transition-all border ${formData.role === role
                                         ? "bg-gold-theme text-black border-gold-theme"
                                         : "bg-transparent text-muted-foreground border-theme hover:border-gold-theme/50"
                                         }`}

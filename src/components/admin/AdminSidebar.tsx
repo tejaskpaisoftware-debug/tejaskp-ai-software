@@ -98,15 +98,19 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
             {/* Mobile Toggle Button */}
             <button
                 onClick={() => setOpenSubmenu(openSubmenu === 'MOBILE_OPEN' ? null : 'MOBILE_OPEN')}
-                className="md:hidden fixed top-4 right-4 z-[60] bg-gold-500 text-black p-2 rounded-lg shadow-lg"
+                className="md:hidden fixed top-4 right-4 z-[60] bg-gold-theme text-black p-2 rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
             >
-                {openSubmenu === 'MOBILE_OPEN' ? '✕' : '☰'}
+                {openSubmenu === 'MOBILE_OPEN' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                )}
             </button>
 
             {/* Sidebar Overlay for Mobile */}
             {openSubmenu === 'MOBILE_OPEN' && (
                 <div
-                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[45] md:hidden"
+                    className="fixed inset-0 bg-black/40 backdrop-blur-md z-[45] md:hidden"
                     onClick={() => setOpenSubmenu(null)}
                 />
             )}
@@ -119,7 +123,7 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                     className="hidden md:flex fixed top-4 left-4 z-[40] bg-background border border-theme p-2 rounded-lg shadow-xl hover:border-gold-theme text-gold-theme items-center justify-center transition-all hover:scale-105"
                     title="Open Sidebar"
                 >
-                    <span className="text-xl">☰</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
             )}
 
