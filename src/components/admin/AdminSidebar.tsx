@@ -43,7 +43,12 @@ const menuItems = [
     { name: "Settings", href: "/dashboard/admin/settings", icon: "⚙️" },
 ];
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+    isDesktopOpen?: boolean;
+    toggleDesktop?: () => void;
+}
+
+export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const [openSubmenu, setOpenSubmenu] = useState<string | null>("Users"); // Default open for visibility
@@ -106,12 +111,30 @@ export default function AdminSidebar() {
                 />
             )}
 
+
+            {/* Desktop Open Button (Visible when sidebar is closed) */}
+            {!isDesktopOpen && (
+                <button
+                    onClick={toggleDesktop}
+                    className="hidden md:flex fixed top-6 left-6 z-[40] bg-background/80 border border-theme p-3 rounded-xl shadow-lg hover:border-gold-theme text-gold-theme items-center justify-center backdrop-blur-md"
+                >
+                    ☰
+                </button>
+            )}
+
             <div className={`w-64 bg-background/95 backdrop-blur-xl border-r border-theme h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-transform duration-300
-                ${openSubmenu === 'MOBILE_OPEN' ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                ${openSubmenu === 'MOBILE_OPEN' ? 'translate-x-0' : '-translate-x-full'}
+                ${isDesktopOpen ? 'md:translate-x-0' : 'md:-translate-x-full'}
             `}>
-                <div className="flex items-center gap-3 mb-10">
-                    <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full border border-gold-theme" />
-                    <span className="text-xl font-bold text-gold-theme tracking-wider">TEJASKP</span>
+                <div className="flex items-center justify-between mb-10">
+                    <div className="flex items-center gap-3">
+                        <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full border border-gold-theme" />
+                        <span className="text-xl font-bold text-gold-theme tracking-wider">TEJASKP</span>
+                    </div>
+                    {/* Desktop Collapse Button (Inside Panel) */}
+                    <button onClick={toggleDesktop} className="hidden md:block text-gold-theme hover:bg-white/10 p-2 rounded-lg">
+                        ☰
+                    </button>
                 </div>
 
                 <nav className="space-y-2 flex-1 overflow-y-auto pr-2">

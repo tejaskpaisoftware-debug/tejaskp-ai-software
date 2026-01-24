@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
@@ -49,8 +48,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans md:pl-64 transition-colors duration-500 relative z-10">
-            <AdminSidebar />
+        <div className="bg-background text-foreground font-sans transition-colors duration-500 relative z-10 w-full">
 
             <main className="p-8 space-y-8">
                 {/* Header */}
