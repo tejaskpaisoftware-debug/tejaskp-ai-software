@@ -133,7 +133,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Login error:", error);
         return NextResponse.json(
-            { message: "Internal Server Error" },
+            { message: `Login Error: ${error instanceof Error ? error.message : "Unknown Error"}` },
             { status: 500 }
         );
     }
