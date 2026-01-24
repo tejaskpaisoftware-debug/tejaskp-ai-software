@@ -107,9 +107,9 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-obsidian text-gold-100 font-sans flex items-center justify-center relative overflow-hidden">
+        <div className="min-h-screen bg-obsidian text-gold-100 font-sans flex items-center justify-center relative overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-900/50 via-obsidian to-black">
             {/* Background 3D Effect (Subtle) */}
-            <div className="absolute inset-0 z-0 opacity-40">
+            <div className="absolute inset-0 z-0 opacity-60">
                 <Canvas>
                     <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
                 </Canvas>
@@ -208,7 +208,7 @@ export default function LoginPage() {
                                                 type="text"
                                                 value={mobile}
                                                 onChange={(e) => setMobile(e.target.value)}
-                                                className="w-full bg-obsidian/50 border border-gold-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all"
+                                                className="w-full bg-charcoal border border-gold-500/40 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all font-medium"
                                                 placeholder="Enter mobile or username"
                                             />
                                         </div>
@@ -222,7 +222,7 @@ export default function LoginPage() {
                                                 type="password"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                className="w-full bg-obsidian/50 border border-gold-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all"
+                                                className="w-full bg-charcoal border border-gold-500/40 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all font-medium"
                                                 placeholder={activeRole === "ADMIN" ? "admin123" : "pass123 (or leave blank to test setup)"}
                                             />
                                             {activeRole !== "ADMIN" && <p className="text-[10px] text-gray-500">*First time? Enter mobile & leave password blank</p>}
