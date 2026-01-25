@@ -51,7 +51,7 @@ export default function UserChatPage() {
 
     // Fetch Messages Polling
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: any;
         if (user && activeContact) {
             fetchMessages(); // Initial fetch
             interval = setInterval(fetchMessages, 3000); // 3s polling

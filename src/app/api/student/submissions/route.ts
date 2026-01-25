@@ -57,9 +57,9 @@ export async function POST(request: Request) {
 
     try {
         const formData = await request.formData();
-        const pdfFile = formData.get("pdf") as File;
-        const excelFile = formData.get("excel") as File;
-        const weekDate = formData.get("weekDate") as string || getMonday(new Date());
+        const pdfFile = (formData as any).get("pdf") as File;
+        const excelFile = (formData as any).get("excel") as File;
+        const weekDate = (formData as any).get("weekDate") as string || getMonday(new Date());
 
         if (!pdfFile || !excelFile) {
             return NextResponse.json({ success: false, error: "Both PDF and Excel files are required" }, { status: 400 });

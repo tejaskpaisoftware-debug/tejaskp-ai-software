@@ -126,23 +126,23 @@ export default function LoginPage() {
                     className="hidden md:block space-y-6"
                 >
                     <div className="flex items-center gap-4">
-                        <img src="/logo.jpg" alt="Logo" className="w-16 h-16 rounded-full border-2 border-gold-500 shadow-[0_0_20px_rgba(255,215,0,0.3)]" />
+                        <img src="/logo.jpg" alt="Logo" className="w-16 h-16 rounded-full border-2 border-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.3)]" />
                         <div>
-                            <h1 className="text-3xl font-bold text-gold-500 tracking-wider">TEJASKP AI</h1>
-                            <p className="text-gold-200/60 tracking-[0.2em] text-sm">FUTURE IS HERE</p>
+                            <h1 className="text-3xl font-bold text-[#FFD700] tracking-wider drop-shadow-md">TEJASKP AI</h1>
+                            <p className="text-yellow-200 tracking-[0.2em] text-sm font-medium">FUTURE IS HERE</p>
                         </div>
                     </div>
-                    <p className="text-gray-400 leading-relaxed text-lg">
+                    <p className="text-gray-200 leading-relaxed text-lg font-light">
                         Access your secure portal to manage data, view analytics, and experience the power of next-gen AI software.
                     </p>
                     <div className="flex gap-4 pt-4">
-                        <div className="bg-charcoal border border-gold-500/20 p-4 rounded-xl backdrop-blur-sm">
-                            <div className="text-2xl font-bold text-gold-400">99.9%</div>
-                            <div className="text-xs text-gray-500 uppercase tracking-wider">Uptime</div>
+                        <div className="bg-[#1a1a1a] border border-yellow-500/30 p-4 rounded-xl backdrop-blur-sm">
+                            <div className="text-2xl font-bold text-[#FFD700]">99.9%</div>
+                            <div className="text-xs text-white uppercase tracking-wider font-semibold">Uptime</div>
                         </div>
-                        <div className="bg-charcoal border border-gold-500/20 p-4 rounded-xl backdrop-blur-sm">
-                            <div className="text-2xl font-bold text-gold-400">SECURE</div>
-                            <div className="text-xs text-gray-500 uppercase tracking-wider">Encryption</div>
+                        <div className="bg-[#1a1a1a] border border-yellow-500/30 p-4 rounded-xl backdrop-blur-sm">
+                            <div className="text-2xl font-bold text-[#FFD700]">SECURE</div>
+                            <div className="text-xs text-white uppercase tracking-wider font-semibold">Encryption</div>
                         </div>
                     </div>
                 </motion.div>
@@ -153,16 +153,16 @@ export default function LoginPage() {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                    <div className="bg-charcoal/60 backdrop-blur-xl border border-gold-500/30 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                    <div className="bg-[#121212]/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
                         {/* Role Tabs */}
-                        <div className="flex border-b border-gold-500/20">
+                        <div className="flex border-b border-yellow-500/20">
                             {["STUDENT", "EMPLOYEE", "CLIENT"].map((role) => (
                                 <button
                                     key={role}
                                     onClick={() => { setActiveRole(role as Role); setAuthStep("LOGIN"); setError(""); }}
                                     className={`flex-1 py-4 text-xs font-bold tracking-wider transition-all relative ${activeRole === role
-                                        ? "text-obsidian bg-gold-500"
-                                        : "text-gray-500 hover:text-gold-300 hover:bg-white/5"
+                                        ? "text-black bg-[#FFD700]"
+                                        : "text-gray-300 hover:text-white hover:bg-white/10"
                                         }`}
                                 >
                                     {role}
@@ -192,7 +192,7 @@ export default function LoginPage() {
                                                 activeRole === 'STUDENT' ? 'Student Portal' :
                                                     activeRole === 'EMPLOYEE' ? 'Staff Access' : 'Client Dashboard'}
                                     </h2>
-                                    <p className="text-gold-500/60 text-sm">
+                                    <p className="text-gray-300 text-sm">
                                         {authStep === "SET_PASSWORD"
                                             ? "Create a secure password for your account"
                                             : "Please sign in with your mock credentials"}
@@ -203,14 +203,14 @@ export default function LoginPage() {
                                     {/* Mobile/User Input */}
                                     {authStep === "LOGIN" && (
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gold-500/80 uppercase tracking-wider">
+                                            <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">
                                                 Mobile or Username
                                             </label>
                                             <input
                                                 type="text"
                                                 value={mobile}
                                                 onChange={(e) => setMobile(e.target.value)}
-                                                className="w-full bg-charcoal border border-gold-500/40 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all font-medium"
+                                                className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium border-opacity-50"
                                                 placeholder="Enter mobile or username"
                                             />
                                         </div>
@@ -219,15 +219,15 @@ export default function LoginPage() {
                                     {/* Password Input (Active for Admin or Normal Login) */}
                                     {authStep === "LOGIN" && (
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gold-500/80 uppercase tracking-wider">Password</label>
+                                            <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">Password</label>
                                             <input
                                                 type="password"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                className="w-full bg-charcoal border border-gold-500/40 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all font-medium"
+                                                className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium border-opacity-50"
                                                 placeholder={activeRole === "ADMIN" ? "admin123" : "pass123 (or leave blank to test setup)"}
                                             />
-                                            {activeRole !== "ADMIN" && <p className="text-[10px] text-gray-500">*First time? Enter mobile & leave password blank</p>}
+                                            {activeRole !== "ADMIN" && <p className="text-[11px] text-gray-400 font-medium">*First time? Enter mobile & leave password blank</p>}
                                         </div>
                                     )}
 
@@ -235,22 +235,22 @@ export default function LoginPage() {
                                     {authStep === "SET_PASSWORD" && (
                                         <>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold text-gold-500/80 uppercase tracking-wider">New Password</label>
+                                                <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">New Password</label>
                                                 <input
                                                     type="password"
                                                     value={newPassword}
                                                     onChange={(e) => setNewPassword(e.target.value)}
-                                                    className="w-full bg-obsidian/50 border border-gold-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-500 transition-all"
+                                                    className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-all"
                                                     placeholder="Minimum 6 characters"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold text-gold-500/80 uppercase tracking-wider">Confirm Password</label>
+                                                <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">Confirm Password</label>
                                                 <input
                                                     type="password"
                                                     value={confirmPassword}
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                                    className="w-full bg-obsidian/50 border border-gold-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-500 transition-all"
+                                                    className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-all"
                                                     placeholder="Re-enter password"
                                                 />
                                             </div>
@@ -261,13 +261,13 @@ export default function LoginPage() {
 
                                     <div className="flex items-center justify-between text-xs text-gray-400">
                                         <label className="flex items-center gap-2 cursor-pointer hover:text-white">
-                                            <input type="checkbox" className="rounded border-gray-600 bg-transparent text-gold-500 focus:ring-offset-0 focus:ring-gold-500" />
+                                            <input type="checkbox" className="rounded border-gray-600 bg-transparent text-yellow-500 focus:ring-offset-0 focus:ring-yellow-500" />
                                             Remember me
                                         </label>
-                                        <a href="#" className="hover:text-gold-400 transition-colors">Forgot Password?</a>
+                                        <a href="#" className="hover:text-yellow-400 transition-colors">Forgot Password?</a>
                                     </div>
 
-                                    <button className="w-full bg-gradient-to-r from-gold-600 to-gold-400 text-obsidian font-bold py-4 rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] hover:scale-[1.02] transition-all transform active:scale-95">
+                                    <button className="w-full bg-[#EAB308] hover:bg-[#CA8A04] text-black font-extrabold py-4 rounded-lg shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] transition-all transform active:scale-95 text-base tracking-wide">
                                         {authStep === "SET_PASSWORD" ? "SET PASSWORD & LOGIN" : "ACCESS DASHBOARD"}
                                     </button>
 

@@ -48,7 +48,7 @@ function safeDate(excelDate: any): string {
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
-        const file = formData.get("file") as File;
+        const file = (formData as any).get("file") as File;
 
         if (!file) {
             return NextResponse.json({ success: false, error: "No file uploaded" }, { status: 400 });

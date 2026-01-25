@@ -51,5 +51,10 @@
 	<string>This app requires access to your camera to scan QR codes and upload documents.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app requires access to your location for attendance tracking.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
