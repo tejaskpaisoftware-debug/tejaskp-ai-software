@@ -498,3 +498,41 @@
 }
 
 /* --- END OF EFFECTS --- */
+
+/* =========================================
+   5. GLOBAL 3D "REAL SMOOTH" THEME UTILITIES
+   ========================================= */
+
+@layer utilities {
+  .glass-card-3d {
+    @apply bg-gradient-to-br from-[#1e1e1e] to-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_8px_16px_rgba(0, 0, 0, 0.4)] backdrop-blur-xl transition-all duration-300;
+  }
+
+  .glass-card-3d:hover {
+    @apply shadow-[0_12px_24px_rgba(0, 0, 0, 0.5)] border-white/20 transform -translate-y-1;
+  }
+
+  .text-3d {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-300 to-yellow-600 drop-shadow-[0_2px_2px_rgba(0, 0, 0, 0.8)];
+  }
+
+  .text-3d-silver {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_2px_2px_rgba(0, 0, 0, 0.8)];
+  }
+
+  .btn-3d {
+    @apply bg-gradient-to-b from-[#2a2a2a] to-black border border-white/10 shadow-[0_4px_6px_rgba(0, 0, 0, 0.3), inset_0_1px_0_rgba(255, 255, 255, 0.1)] hover:border-yellow-500/30 text-yellow-500 transition-all active:scale-95;
+  }
+
+  .btn-3d-primary {
+    @apply bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold shadow-[0_4px_6px_rgba(0, 0, 0, 0.3), inset_0_1px_0_rgba(255, 255, 255, 0.4)] border border-yellow-500/50 hover:brightness-110 active:scale-95;
+  }
+
+  .input-3d {
+    @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white shadow-[inset_0_2px_4px_rgba(0, 0, 0, 0.5)] focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/30 outline-none transition-all placeholder:text-gray-600;
+  }
+
+  .line-3d {
+    @apply h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent shadow-[0_0_10px_rgba(234, 179, 8, 0.5)];
+  }
+}

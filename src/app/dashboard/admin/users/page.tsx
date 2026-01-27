@@ -640,18 +640,17 @@ export default function UsersPage() {
             </AnimatePresence>
 
             {/* Recent Users Widget Box */}
-            {/* Recent Users Widget Box */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="mb-10 bg-gradient-to-br from-[#121212] to-black border border-white/10 rounded-2xl p-8 relative overflow-hidden shadow-2xl"
+                className="mb-10 glass-card-3d p-8 relative overflow-hidden"
             >
                 {/* Background Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
                 <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-6 flex items-center gap-3 relative z-10">
-                    <span className="bg-yellow-500/20 p-2 rounded-lg text-yellow-500 border border-yellow-500/20">✨</span>
+                    <span className="bg-yellow-500/20 p-2 rounded-lg text-yellow-500 border border-yellow-500/20 shadow-[inset_0_0_10px_rgba(234,179,8,0.2)]">✨</span>
                     Recently Added Users <span className="text-sm font-normal text-gray-400 ml-auto block md:inline">(Last 5)</span>
                 </h2>
 
@@ -689,22 +688,23 @@ export default function UsersPage() {
                 </div>
             </motion.div>
 
-            <header className="flex justify-between items-center mb-10">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                    <h1 className="text-5xl font-black text-3d tracking-wide pb-2">
                         All Users
                     </h1>
                     <p className="text-gray-400 mt-2 text-sm font-medium tracking-wide drop-shadow-md">Manage all registered users categorized by their role.</p>
                 </div>
-                <div className="flex gap-4 items-center">
-                    <div className="relative group">
+                <div className="flex flex-wrap gap-4 items-center w-full md:w-auto">
+                    <div className="relative group w-full md:w-auto">
                         <input
                             type="text"
                             placeholder="Search students..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-[#1a1a1a] border border-white/10 text-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-yellow-500/50 w-64 placeholder-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] transition-all focus:shadow-[0_0_15px_rgba(234,179,8,0.1)]"
+                            className="input-3d w-full md:w-64 pl-10"
                         />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-yellow-500 transition-colors">🔍</span>
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
@@ -717,17 +717,15 @@ export default function UsersPage() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadStatus === 'uploading'}
-                        className="relative overflow-hidden bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border border-white/10 text-yellow-500 px-6 py-2.5 rounded-xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] group disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-3d px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 group disabled:opacity-50"
                     >
-                        <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                            <span>📂</span> Upload Excel
-                        </span>
+                        <span>📂</span> Upload Excel
                     </button>
                     <button
                         onClick={fetchUsers}
-                        className="relative overflow-hidden bg-gradient-to-b from-yellow-500 to-yellow-600 text-black px-6 py-2.5 rounded-xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_10px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"
+                        className="btn-3d-primary px-6 py-2.5 rounded-xl transition-all"
                     >
-                        <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.3)]">Refresh List</span>
+                        Refresh List
                     </button>
                     <button
                         onClick={async () => {
@@ -754,11 +752,9 @@ export default function UsersPage() {
                                 }
                             }
                         }}
-                        className="relative overflow-hidden bg-gradient-to-b from-red-900/80 to-red-950 border border-red-500/30 text-red-400 px-6 py-2.5 rounded-xl font-bold hover:bg-red-900 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] active:scale-95"
+                        className="relative overflow-hidden bg-gradient-to-b from-red-900/80 to-red-950 border border-red-500/30 text-red-400 px-6 py-2.5 rounded-xl font-bold hover:bg-red-900 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] active:scale-95 text-xs md:text-sm"
                     >
-                        <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] flex items-center gap-2">
-                            ⚠️ Clear All Data
-                        </span>
+                        ⚠️ Clear All Data
                     </button>
                 </div>
             </header>
