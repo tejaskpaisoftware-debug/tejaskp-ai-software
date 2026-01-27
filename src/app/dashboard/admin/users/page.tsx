@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SalarySlipTemplate from '@/components/documents/SalarySlipTemplate';
 import jsPDF from "jspdf";
 import { toPng, toJpeg } from "html-to-image";
+import UserCard from "./UserCard";
 
 interface User {
     id: string;
@@ -787,85 +788,14 @@ export default function UsersPage() {
                                     {filteredUsers
                                         .filter(u => activeRole === "ALL" || (activeRole === "RECENT" ? new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : activeRole === "PENDING_FEES" ? (u.pendingAmount || 0) > 0 : u.role === activeRole))
                                         .map((user) => (
-                                            <div key={user.id} className="bg-card border border-gold-theme/10 rounded-xl p-5 hover:border-gold-theme/30 transition-all group">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <div>
-                                                        <h3 className="font-bold text-foreground text-lg">{user.name || "No Name"}</h3>
-                                                        <p className="text-sm text-gold-theme/70 font-mono">{user.mobile}</p>
-                                                        {user.course && <p className="text-xs text-muted-foreground mt-1">{user.course}</p>}
-                                                        {((user.totalFees || 0) > 0 || (user.paidAmount || 0) > 0) && (
-                                                            <div className="mt-2 text-[10px] grid grid-cols-3 gap-1 bg-background p-2 rounded border border-theme">
-                                                                <div>
-                                                                    <div className="text-muted-foreground">Fees</div>
-                                                                    <div className="text-foreground font-mono">₹{Math.max(user.totalFees || 0, user.paidAmount || 0)}</div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="text-muted-foreground">Paid</div>
-                                                                    <div className="text-green-400 font-mono">₹{user.paidAmount || 0}</div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="text-muted-foreground">Pending</div>
-                                                                    <div className="text-red-400 font-mono">₹{Math.max(0, user.pendingAmount || 0)}</div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <button
-                                                        onClick={() => {
-                                                            const newStatus = user.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
-                                                            if (confirm(`Are you sure you want to ${newStatus === 'ACTIVE' ? 'ACTIVATE' : 'BLOCK'} this user?`)) {
-                                                                handleUpdateStatus(user.id, newStatus);
-                                                            }
-                                                        }}
-                                                        disabled={uploadStatus === 'uploading'}
-                                                        className={`mt-2 text-[10px] font-bold px-3 py-1 rounded-full border transition-all hover:scale-105 active:scale-95 ${user.status === 'ACTIVE' ? 'text-green-500 border-green-500/30 bg-green-500/10 hover:bg-green-500/20' :
-                                                            user.status === 'BLOCKED' ? 'text-red-500 border-red-500/30 bg-red-500/10 hover:bg-red-500/20' :
-                                                                'text-yellow-500 border-yellow-500/30 bg-yellow-500/10'
-                                                            }`}
-                                                        title="Click to Toggle Status"
-                                                    >
-                                                        {user.status === 'ACTIVE' ? '● ACTIVE' : '○ BLOCKED'}
-                                                    </button>
-                                                </div>
-
-                                                <div className="text-xs text-muted-foreground space-y-1">
-                                                    <p>Joined: {user.joiningDate ? new Date(user.joiningDate).toLocaleDateString() : new Date(user.createdAt).toLocaleDateString()}</p>
-                                                    <p className="truncate">ID: {user.id}</p>
-                                                    <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] bg-foreground/5 border border-theme ${user.role === 'STUDENT' ? 'text-blue-400' :
-                                                        user.role === 'EMPLOYEE' ? 'text-purple-400' :
-                                                            user.role === 'ADMIN' ? 'text-red-400' : 'text-muted-foreground'
-                                                        }`}>
-                                                        {user.role}
-                                                    </span>
-                                                </div>
-
-                                                <div className="mt-4 pt-4 border-t border-theme flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => setEditingUser(user)} className="flex-1 bg-foreground/5 hover:bg-gold-theme hover:text-black text-xs py-2 rounded transition-colors duration-300">
-                                                        Edit
-                                                    </button>
-                                                    <button onClick={() => window.location.href = `/dashboard/admin/users/${user.id}`} className="flex-1 bg-foreground/5 hover:bg-gold-theme hover:text-black text-xs py-2 rounded transition-colors duration-300">
-                                                        History
-                                                    </button>
-                                                    <button onClick={() => window.location.href = `/dashboard/admin/documents/joining-letter?userId=${user.id}`} className="flex-1 bg-foreground/5 hover:bg-gold-theme hover:text-black text-xs py-2 rounded transition-colors duration-300">
-                                                        Letter
-                                                    </button>
-                                                    {user.role === 'EMPLOYEE' ? (
-                                                        <button
-                                                            onClick={() => openSalarySlipModal(user)}
-                                                            className="flex-1 bg-foreground/5 hover:bg-green-500 hover:text-foreground text-xs py-2 rounded transition-colors duration-300 text-green-400"
-                                                        >
-                                                            Salary Slip
-                                                        </button>
-                                                    ) : (
-                                                        <button onClick={() => window.location.href = `/dashboard/admin/documents/certificate?userId=${user.id}`} className="flex-1 bg-foreground/5 hover:bg-gold-theme hover:text-black text-xs py-2 rounded transition-colors duration-300">
-                                                            Cert.
-                                                        </button>
-                                                    )}
-                                                    <button onClick={() => handleDelete(user.id)} className="flex-1 bg-foreground/5 hover:bg-red-500 hover:text-foreground text-xs py-2 rounded transition-colors duration-300 text-red-400">
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <UserCard
+                                                key={user.id}
+                                                user={user}
+                                                onEdit={setEditingUser}
+                                                onStatusUpdate={handleUpdateStatus}
+                                                onDelete={handleDelete}
+                                                onSalarySlip={openSalarySlipModal}
+                                            />
                                         ))}
                                 </div>
                             )}
