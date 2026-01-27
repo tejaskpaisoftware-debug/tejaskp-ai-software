@@ -539,7 +539,7 @@ export default function UsersPage() {
                                             <div className="absolute inset-0 rounded-full bg-gold-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                         </div>
                                         <h3 className="text-xl font-bold text-white mt-4">{editingUser.name}</h3>
-                                        <span className="px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/20 text-gold-400 text-xs font-bold tracking-wider uppercase mt-2">
+                                        <span className="px-4 py-1.5 rounded-full bg-gold-500 text-black text-xs font-bold tracking-wider uppercase mt-3 shadow-lg shadow-gold-500/20">
                                             {editingUser.role}
                                         </span>
                                     </div>
@@ -582,12 +582,12 @@ export default function UsersPage() {
                                         {/* Role Configuration Box */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-white/[0.03] rounded-2xl border border-white/10">
                                             <div className="group">
-                                                <label className="block text-[10px] uppercase tracking-widest text-gold-400 font-bold mb-2 ml-1">Role</label>
+                                                <label className="block text-xs uppercase tracking-widest text-white font-bold mb-2 ml-1">Role</label>
                                                 <div className="relative">
                                                     <select
                                                         value={editingUser.role}
                                                         onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}
-                                                        className="w-full bg-[#1a1a1a] border border-gold-500/30 rounded-xl p-3 text-white appearance-none cursor-pointer outline-none focus:border-gold-500/60 transition-all font-medium"
+                                                        className="w-full bg-[#1a1a1a] border border-gold-500/50 rounded-xl p-3 text-white appearance-none cursor-pointer outline-none focus:border-gold-500 transition-all font-bold"
                                                     >
                                                         <option value="STUDENT" className="bg-black text-white">Student</option>
                                                         <option value="EMPLOYEE" className="bg-black text-white">Employee</option>
