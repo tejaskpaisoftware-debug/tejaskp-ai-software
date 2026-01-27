@@ -19,6 +19,7 @@ export interface UserProp {
     pendingAmount?: number;
     joiningDate?: string;
     salarySlips?: any[];
+    joiningLetters?: any[]; // Added joiningLetters
     salaryDetails?: string;
 }
 
@@ -32,6 +33,15 @@ interface UserCardProps {
 
 export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip }: UserCardProps) {
     const [isExpanded, setIsExpanded] = useState(true);
+
+    // Helper to get course name
+    const getCourseName = () => {
+        if (user.course) return user.course;
+        if (user.joiningLetters && user.joiningLetters.length > 0) {
+            return user.joiningLetters[0].internshipType || user.joiningLetters[0].designation;
+        }
+        return '-';
+    };
 
     return (
         <motion.div
@@ -121,7 +131,7 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                                 </div>
                                 <div>
                                     <div className="text-gray-400 mb-1">Course</div>
-                                    <div className="text-gray-300">{user.course || '-'}</div>
+                                    <div className="text-gray-300">{getCourseName()}</div>
                                 </div>
                             </div>
 

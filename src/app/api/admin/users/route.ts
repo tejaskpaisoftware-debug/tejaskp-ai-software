@@ -9,7 +9,8 @@ export async function GET() {
             },
             include: {
                 leaves: true,
-                salarySlips: true
+                salarySlips: true,
+                joiningLetters: true
             }
         });
         return NextResponse.json({ users });
