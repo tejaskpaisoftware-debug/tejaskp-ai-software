@@ -661,67 +661,67 @@ export default function UsersPage() {
                                         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                             {/* Official Section */}
                                             <div className="relative p-6 rounded-2xl bg-gradient-to-b from-white/[0.03] to-transparent border border-white/5">
-                                                <div className="absolute -top-3 left-6 px-3 bg-[#0a0a0a] text-gold-300 text-xs font-bold uppercase tracking-widest border border-gold-500/30 rounded-full flex items-center gap-2 shadow-lg z-10">
+                                                <div className="absolute -top-3 left-6 px-3 bg-[#0a0a0a] text-blue-400 text-xs font-bold uppercase tracking-widest border border-blue-500/20 rounded-full flex items-center gap-2 shadow-lg z-10">
                                                     <span>🏢</span> Official Details
                                                 </div>
 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                                                     <div className="group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Employee ID</label>
-                                                        <input type="text" value={editingUser.employeeId || ''} onChange={e => setEditingUser({ ...editingUser, employeeId: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" placeholder="EMP-001" />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-blue-400 transition-colors">Employee ID</label>
+                                                        <input type="text" value={editingUser.employeeId || ''} onChange={e => setEditingUser({ ...editingUser, employeeId: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-blue-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300" placeholder="EMP-001" />
                                                     </div>
                                                     <div className="group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Designation</label>
-                                                        <input type="text" value={editingUser.designation || ''} onChange={e => setEditingUser({ ...editingUser, designation: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" placeholder="e.g. Senior Developer" />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-blue-400 transition-colors">Designation</label>
+                                                        <input type="text" value={editingUser.designation || ''} onChange={e => setEditingUser({ ...editingUser, designation: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-blue-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300" placeholder="e.g. Senior Developer" />
                                                     </div>
                                                     <div className="group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Department</label>
-                                                        <input type="text" value={editingUser.department || ''} onChange={e => setEditingUser({ ...editingUser, department: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" placeholder="e.g. Engineering" />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-blue-400 transition-colors">Department</label>
+                                                        <input type="text" value={editingUser.department || ''} onChange={e => setEditingUser({ ...editingUser, department: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-blue-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300" placeholder="e.g. Engineering" />
                                                     </div>
                                                     <div className="group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Reporting Manager</label>
-                                                        <input type="text" value={editingUser.reportingManager || ''} onChange={e => setEditingUser({ ...editingUser, reportingManager: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-blue-400 transition-colors">Reporting Manager</label>
+                                                        <input type="text" value={editingUser.reportingManager || ''} onChange={e => setEditingUser({ ...editingUser, reportingManager: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-blue-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300" />
                                                     </div>
                                                     <div className="md:col-span-2 group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Photo URL</label>
-                                                        <input type="text" value={editingUser.photoUrl || ''} onChange={e => setEditingUser({ ...editingUser, photoUrl: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium overflow-ellipsis outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" placeholder="https://..." />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-blue-400 transition-colors">Photo URL</label>
+                                                        <input type="text" value={editingUser.photoUrl || ''} onChange={e => setEditingUser({ ...editingUser, photoUrl: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium overflow-ellipsis outline-none focus:border-blue-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300" placeholder="https://..." />
                                                     </div>
                                                     <div className="md:col-span-2 group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Skills Tags</label>
-                                                        <input type="text" value={editingUser.skills || ''} onChange={e => setEditingUser({ ...editingUser, skills: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" placeholder="React, Node.js, TypeScript" />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-blue-400 transition-colors">Skills Tags</label>
+                                                        <input type="text" value={editingUser.skills || ''} onChange={e => setEditingUser({ ...editingUser, skills: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-blue-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300" placeholder="React, Node.js, TypeScript" />
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Personal Section */}
                                             <div className="relative p-6 rounded-2xl bg-gradient-to-b from-white/[0.03] to-transparent border border-white/5">
-                                                <div className="absolute -top-3 left-6 px-3 bg-[#0a0a0a] text-gold-300 text-xs font-bold uppercase tracking-widest border border-gold-500/30 rounded-full flex items-center gap-2 shadow-lg z-10">
+                                                <div className="absolute -top-3 left-6 px-3 bg-[#0a0a0a] text-purple-400 text-xs font-bold uppercase tracking-widest border border-purple-500/20 rounded-full flex items-center gap-2 shadow-lg z-10">
                                                     <span>🚑</span> Personal & Emergency
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                                                     <div className="group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Date of Birth</label>
-                                                        <input type="date" value={editingUser.dob || ''} onChange={e => setEditingUser({ ...editingUser, dob: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-purple-400 transition-colors">Date of Birth</label>
+                                                        <input type="date" value={editingUser.dob || ''} onChange={e => setEditingUser({ ...editingUser, dob: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-purple-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300" />
                                                     </div>
                                                     <div className="group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Blood Group</label>
-                                                        <input type="text" value={editingUser.bloodGroup || ''} onChange={e => setEditingUser({ ...editingUser, bloodGroup: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300" placeholder="O+" />
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-purple-400 transition-colors">Blood Group</label>
+                                                        <input type="text" value={editingUser.bloodGroup || ''} onChange={e => setEditingUser({ ...editingUser, bloodGroup: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium outline-none focus:border-purple-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300" placeholder="O+" />
                                                     </div>
                                                     <div className="md:col-span-2 group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Current Address</label>
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-purple-400 transition-colors">Current Address</label>
                                                         <textarea
                                                             value={editingUser.currentAddress || ''}
                                                             onChange={e => setEditingUser({ ...editingUser, currentAddress: e.target.value })}
-                                                            className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium min-h-[100px] resize-none outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
+                                                            className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium min-h-[100px] resize-none outline-none focus:border-purple-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300"
                                                             placeholder="Full address details..."
                                                         />
                                                     </div>
                                                     <div className="md:col-span-2 group">
-                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Emergency Contact</label>
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-purple-400 transition-colors">Emergency Contact</label>
                                                         <textarea
                                                             value={editingUser.emergencyContact || ''}
                                                             onChange={e => setEditingUser({ ...editingUser, emergencyContact: e.target.value })}
-                                                            className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium min-h-[80px] resize-none outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
+                                                            className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-medium min-h-[80px] resize-none outline-none focus:border-purple-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300"
                                                             placeholder="Name: John Doe, Relation: Father, Mobile: 9876543210"
                                                         />
                                                     </div>
