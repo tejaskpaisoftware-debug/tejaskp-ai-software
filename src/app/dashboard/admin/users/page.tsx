@@ -775,14 +775,14 @@ export default function UsersPage() {
                                 <button
                                     type="button"
                                     onClick={() => setEditingUser(null)}
-                                    className="flex-1 bg-white/5 hover:bg-white/10 text-gray-400 py-3 rounded-xl font-bold uppercase tracking-wider text-xs transition-colors border border-white/5"
+                                    className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition-all duration-300"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    form="editUserForm"
                                     type="submit"
-                                    className="flex-1 bg-gradient-to-r from-gold-600 to-gold-500 text-black py-3 rounded-xl font-bold uppercase tracking-wider text-xs hover:brightness-110 shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all active:scale-[0.98]"
+                                    form="editUserForm"
+                                    className="flex-1 py-4 rounded-xl bg-gradient-to-r from-gold-600 to-gold-400 text-black font-bold uppercase tracking-widest shadow-lg shadow-gold-500/20 hover:shadow-gold-500/40 hover:scale-[1.02] transition-all duration-300 transform active:scale-[0.98]"
                                 >
                                     Save Changes
                                 </button>
