@@ -646,10 +646,10 @@ export default function UsersPage() {
                 className="mb-10 bg-gradient-to-br from-[#121212] to-black border border-white/10 rounded-2xl p-8 relative overflow-hidden shadow-2xl"
             >
                 {/* Background Decoration */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
                 <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-6 flex items-center gap-3 relative z-10">
-                    <span className="bg-gold-500/20 p-2 rounded-lg text-gold-500 border border-gold-500/20">✨</span>
+                    <span className="bg-yellow-500/20 p-2 rounded-lg text-yellow-500 border border-yellow-500/20">✨</span>
                     Recently Added Users <span className="text-sm font-normal text-gray-400 ml-auto block md:inline">(Last 5)</span>
                 </h2>
 
@@ -660,19 +660,19 @@ export default function UsersPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl p-4 hover:border-gold-500/40 hover:bg-white/10 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] cursor-pointer"
+                            className="bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl p-4 hover:border-yellow-500/40 hover:bg-white/10 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] cursor-pointer"
                         >
                             <div className="flex justify-between items-start mb-3">
                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${u.role === 'ADMIN' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
                                     u.role === 'EMPLOYEE' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
                                         u.role === 'CLIENT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                            'bg-gold-500/10 text-gold-400 border-gold-500/20'
+                                            'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
                                     }`}>
                                     {u.role}
                                 </span>
                                 <span className="text-[10px] text-gray-400">{new Date(u.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                             </div>
-                            <div className="font-bold text-white text-sm truncate mb-1 group-hover:text-gold-400 transition-colors">{u.name}</div>
+                            <div className="font-bold text-white text-sm truncate mb-1 group-hover:text-yellow-400 transition-colors">{u.name}</div>
                             <div className="text-xs text-gray-400 truncate flex items-center gap-1">
                                 <span className="opacity-50">📱</span> {u.mobile}
                             </div>

@@ -41,7 +41,7 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
             className={`
                 relative overflow-hidden rounded-2xl border transition-all duration-300
                 ${user.status === 'BLOCKED' ? 'border-red-500/30 bg-red-950/20' : 'border-white/10 bg-gradient-to-br from-[#121212] to-[#0a0a0a]'}
-                hover:border-gold-500/50 hover:shadow-[0_0_30px_rgba(234,179,8,0.1)]
+                hover:border-yellow-500/50 hover:shadow-[0_0_30px_rgba(234,179,8,0.1)]
                 group
             `}
         >
@@ -54,7 +54,7 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                         ${user.role === 'ADMIN' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
                             user.role === 'EMPLOYEE' ? 'bg-purple-500/20 text-purple-500 border border-purple-500/30' :
                                 user.role === 'CLIENT' ? 'bg-blue-500/20 text-blue-500 border border-blue-500/30' :
-                                    'bg-gold-500/20 text-gold-500 border border-gold-500/30'}
+                                    'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30'}
                     `}>
                         {user.name.charAt(0).toUpperCase()}
                     </div>
@@ -65,7 +65,7 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                             <span className={`text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold border ${user.role === 'ADMIN' ? 'border-red-500/30 text-red-400' :
                                 user.role === 'EMPLOYEE' ? 'border-purple-500/30 text-purple-400' :
                                     user.role === 'CLIENT' ? 'border-blue-500/30 text-blue-400' :
-                                        'border-gold-500/30 text-gold-400'
+                                        'border-yellow-500/30 text-yellow-400'
                                 }`}>
                                 {user.role}
                             </span>
@@ -174,7 +174,7 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                                 ) : (
                                     <button
                                         onClick={() => window.location.href = `/dashboard/admin/documents/certificate?userId=${user.id}`}
-                                        className="bg-gold-600/20 hover:bg-gold-600/30 text-gold-400 border border-gold-500/30 py-2 rounded text-xs font-bold transition-all"
+                                        className="bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 border border-yellow-500/30 py-2 rounded text-xs font-bold transition-all"
                                     >
                                         🏆 Certificate
                                     </button>
