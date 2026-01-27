@@ -146,6 +146,14 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                         </div>
                         <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-700 tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] filter contrast-125">TEJASKP</span>
                     </div>
+
+                    {/* Desktop Collapse Button */}
+                    <button
+                        onClick={toggleDesktop}
+                        className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#2a2a2a] to-black border border-white/10 shadow-[0_2px_5px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] hover:border-yellow-500/50 hover:text-yellow-400 text-gray-400 transition-all active:scale-95 group/btn"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md group-hover/btn:drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]"><path d="M15 18l-6-6 6-6" /></svg>
+                    </button>
                 </div>
 
                 <nav className="space-y-1.5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-yellow-900/20 scrollbar-track-transparent">
