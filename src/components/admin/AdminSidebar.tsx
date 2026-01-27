@@ -164,17 +164,17 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop, widt
             <div
                 style={{ width: isDesktopOpen ? `${width}px` : '0px' }}
                 className={`bg-gradient-to-b from-[#1a1a1a] via-[#111111] to-black backdrop-blur-2xl border-r border-white/10 h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-all duration-75 shadow-[10px_0_30px_rgba(0,0,0,0.5)]
-                ${isMobileOpen ? 'translate-x-0 w-64' : ''}
-                ${!isDesktopOpen ? '-translate-x-full overflow-hidden opacity-0' : 'translate-x-0 opacity-100'}
+                ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full'}
+                ${isDesktopOpen ? 'md:translate-x-0 md:opacity-100' : 'md:-translate-x-full md:opacity-0 md:overflow-hidden'}
             `}>
 
-                {/* Drag Handle */}
+                {/* Drag Handle - Desktop Only */}
                 <div
                     onMouseDown={(e) => {
                         e.preventDefault();
                         setIsResizing(true);
                     }}
-                    className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-yellow-500/50 transition-colors z-[60] group flex items-center justify-center"
+                    className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-yellow-500/50 transition-colors z-[60] group hidden md:flex items-center justify-center"
                 >
                     <div className="h-8 w-1 rounded-full bg-gray-600/50 group-hover:bg-yellow-400 shadow-[0_1px_2px_rgba(0,0,0,0.8)]"></div>
                 </div>

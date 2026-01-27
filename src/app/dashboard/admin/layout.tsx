@@ -23,10 +23,10 @@ export default function AdminDashboardLayout({
 
             {/* Main Content Area */}
             <main
-                className="flex-1 p-8 space-y-8 transition-all duration-75 ease-out"
+                className="flex-1 p-8 space-y-8 transition-all duration-75 ease-out pl-0 md:pl-[var(--sidebar-width)]"
                 style={{
-                    paddingLeft: isSidebarOpen ? `${sidebarWidth}px` : '0px'
-                }}
+                    '--sidebar-width': isSidebarOpen ? `${sidebarWidth}px` : '0px'
+                } as React.CSSProperties}
             >
                 {children}
             </main>
