@@ -529,7 +529,7 @@ export default function UsersPage() {
                                     {/* Avatar Section */}
                                     <div className="flex flex-col items-center justify-center mb-8">
                                         <div className="relative group">
-                                            <div className="w-28 h-28 rounded-full border-2 border-gold-500/30 overflow-hidden bg-black flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.15)] group-hover:border-gold-500 transition-all duration-500">
+                                            <div className="w-28 h-28 rounded-full border-2 border-gold-500/30 overflow-hidden bg-[#1a1a1a] flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.15)] group-hover:border-gold-500 transition-all duration-500">
                                                 {editingUser.photoUrl ? (
                                                     <img src={editingUser.photoUrl} alt="Preview" className="w-full h-full object-cover" />
                                                 ) : (
@@ -538,75 +538,78 @@ export default function UsersPage() {
                                             </div>
                                             <div className="absolute inset-0 rounded-full bg-gold-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                         </div>
-                                        <p className="text-xs text-gold-500/60 mt-3 font-mono">{editingUser.role}</p>
+                                        <h3 className="text-xl font-bold text-white mt-4">{editingUser.name}</h3>
+                                        <span className="px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/20 text-gold-400 text-xs font-bold tracking-wider uppercase mt-2">
+                                            {editingUser.role}
+                                        </span>
                                     </div>
 
                                     {/* Core Details */}
                                     <div className="space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="md:col-span-2 group">
-                                                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Full Name</label>
+                                                <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Full Name</label>
                                                 <input
                                                     type="text"
                                                     value={editingUser.name || ''}
                                                     onChange={e => setEditingUser({ ...editingUser, name: e.target.value })}
-                                                    className="w-full bg-[#151515] border border-white/10 rounded-xl p-3 text-white placeholder-gray-700 outline-none focus:border-gold-500/50 focus:bg-black focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
+                                                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
                                                     placeholder="Enter full name"
                                                 />
                                             </div>
                                             <div className="group">
-                                                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Mobile</label>
+                                                <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Mobile</label>
                                                 <input
                                                     type="text"
                                                     value={editingUser.mobile || ''}
                                                     onChange={e => setEditingUser({ ...editingUser, mobile: e.target.value })}
-                                                    className="w-full bg-[#151515] border border-white/10 rounded-xl p-3 text-white placeholder-gray-700 outline-none focus:border-gold-500/50 focus:bg-black focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
+                                                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
                                                     placeholder="10 digit mobile"
                                                 />
                                             </div>
                                             <div className="group">
-                                                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Email</label>
+                                                <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Email</label>
                                                 <input
                                                     type="email"
                                                     value={editingUser.email || ''}
                                                     onChange={e => setEditingUser({ ...editingUser, email: e.target.value })}
-                                                    className="w-full bg-[#151515] border border-white/10 rounded-xl p-3 text-white placeholder-gray-700 outline-none focus:border-gold-500/50 focus:bg-black focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
+                                                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
                                                     placeholder="john@example.com"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Role Configuration Box */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-white/[0.02] rounded-2xl border border-dashed border-white/10">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-white/[0.03] rounded-2xl border border-white/10">
                                             <div className="group">
-                                                <label className="block text-[10px] uppercase tracking-widest text-gold-500/80 font-bold mb-2 ml-1">Role</label>
+                                                <label className="block text-[10px] uppercase tracking-widest text-gold-500/90 font-bold mb-2 ml-1">Role</label>
                                                 <div className="relative">
                                                     <select
                                                         value={editingUser.role}
                                                         onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}
-                                                        className="w-full bg-[#0a0a0a] border border-gold-500/20 rounded-xl p-3 text-gold-100 appearance-none cursor-pointer outline-none focus:border-gold-500/50 transition-all font-medium"
+                                                        className="w-full bg-[#1a1a1a] border border-gold-500/30 rounded-xl p-3 text-gold-100 appearance-none cursor-pointer outline-none focus:border-gold-500/60 transition-all font-medium"
                                                     >
-                                                        <option value="STUDENT">Student</option>
-                                                        <option value="EMPLOYEE">Employee</option>
-                                                        <option value="ADMIN">Admin</option>
-                                                        <option value="CLIENT">Client</option>
+                                                        <option value="STUDENT" className="bg-black text-white">Student</option>
+                                                        <option value="EMPLOYEE" className="bg-black text-white">Employee</option>
+                                                        <option value="ADMIN" className="bg-black text-white">Admin</option>
+                                                        <option value="CLIENT" className="bg-black text-white">Client</option>
                                                     </select>
                                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gold-500 pointer-events-none text-xs">▼</div>
                                                 </div>
                                             </div>
                                             <div className="group">
-                                                <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Account Status</label>
+                                                <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Account Status</label>
                                                 <div className="relative">
                                                     <select
                                                         value={editingUser.status}
                                                         onChange={e => setEditingUser({ ...editingUser, status: e.target.value })}
-                                                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl p-3 text-white appearance-none cursor-pointer outline-none focus:border-gold-500/50 transition-all"
+                                                        className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white appearance-none cursor-pointer outline-none focus:border-gold-500/50 transition-all"
                                                     >
-                                                        <option value="ACTIVE">Active</option>
-                                                        <option value="BLOCKED">Blocked</option>
-                                                        <option value="PENDING">Pending</option>
+                                                        <option value="ACTIVE" className="bg-black text-white">Active</option>
+                                                        <option value="BLOCKED" className="bg-black text-white">Blocked</option>
+                                                        <option value="PENDING" className="bg-black text-white">Pending</option>
                                                     </select>
-                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none text-xs">▼</div>
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs">▼</div>
                                                 </div>
                                             </div>
                                         </div>
