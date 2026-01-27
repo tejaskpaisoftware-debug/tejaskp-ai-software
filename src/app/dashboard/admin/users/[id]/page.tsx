@@ -72,6 +72,16 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
         { id: "documents", label: "Documents", icon: FileCheck },
     ];
 
+    // Helper to get course name
+    const getCourseName = () => {
+        if (user.course) return user.course;
+        if (user.joiningLetters && user.joiningLetters.length > 0) {
+            // Prioritize designation as per user request
+            return user.joiningLetters[0].designation || user.joiningLetters[0].internshipType;
+        }
+        return '-';
+    };
+
     return (
         <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
             {/* Header */}
@@ -121,9 +131,9 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                         <div>
                             <h3 className="text-lg font-semibold mb-4 text-gray-800">Personal Information</h3>
                             <div className="space-y-3 text-sm">
-                                <InfoRow label="Course" value={user.course} />
-                                <InfoRow label="Joining Date" value={user.joiningDate} />
-                                <InfoRow label="Duration" value={user.duration} />
+                                <InfoRow label="Course" value={getCourseName()} />
+                                <InfoRow label="Joining Date" value={user.joiningDate ? new Date(user.joiningDate).toLocaleDateString() : '-'} />
+                                <InfoRow label="Duration" value={user.duration || '-'} />
                                 <InfoRow label="College" value={user.college || '-'} />
                                 <InfoRow label="University" value={user.university || '-'} />
                             </div>
