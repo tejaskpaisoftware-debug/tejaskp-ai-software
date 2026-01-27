@@ -691,24 +691,24 @@ export default function UsersPage() {
 
             <header className="flex justify-between items-center mb-10">
                 <div>
-                    <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-theme to-foreground">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
                         All Users
                     </h1>
-                    <p className="text-gray-400 mt-2">Manage all registered users categorized by their role.</p>
+                    <p className="text-gray-400 mt-2 text-sm font-medium tracking-wide drop-shadow-md">Manage all registered users categorized by their role.</p>
                 </div>
                 <div className="flex gap-4 items-center">
-                    <div className="relative">
+                    <div className="relative group">
                         <input
                             type="text"
                             placeholder="Search students..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-card border border-theme text-foreground rounded-lg py-2 px-4 focus:outline-none focus:border-gold-theme w-64 placeholder-muted-foreground"
+                            className="bg-[#1a1a1a] border border-white/10 text-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-yellow-500/50 w-64 placeholder-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] transition-all focus:shadow-[0_0_15px_rgba(234,179,8,0.1)]"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
                             >
                                 ✕
                             </button>
@@ -717,15 +717,17 @@ export default function UsersPage() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadStatus === 'uploading'}
-                        className="bg-card border border-gold-500/30 text-gold-400 px-6 py-2 rounded-lg font-bold hover:bg-gold-500/10 transition-colors flex items-center gap-2 group disabled:opacity-50"
+                        className="relative overflow-hidden bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border border-white/10 text-yellow-500 px-6 py-2.5 rounded-xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span>📂</span> Upload Excel
+                        <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                            <span>📂</span> Upload Excel
+                        </span>
                     </button>
                     <button
                         onClick={fetchUsers}
-                        className="bg-gold-500 text-obsidian px-6 py-2 rounded-lg font-bold hover:bg-gold-400 transition-colors"
+                        className="relative overflow-hidden bg-gradient-to-b from-yellow-500 to-yellow-600 text-black px-6 py-2.5 rounded-xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_10px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"
                     >
-                        Refresh List
+                        <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.3)]">Refresh List</span>
                     </button>
                     <button
                         onClick={async () => {
@@ -752,29 +754,37 @@ export default function UsersPage() {
                                 }
                             }
                         }}
-                        className="bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-2 rounded-lg font-bold hover:bg-red-500 hover:text-foreground transition-all"
+                        className="relative overflow-hidden bg-gradient-to-b from-red-900/80 to-red-950 border border-red-500/30 text-red-400 px-6 py-2.5 rounded-xl font-bold hover:bg-red-900 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] active:scale-95"
                     >
-                        ⚠️ Clear All Data
+                        <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] flex items-center gap-2">
+                            ⚠️ Clear All Data
+                        </span>
                     </button>
                 </div>
             </header>
 
-            <div className="flex gap-4 mb-8 overflow-x-auto pb-2 border-b border-theme/20">
+            <div className="flex gap-3 mb-8 overflow-x-auto pb-4 border-b border-white/5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                 {["ALL", "RECENT", "STUDENT", "EMPLOYEE", "CLIENT", "ADMIN", "PENDING_FEES"].map((role) => {
                     const count = role === "ALL" ? filteredUsers.length :
                         role === "RECENT" ? filteredUsers.filter(u => new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length :
                             role === "PENDING_FEES" ? filteredUsers.filter(u => (u.pendingAmount || 0) > 0).length :
                                 filteredUsers.filter(u => u.role === role).length;
+
+                    const isActive = activeRole === role;
+
                     return (
                         <button
                             key={role}
                             onClick={() => setActiveRole(role)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold transition-all relative ${activeRole === role
-                                ? "text-gold-theme bg-foreground/5 border-b-2 border-gold-theme"
-                                : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
-                                }`}
+                            className={`
+                                relative flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all duration-300
+                                ${isActive
+                                    ? "bg-gradient-to-b from-yellow-500 to-yellow-600 text-black shadow-[0_5px_15px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] transform -translate-y-1"
+                                    : "bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border border-white/5 text-gray-400 hover:text-white hover:border-yellow-500/30 hover:shadow-[0_5px_15px_rgba(0,0,0,0.5)]"
+                                }
+                            `}
                         >
-                            <span>
+                            <span className={`tracking-wide text-sm uppercase ${isActive ? "drop-shadow-[0_1px_0_rgba(255,255,255,0.3)]" : "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"}`}>
                                 {role === "ALL" ? "All Users" :
                                     role === "RECENT" ? "Recently Added" :
                                         role === "STUDENT" ? "Students" :
@@ -782,7 +792,13 @@ export default function UsersPage() {
                                                 role === "CLIENT" ? "Clients" :
                                                     role === "PENDING_FEES" ? "Pending Fees" : "Admins"}
                             </span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${activeRole === role ? "bg-gold-theme text-black" : "bg-foreground/10 text-muted-foreground"}`}>
+                            <span className={`
+                                text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-inner
+                                ${isActive
+                                    ? "bg-black/20 text-black"
+                                    : "bg-black/40 text-gray-500"
+                                }
+                            `}>
                                 {count}
                             </span>
                         </button>
