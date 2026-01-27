@@ -2,6 +2,7 @@
 
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 // AdminSidebar removed (handled by layout)
 import SalarySlipTemplate from '@/components/documents/SalarySlipTemplate';
@@ -28,6 +29,7 @@ interface User {
 }
 
 export default function UsersPage() {
+    const router = useRouter();
     const [users, setUsers] = useState<User[]>([]);
     const [activeRole, setActiveRole] = useState("STUDENT"); // Default tab
     const [loading, setLoading] = useState(true);
@@ -660,6 +662,7 @@ export default function UsersPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: i * 0.1 }}
+                            onClick={() => router.push(`/dashboard/admin/users/${u.id}`)}
                             className="bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl p-4 hover:border-yellow-500/40 hover:bg-white/10 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] cursor-pointer"
                         >
                             <div className="flex justify-between items-start mb-3">
