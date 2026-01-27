@@ -650,7 +650,7 @@ export default function UsersPage() {
 
                 <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-6 flex items-center gap-3 relative z-10">
                     <span className="bg-gold-500/20 p-2 rounded-lg text-gold-500 border border-gold-500/20">✨</span>
-                    Recently Added Users <span className="text-sm font-normal text-gray-500 ml-auto block md:inline">(Last 5)</span>
+                    Recently Added Users <span className="text-sm font-normal text-gray-400 ml-auto block md:inline">(Last 5)</span>
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-5 relative z-10">
@@ -670,10 +670,10 @@ export default function UsersPage() {
                                     }`}>
                                     {u.role}
                                 </span>
-                                <span className="text-[10px] text-gray-500">{new Date(u.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                <span className="text-[10px] text-gray-400">{new Date(u.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                             </div>
                             <div className="font-bold text-white text-sm truncate mb-1 group-hover:text-gold-400 transition-colors">{u.name}</div>
-                            <div className="text-xs text-gray-500 truncate flex items-center gap-1">
+                            <div className="text-xs text-gray-400 truncate flex items-center gap-1">
                                 <span className="opacity-50">📱</span> {u.mobile}
                             </div>
                         </motion.div>

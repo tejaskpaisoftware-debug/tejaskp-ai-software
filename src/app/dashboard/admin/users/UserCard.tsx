@@ -69,7 +69,7 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                                 }`}>
                                 {user.role}
                             </span>
-                            <span className="text-gray-500 text-xs">{user.mobile}</span>
+                            <span className="text-gray-400 text-xs">{user.mobile}</span>
                         </div>
                     </div>
                 </div>
@@ -114,13 +114,13 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                             {/* Course / Fees Grid */}
                             <div className="grid grid-cols-2 gap-4 text-xs">
                                 <div>
-                                    <div className="text-gray-500 mb-1">Joined</div>
+                                    <div className="text-gray-400 mb-1">Joined</div>
                                     <div className="text-gray-300 font-mono">
                                         {user.joiningDate ? new Date(user.joiningDate).toLocaleDateString() : new Date(user.createdAt).toLocaleDateString()}
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="text-gray-500 mb-1">Course</div>
+                                    <div className="text-gray-400 mb-1">Course</div>
                                     <div className="text-gray-300">{user.course || '-'}</div>
                                 </div>
                             </div>
@@ -129,15 +129,15 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                             {((user.totalFees || 0) > 0 || (user.paidAmount || 0) > 0) && (
                                 <div className="bg-white/5 rounded-lg p-3 grid grid-cols-3 gap-2 text-center border border-white/5">
                                     <div>
-                                        <div className="text-[10px] text-gray-500 uppercase">Fees</div>
+                                        <div className="text-[10px] text-gray-400 uppercase">Fees</div>
                                         <div className="text-sm font-bold text-white">₹{user.totalFees || 0}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[10px] text-gray-500 uppercase">Paid</div>
+                                        <div className="text-[10px] text-gray-400 uppercase">Paid</div>
                                         <div className="text-sm font-bold text-green-400">₹{user.paidAmount || 0}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[10px] text-gray-500 uppercase">Pending</div>
+                                        <div className="text-[10px] text-gray-400 uppercase">Pending</div>
                                         <div className="text-sm font-bold text-red-400">₹{Math.max(0, (user.totalFees || 0) - (user.paidAmount || 0))}</div>
                                     </div>
                                 </div>
