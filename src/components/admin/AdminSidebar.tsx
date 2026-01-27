@@ -104,19 +104,19 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
             {/* Mobile Toggle Button */}
             <button
                 onClick={() => setIsMobileOpen(!isMobileOpen)}
-                className="md:hidden fixed top-4 right-4 z-[60] bg-gold-theme text-black p-2 rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+                className="md:hidden fixed top-4 right-4 z-[60] bg-gradient-to-b from-yellow-400 to-yellow-600 text-black p-2.5 rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 transition-all border border-yellow-500/50"
             >
                 {isMobileOpen ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 )}
             </button>
 
             {/* Sidebar Overlay for Mobile */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 backdrop-blur-md z-[45] md:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-md z-[45] md:hidden"
                     onClick={() => setIsMobileOpen(false)}
                 />
             )}
@@ -126,21 +126,24 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
             {!isDesktopOpen && (
                 <button
                     onClick={toggleDesktop}
-                    className="hidden md:flex fixed top-4 left-4 z-[40] bg-background border border-theme p-2 rounded-lg shadow-xl hover:border-gold-theme text-gold-theme items-center justify-center transition-all hover:scale-105"
+                    className="hidden md:flex fixed top-4 left-4 z-[40] bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border border-white/10 p-2.5 rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] hover:border-yellow-500/30 text-yellow-500 items-center justify-center transition-all hover:scale-105 active:scale-95 group"
                     title="Open Sidebar"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:text-yellow-400"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
             )}
 
-            <div className={`w-64 bg-background/95 backdrop-blur-xl border-r border-theme h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-transform duration-300
+            <div className={`w-64 bg-[#121212]/95 backdrop-blur-2xl border-r border-white/5 h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-transform duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.4)]
                 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
                 ${isDesktopOpen ? 'md:translate-x-0' : 'md:-translate-x-full'}
             `}>
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-3">
-                        <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full border border-gold-theme" />
-                        <span className="text-xl font-bold text-gold-theme tracking-wider">TEJASKP</span>
+                        <div className="relative">
+                            <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full border-2 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]" />
+                            <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)]"></div>
+                        </div>
+                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">TEJASKP</span>
                     </div>
                     {/* Desktop Collapse Button (Inside Panel) */}
                     <button onClick={toggleDesktop} className="hidden md:flex text-gold-theme hover:bg-white/10 p-2 rounded-lg items-center justify-center transition-colors">
