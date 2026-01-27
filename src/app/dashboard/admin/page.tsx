@@ -52,14 +52,26 @@ export default function AdminDashboard() {
 
             <main className="p-8 space-y-8">
                 {/* Header */}
-                <header className="flex justify-between items-end border-b border-theme pb-6">
+                {/* Header */}
+                <header className="flex justify-between items-end border-b border-white/10 pb-6 relative">
+                    {/* Glowing line at the bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
+
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground tracking-widest">DASHBOARD</h1>
-                        <p className="text-gold-theme/60 mt-1">Welcome back, Administrator</p>
+                        <h1 className="text-5xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-300 to-yellow-600 drop-shadow-[0_4px_3px_rgba(0,0,0,0.5)] filter contrast-125 pb-2">
+                            DASHBOARD
+                        </h1>
+                        <p className="text-lg font-medium text-gray-400 tracking-wide mt-1 flex items-center gap-2">
+                            Welcome back, <span className="text-yellow-400 font-bold drop-shadow-sm">Administrator</span>
+                        </p>
                     </div>
                     <div className="text-right">
-                        <div className="text-2xl font-bold text-gold-theme">14:39 PM</div>
-                        <div className="text-sm text-muted-foreground">Dec 25, 2025</div>
+                        <div className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                            14:39 <span className="text-lg text-yellow-500 align-top mt-1 inline-block">PM</span>
+                        </div>
+                        <div className="text-sm font-bold text-gray-500 tracking-widest uppercase mt-1">
+                            Dec 25, 2025
+                        </div>
                     </div>
                 </header>
 
@@ -174,10 +186,10 @@ function StatsCard({ title, value, change, isGood, onClick, isClickable, highlig
             </div>
 
             <div className={`flex items-center text-sm font-bold ${change?.toString().includes('+') || isGood
-                    ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]'
-                    : change === 'Uncollected'
-                        ? 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]'
-                        : 'text-yellow-500'
+                ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]'
+                : change === 'Uncollected'
+                    ? 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]'
+                    : 'text-yellow-500'
                 }`}>
                 {change}
                 <span className={`ml-1 font-normal text-xs ${highlight ? 'text-yellow-200/60' : 'text-gray-500'}`}>
