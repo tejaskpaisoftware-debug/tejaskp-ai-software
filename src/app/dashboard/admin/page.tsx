@@ -68,16 +68,16 @@ export default function AdminDashboard() {
                     <StatsCard
                         title="Total Users"
                         value={stats.users.toLocaleString()}
-                        change={stats.usersGrowth}
+                        change={stats.usersGrowth || "+0%"}
                         onClick={() => window.location.href = '/dashboard/admin/users'}
-                        className="cursor-pointer hover:border-gold-theme"
+                        isClickable
                     />
                     <StatsCard
                         title="Active Today"
                         value={stats.activeSessions.toLocaleString()}
                         change="Daily"
                         onClick={() => window.location.href = '/dashboard/admin/attendance'}
-                        className="cursor-pointer hover:border-gold-theme"
+                        isClickable
                     />
                     <StatsCard
                         title="Total Revenue"
@@ -85,7 +85,8 @@ export default function AdminDashboard() {
                         change={stats.revenueGrowth}
                         isGood
                         onClick={() => window.location.href = '/dashboard/admin/revenue'}
-                        className="cursor-pointer hover:border-gold-theme"
+                        isClickable
+                        highlight
                     />
                     <StatsCard title="Pending Amount" value={formatCurrency(stats.pendingAmount || 0)} change="Uncollected" />
                     <StatsCard title="System Health" value="99.9%" change="Stable" isGood />
@@ -93,14 +94,15 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Chart Area (Real Data) */}
-                    <div className="lg:col-span-2 bg-card border border-theme rounded-2xl p-6 backdrop-blur-sm">
-                        <div className="flex justify-between items-center mb-6">
+                    <div className="lg:col-span-2 bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -skew-x-12 translate-x-full group-hover:animate-shine"></div>
+                        <div className="flex justify-between items-center mb-6 relative z-10">
                             <div className="flex items-center gap-4">
-                                <h3 className="text-lg font-bold text-foreground tracking-wide">REVENUE ANALYTICS ({year})</h3>
+                                <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-wide drop-shadow-sm">REVENUE ANALYTICS ({year})</h3>
                                 <select
                                     value={year}
                                     onChange={(e) => setYear(parseInt(e.target.value))}
-                                    className="bg-card border border-theme rounded px-2 py-1 text-sm text-gold-theme outline-none focus:border-gold-theme"
+                                    className="bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-1 text-sm text-yellow-500 font-bold outline-none focus:border-yellow-500/50 shadow-inner"
                                 >
                                     {[2025, 2026, 2027].map(y => (
                                         <option key={y} value={y}>{y}</option>
@@ -108,11 +110,11 @@ export default function AdminDashboard() {
                                 </select>
                             </div>
                             {/* Small total indicator to confirm data load */}
-                            <div className="text-xs text-gold-theme/50 font-mono">
+                            <div className="text-xs text-yellow-500/70 font-mono bg-black/40 px-3 py-1 rounded-full border border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.1)]">
                                 Total: {formatCurrency(stats.revenue)}
                             </div>
                         </div>
-                        <div className="h-64 mt-4 w-full">
+                        <div className="h-64 mt-4 w-full relative z-10">
                             <RevenueChart3D
                                 data={stats.graph && stats.graph.length > 0 ? stats.graph : new Array(12).fill(0)}
                                 year={year}
@@ -122,23 +124,22 @@ export default function AdminDashboard() {
 
                     {/* Right Column: Stacked Widgets */}
                     <div className="flex flex-col gap-6">
-                        {/* 1. Live Traffic (Restored) */}
-                        <div className="bg-card border border-theme rounded-2xl p-6 backdrop-blur-sm relative overflow-hidden h-[350px]">
+                        {/* 1. Live Traffic */}
+                        <div className="bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] relative overflow-hidden h-[350px] group">
+                            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
                             <div className="absolute top-6 left-6 z-10">
-                                <h3 className="text-lg font-bold text-foreground tracking-wide">LIVE TRAFFIC</h3>
-                                <p className="text-xs text-gold-theme/60">Real-time Visualization</p>
+                                <h3 className="text-lg font-bold text-white tracking-wide drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">LIVE TRAFFIC</h3>
+                                <p className="text-xs text-yellow-500/80 font-medium">Real-time Visualization</p>
                             </div>
-                            <div className="h-full mt-4">
+                            <div className="h-full mt-4 relative z-0">
                                 <Canvas>
                                     <ambientLight intensity={0.5} />
                                     <directionalLight position={[10, 10, 5]} />
                                     <Widget3D traffic={stats.activeSessions} />
-                                    <OrbitControls enableZoom={false} autoRotate={false} />
+                                    <OrbitControls enableZoom={false} autoRotate={true} autoRotateSpeed={2} />
                                 </Canvas>
                             </div>
                         </div>
-
-
                     </div>
                 </div >
 
@@ -147,17 +148,41 @@ export default function AdminDashboard() {
     );
 }
 
-function StatsCard({ title, value, change, isGood, onClick, className }: any) {
+function StatsCard({ title, value, change, isGood, onClick, isClickable, highlight, className }: any) {
     return (
         <motion.div
-            whileHover={{ y: -5 }}
+            whileHover={isClickable ? { y: -5, scale: 1.02 } : {}}
             onClick={onClick}
-            className={`bg-card border border-theme rounded-xl p-6 backdrop-blur-sm shadow-lg hover:border-gold-theme/50 transition-colors ${className}`}
+            className={`
+                relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl transition-all duration-300
+                ${isClickable ? 'cursor-pointer' : ''}
+                ${highlight
+                    ? 'bg-gradient-to-br from-yellow-900/40 to-black border border-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.2)]'
+                    : 'bg-gradient-to-br from-[#1e1e1e] to-[#0a0a0a] border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.5)] hover:border-white/20'
+                }
+                ${className}
+            `}
         >
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{title}</h3>
-            <div className="text-3xl font-bold text-foreground mb-2">{value}</div>
-            <div className={`text-sm ${change?.includes('+') || isGood ? 'text-green-400' : 'text-gold-theme'}`}>
-                {change} {change === 'Daily' || change === 'Stable' ? '' : 'from last month'}
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+                <div className={`w-16 h-16 rounded-full blur-2xl ${highlight ? 'bg-yellow-500' : 'bg-white'}`}></div>
+            </div>
+
+            <h3 className={`text-xs font-bold uppercase tracking-widest mb-3 ${highlight ? 'text-yellow-200' : 'text-gray-400'}`}>{title}</h3>
+
+            <div className={`text-3xl font-black mb-3 drop-shadow-md ${highlight ? 'text-yellow-400' : 'text-white'}`}>
+                {value}
+            </div>
+
+            <div className={`flex items-center text-sm font-bold ${change?.toString().includes('+') || isGood
+                    ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]'
+                    : change === 'Uncollected'
+                        ? 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]'
+                        : 'text-yellow-500'
+                }`}>
+                {change}
+                <span className={`ml-1 font-normal text-xs ${highlight ? 'text-yellow-200/60' : 'text-gray-500'}`}>
+                    {change === 'Daily' || change === 'Stable' || change === 'Uncollected' ? '' : 'from last month'}
+                </span>
             </div>
         </motion.div>
     )
@@ -165,18 +190,18 @@ function StatsCard({ title, value, change, isGood, onClick, className }: any) {
 
 function Widget3D({ traffic }: { traffic: number }) {
     // Load texture (ensure logo_texture.jpg is in public folder)
-    const texture = useLoader(TextureLoader, "/logo_texture.jpg");
+    const texture = useLoader(TextureLoader, "/logo.jpg"); // Fixed path to logo.jpg which we know exists
     const meshRef = useRef<THREE.Mesh>(null);
 
     // Dynamic animation based on traffic
     useFrame((state, delta) => {
         if (meshRef.current) {
             // Base speed + traffic multiplier
-            const speed = 0.5 + (traffic * 0.1);
-            meshRef.current.rotation.y += delta * speed;
+            // const speed = 0.5 + (traffic * 0.1); 
+            // meshRef.current.rotation.y += delta * speed; // OrbitControls handles rotation now for smoother drag
 
             // Pulse effect
-            const scale = 2.5 + Math.sin(state.clock.elapsedTime * 2) * 0.1; // Bigger scale: 2.5 base
+            const scale = 1.8 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
             meshRef.current.scale.set(scale, scale, scale);
         }
     });
@@ -184,19 +209,19 @@ function Widget3D({ traffic }: { traffic: number }) {
     return (
         <group>
             {/* Bright Lights for clear visibility */}
-            <ambientLight intensity={2} />
-            <pointLight position={[5, 5, 5]} intensity={1} color="white" />
+            <ambientLight intensity={1.5} />
+            <pointLight position={[5, 5, 5]} intensity={1.5} color="#ffd700" />
+            <spotLight position={[-5, 5, 5]} intensity={1} color="white" />
 
             <mesh ref={meshRef} rotation={[0, 0, 0]}>
-                {/* Bigger Geometry */}
-                <boxGeometry args={[1.5, 1.5, 0.05]} />
+                {/* Cube Geometry */}
+                <boxGeometry args={[1.5, 1.5, 0.2]} />
                 <meshStandardMaterial
                     map={texture}
-                    metalness={0.1} // Less metallic, more photo-realistic
+                    metalness={0.6} // More metallic
                     roughness={0.2} // Glossy look
-                    emissive="white"
-                    emissiveIntensity={0.2} // Self-illuminate slightly so colors pop
-                    emissiveMap={texture} // Use texture colors for glow, not yellow tint
+                    emissive="#b8860b" // Dark gold glow
+                    emissiveIntensity={0.2}
                 />
             </mesh>
         </group>
