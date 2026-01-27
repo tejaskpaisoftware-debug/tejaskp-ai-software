@@ -582,12 +582,12 @@ export default function UsersPage() {
                                         {/* Role Configuration Box */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-white/[0.03] rounded-2xl border border-white/10">
                                             <div className="group">
-                                                <label className="block text-[10px] uppercase tracking-widest text-gold-500/90 font-bold mb-2 ml-1">Role</label>
+                                                <label className="block text-[10px] uppercase tracking-widest text-gold-400 font-bold mb-2 ml-1">Role</label>
                                                 <div className="relative">
                                                     <select
                                                         value={editingUser.role}
                                                         onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}
-                                                        className="w-full bg-[#1a1a1a] border border-gold-500/30 rounded-xl p-3 text-gold-100 appearance-none cursor-pointer outline-none focus:border-gold-500/60 transition-all font-medium"
+                                                        className="w-full bg-[#1a1a1a] border border-gold-500/30 rounded-xl p-3 text-white appearance-none cursor-pointer outline-none focus:border-gold-500/60 transition-all font-medium"
                                                     >
                                                         <option value="STUDENT" className="bg-black text-white">Student</option>
                                                         <option value="EMPLOYEE" className="bg-black text-white">Employee</option>
