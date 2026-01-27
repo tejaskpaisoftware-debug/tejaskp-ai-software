@@ -38,7 +38,8 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
     const getCourseName = () => {
         if (user.course) return user.course;
         if (user.joiningLetters && user.joiningLetters.length > 0) {
-            return user.joiningLetters[0].internshipType || user.joiningLetters[0].designation;
+            // User requested to take Designation (e.g. "Python Developer") instead of Type (e.g. "Offline")
+            return user.joiningLetters[0].designation || user.joiningLetters[0].internshipType;
         }
         return '-';
     };
