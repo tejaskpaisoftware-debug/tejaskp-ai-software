@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+// import { useSession } from "next-auth/react"; // Removed as not used in this project
 import { motion, AnimatePresence } from "framer-motion";
 import SalarySlipTemplate from "@/components/documents/SalarySlipTemplate";
 import jsPDF from "jspdf";
 import { toPng } from "html-to-image";
 
 export default function EmployeeSalarySlipsPage() {
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed
+    const [user, setUser] = useState<any>(null);
     const [slips, setSlips] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedSlip, setSelectedSlip] = useState<any | null>(null);
@@ -16,14 +17,33 @@ export default function EmployeeSalarySlipsPage() {
     const slipRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (session?.user?.id) {
-            fetchSlips();
+        // Custom session retrieval
+        const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user");
+        if (userStr) {
+            try {
+                const userData = JSON.parse(userStr);
+                setUser(userData);
+            } catch (e) {
+                console.error("Failed to parse user session", e);
+            }
         }
-    }, [session]);
+        // If we want to redirect if not logged in, we could do that here
+    }, []);
+
+    useEffect(() => {
+        if (user?.id) {
+            fetchSlips();
+        } else {
+            // If user is not yet loaded, we might wait. If loading is false and no user, show error?
+            // asking to loading logic handled in fetchSlips calls or logic below
+            if (!loading && !user) setLoading(false);
+        }
+    }, [user]);
 
     const fetchSlips = async () => {
+        if (!user?.id) return;
         try {
-            const res = await fetch(`/api/employee/documents/salary-slips?userId=${session?.user?.id}`);
+            const res = await fetch(`/api/employee/documents/salary-slips?userId=${user.id}`);
             if (res.ok) {
                 const data = await res.json();
                 setSlips(data);
@@ -56,13 +76,13 @@ export default function EmployeeSalarySlipsPage() {
     };
 
     const getTemplateData = (slip: any) => {
-        if (!session?.user) return null;
+        if (!user) return null;
         return {
             month: slip.month,
             year: slip.year,
-            employeeName: session.user.name,
+            employeeName: user.name,
             designation: "Employee", // Could fetch from profile if needed
-            employeeId: "EMP-" + (session.user as any).mobile?.slice(-4),
+            employeeId: "EMP-" + (user.mobile?.slice(-4) || "0000"),
             joiningDate: new Date().toLocaleDateString(), // Placeholder, ideally fetch form profile
             bankName: slip.bankName,
             bankBranch: slip.bankBranch,
@@ -172,7 +192,9 @@ export default function EmployeeSalarySlipsPage() {
 
                             <div className="flex-1 overflow-auto p-8 bg-gray-100 flex justify-center">
                                 <div className="shadow-2xl">
-                                    <SalarySlipTemplate ref={slipRef} data={getTemplateData(selectedSlip)} />
+                                    {getTemplateData(selectedSlip) && (
+                                        <SalarySlipTemplate ref={slipRef} data={getTemplateData(selectedSlip)!} />
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
