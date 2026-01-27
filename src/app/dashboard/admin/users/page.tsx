@@ -808,7 +808,7 @@ export default function UsersPage() {
                                     <p className="text-sm mt-2">Try adjusting your search{activeRole !== "PENDING_FEES" && ` or add a new ${activeRole === "ALL" ? "user" : activeRole.toLowerCase()}`}.</p>
                                 </div>
                             ) : (
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
                                     {filteredUsers
                                         .filter(u => activeRole === "ALL" || (activeRole === "RECENT" ? new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : activeRole === "PENDING_FEES" ? (u.pendingAmount || 0) > 0 : u.role === activeRole))
                                         .map((user) => (
