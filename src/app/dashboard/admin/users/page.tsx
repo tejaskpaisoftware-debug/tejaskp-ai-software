@@ -638,27 +638,51 @@ export default function UsersPage() {
             </AnimatePresence>
 
             {/* Recent Users Widget Box */}
+            {/* Recent Users Widget Box */}
             <motion.div
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-8 bg-card border border-theme rounded-xl p-6 relative overflow-hidden"
+                transition={{ duration: 0.5 }}
+                className="mb-10 bg-gradient-to-br from-[#121212] to-black border border-white/10 rounded-2xl p-8 relative overflow-hidden shadow-2xl"
             >
-                <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                    Recently Added Users (Last 5)
+                {/* Background Decoration */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+
+                <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-6 flex items-center gap-3 relative z-10">
+                    <span className="bg-gold-500/20 p-2 rounded-lg text-gold-500 border border-gold-500/20">✨</span>
+                    Recently Added Users <span className="text-sm font-normal text-gray-500 ml-auto block md:inline">(Last 5)</span>
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-5 relative z-10">
                     {recentFiveUsers.map((u, i) => (
-                        <div key={u.id} className="bg-foreground/5 border border-theme rounded-lg p-3 hover:border-gold-theme/30 transition-colors">
-                            <div className="flex justify-between items-start mb-2">
-                                <span className="text-xs font-bold text-gold-theme bg-gold-500/10 px-2 py-0.5 rounded">{u.role}</span>
-                                <span className="text-[10px] text-muted-foreground">{new Date(u.createdAt).toLocaleDateString()}</span>
+                        <motion.div
+                            key={u.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl p-4 hover:border-gold-500/40 hover:bg-white/10 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] cursor-pointer"
+                        >
+                            <div className="flex justify-between items-start mb-3">
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${u.role === 'ADMIN' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                    u.role === 'EMPLOYEE' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                                        u.role === 'CLIENT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                            'bg-gold-500/10 text-gold-400 border-gold-500/20'
+                                    }`}>
+                                    {u.role}
+                                </span>
+                                <span className="text-[10px] text-gray-500">{new Date(u.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                             </div>
-                            <div className="font-bold text-foreground text-sm truncate">{u.name}</div>
-                            <div className="text-xs text-muted-foreground truncate">{u.mobile}</div>
-                        </div>
+                            <div className="font-bold text-white text-sm truncate mb-1 group-hover:text-gold-400 transition-colors">{u.name}</div>
+                            <div className="text-xs text-gray-500 truncate flex items-center gap-1">
+                                <span className="opacity-50">📱</span> {u.mobile}
+                            </div>
+                        </motion.div>
                     ))}
-                    {recentFiveUsers.length === 0 && <div className="col-span-5 text-center text-gray-500 py-4">No recent users found.</div>}
+                    {recentFiveUsers.length === 0 && (
+                        <div className="col-span-5 text-center text-gray-500 py-8 border border-dashed border-white/10 rounded-xl bg-white/5">
+                            No recent users found.
+                        </div>
+                    )}
                 </div>
             </motion.div>
 
