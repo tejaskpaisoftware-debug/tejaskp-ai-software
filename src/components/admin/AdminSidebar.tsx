@@ -46,13 +46,41 @@ const menuItems = [
 interface AdminSidebarProps {
     isDesktopOpen?: boolean;
     toggleDesktop?: () => void;
+    width?: number;
+    setWidth?: (w: number) => void;
 }
 
-export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: AdminSidebarProps) {
+export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop, width = 260, setWidth }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const [openSubmenu, setOpenSubmenu] = useState<string | null>("Users");
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [isResizing, setIsResizing] = useState(false);
+
+    // Sidebar resize handler
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing || !setWidth) return;
+            const newWidth = Math.max(240, Math.min(e.clientX, 480)); // Min 240px, Max 480px
+            setWidth(newWidth);
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+            document.body.style.cursor = 'default';
+        };
+
+        if (isResizing) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'col-resize';
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isResizing, setWidth]);
 
     // Close mobile sidebar on route change
     useEffect(() => {
@@ -133,10 +161,23 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                 </button>
             )}
 
-            <div className={`w-64 bg-gradient-to-b from-[#1a1a1a] via-[#111111] to-black backdrop-blur-2xl border-r border-white/10 h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-transform duration-300 shadow-[10px_0_30px_rgba(0,0,0,0.5)]
-                ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
-                ${isDesktopOpen ? 'md:translate-x-0' : 'md:-translate-x-full'}
+            <div
+                style={{ width: isDesktopOpen ? `${width}px` : '0px' }}
+                className={`bg-gradient-to-b from-[#1a1a1a] via-[#111111] to-black backdrop-blur-2xl border-r border-white/10 h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-all duration-75 shadow-[10px_0_30px_rgba(0,0,0,0.5)]
+                ${isMobileOpen ? 'translate-x-0 w-64' : ''}
+                ${!isDesktopOpen ? '-translate-x-full overflow-hidden opacity-0' : 'translate-x-0 opacity-100'}
             `}>
+
+                {/* Drag Handle */}
+                <div
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        setIsResizing(true);
+                    }}
+                    className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-yellow-500/50 transition-colors z-[60] group flex items-center justify-center"
+                >
+                    <div className="h-8 w-1 rounded-full bg-gray-600/50 group-hover:bg-yellow-400 shadow-[0_1px_2px_rgba(0,0,0,0.8)]"></div>
+                </div>
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5 relative">
                     <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"></div>
                     <div className="flex items-center gap-3">

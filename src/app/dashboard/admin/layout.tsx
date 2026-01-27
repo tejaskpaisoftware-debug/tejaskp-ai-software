@@ -9,6 +9,7 @@ export default function AdminDashboardLayout({
     children: React.ReactNode;
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [sidebarWidth, setSidebarWidth] = useState(260); // Default width
 
     return (
         <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-500 relative z-10 flex">
@@ -16,15 +17,17 @@ export default function AdminDashboardLayout({
             <AdminSidebar
                 isDesktopOpen={isSidebarOpen}
                 toggleDesktop={() => setIsSidebarOpen(!isSidebarOpen)}
+                width={sidebarWidth}
+                setWidth={setSidebarWidth}
             />
 
             {/* Main Content Area */}
-            {/* Logic: if sidebar is open, padding left is 64 (16rem/256px), else 0 or small icon width */}
-            {/* Actually AdminSidebar expands to 64. If collapsed, maybe 0. */}
-            <main className={`flex-1 p-8 space-y-8 transition-all duration-300 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-0'}`}>
-                {/* Desktop Toggle Button (External to Sidebar, optional) */}
-                {/* Or we put the toggle INSIDE the sidebar header */}
-
+            <main
+                className="flex-1 p-8 space-y-8 transition-all duration-75 ease-out"
+                style={{
+                    paddingLeft: isSidebarOpen ? `${sidebarWidth}px` : '0px'
+                }}
+            >
                 {children}
             </main>
         </div>
