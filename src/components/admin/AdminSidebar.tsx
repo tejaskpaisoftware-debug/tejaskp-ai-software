@@ -133,63 +133,62 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                 </button>
             )}
 
-            <div className={`w-64 bg-[#121212]/95 backdrop-blur-2xl border-r border-white/5 h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-transform duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.4)]
+            <div className={`w-64 bg-gradient-to-b from-[#1a1a1a] via-[#111111] to-black backdrop-blur-2xl border-r border-white/10 h-screen fixed left-0 top-0 flex flex-col p-6 z-50 transition-transform duration-300 shadow-[10px_0_30px_rgba(0,0,0,0.5)]
                 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
                 ${isDesktopOpen ? 'md:translate-x-0' : 'md:-translate-x-full'}
             `}>
-                <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5 relative">
+                    <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"></div>
                     <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full border-2 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]" />
-                            <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)]"></div>
+                        <div className="relative group cursor-pointer">
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-600 to-yellow-300 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+                            <img src="/logo.jpg" alt="Logo" className="relative w-11 h-11 rounded-full border-2 border-yellow-400 shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
                         </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">TEJASKP</span>
+                        <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-700 tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] filter contrast-125">TEJASKP</span>
                     </div>
-                    {/* Desktop Collapse Button (Inside Panel) */}
-                    <button onClick={toggleDesktop} className="hidden md:flex text-gold-theme hover:bg-white/10 p-2 rounded-lg items-center justify-center transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-                    </button>
                 </div>
 
-                <nav className="space-y-2 flex-1 overflow-y-auto pr-2">
+                <nav className="space-y-1.5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-yellow-900/20 scrollbar-track-transparent">
                     {menuItems.map((item) => {
                         const isActive = pathname === item.href;
                         const hasSubItems = item.subItems && item.subItems.length > 0;
                         const isOpen = openSubmenu === item.name;
-
-                        // Check if any child is active to highlight parent
                         const isChildActive = hasSubItems && item.subItems?.some(sub => pathname === sub.href);
 
                         return (
-                            <div key={item.name}>
+                            <div key={item.name} className="mb-1">
                                 {hasSubItems ? (
                                     <motion.div
                                         onClick={() => toggleSubmenu(item.name)}
-                                        className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all cursor-pointer ${isChildActive || isOpen ? "text-gold-theme bg-foreground/5" : "text-muted-foreground hover:text-gold-theme/80 hover:bg-foreground/5"
+                                        className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer border border-transparent
+                                            ${isChildActive || isOpen
+                                                ? "bg-white/5 border-white/10 text-yellow-400 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]"
+                                                : "text-gray-400 hover:text-yellow-200 hover:bg-white/5"
                                             }`}
-                                        whileHover={{ x: 5 }}
+                                        whileHover={{ x: 3 }}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className="text-lg">{item.icon}</span>
+                                            <span className="text-xl filter drop-shadow-md">{item.icon}</span>
                                             <span className="text-sm tracking-wide font-bold">{item.name}</span>
                                         </div>
-                                        <span className={`text-xs transition-transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+                                        <span className={`text-xs transition-transform duration-300 ${isOpen ? 'rotate-180 text-yellow-500' : 'text-gray-600'}`}>▼</span>
                                     </motion.div>
                                 ) : (
                                     <Link
                                         href={item.href}
-                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group
+                                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden
                                 ${item.special
-                                                ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-purple-300 border border-purple-500/30 hover:shadow-[0_0_15px_rgba(147,51,234,0.3)]'
+                                                ? 'bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 text-purple-200 shadow-[0_4px_15px_rgba(147,51,234,0.2)] hover:shadow-[0_0_20px_rgba(147,51,234,0.4)]'
                                                 : isActive
-                                                    ? 'bg-gold-theme text-black font-bold shadow-[0_0_15px_rgba(255,215,0,0.5)]'
-                                                    : 'text-muted-foreground hover:bg-foreground/5 hover:text-gold-theme'
+                                                    ? 'bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-black font-extrabold shadow-[0_4px_12px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] border border-yellow-400/50 transform translate-y-[-1px]'
+                                                    : 'text-gray-400 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5 active:scale-98'
                                             }`}
                                     >
-                                        <span className={`text-xl ${item.special ? 'animate-pulse' : ''}`}>{item.icon}</span>
-                                        <span className="font-medium">{item.name}</span>
+                                        {isActive && <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-50 pointer-events-none"></div>}
+                                        <span className={`text-xl relative z-10 ${item.special ? 'animate-pulse' : ''} ${isActive ? 'drop-shadow-[0_1px_0_rgba(255,255,255,0.4)]' : 'drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)]'}`}>{item.icon}</span>
+                                        <span className={`relative z-10 ${isActive ? 'drop-shadow-[0_1px_0_rgba(255,255,255,0.4)]' : ''}`}>{item.name}</span>
                                         {item.name === "Payroll Automation" && isPayDay && (
-                                            <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                            <span className="ml-auto w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse border border-red-300"></span>
                                         )}
                                     </Link>
                                 )}
@@ -200,13 +199,16 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: "auto", opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
-                                        className="ml-8 mt-1 space-y-1 border-l border-theme pl-4"
+                                        className="ml-4 mt-2 mb-2 space-y-1 border-l-2 border-white/5 pl-4 overflow-hidden"
                                     >
                                         {item.subItems?.map((sub) => {
                                             const isSubActive = pathname === sub.href;
                                             return (
                                                 <Link key={sub.name} href={sub.href}>
-                                                    <div className={`py-2 text-sm transition-colors ${isSubActive ? "text-gold-theme font-bold" : "text-muted-foreground hover:text-gold-theme/80"
+                                                    <div className={`py-2.5 px-3 rounded-lg text-sm transition-all duration-200 border border-transparent 
+                                                        ${isSubActive
+                                                            ? "bg-white/10 text-yellow-400 font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] border-white/5"
+                                                            : "text-gray-500 hover:text-gray-200 hover:bg-white/5"
                                                         }`}>
                                                         {sub.name}
                                                     </div>
@@ -220,14 +222,18 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                     })}
                 </nav>
 
-                <div className="pt-6 border-t border-theme space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-foreground/5 rounded-lg border border-theme">
-                        <div className="w-10 h-10 rounded-full bg-gold-theme flex items-center justify-center text-black font-bold">
-                            AD
+                <div className="pt-6 relative">
+                    <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-[#222] to-black rounded-xl border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5)] mb-4 group hover:border-yellow-900/30 transition-colors">
+                        <div className="relative">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-800 flex items-center justify-center text-black font-black border border-yellow-400/30 shadow-inner">
+                                AD
+                            </div>
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black shadow-[0_0_5px_rgba(34,197,94,0.8)]"></div>
                         </div>
                         <div>
-                            <div className="text-sm font-bold text-foreground">Admin User</div>
-                            <div className="text-xs text-green-400">● Online</div>
+                            <div className="text-sm font-bold text-gray-200 group-hover:text-white transition-colors">Admin User</div>
+                            <div className="text-xs text-green-400 font-medium">● Online</div>
                         </div>
                     </div>
 
@@ -235,9 +241,9 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop }: Ad
                         onClick={handleLogout}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all font-medium text-sm"
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-b from-red-600 to-red-800 text-white border border-red-500/30 shadow-[0_4px_8px_rgba(220,38,38,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:from-red-500 hover:to-red-700 transition-all font-bold text-sm"
                     >
-                        🚪 Log Out
+                        <span className="drop-shadow-md">🚪 Log Out</span>
                     </motion.button>
                 </div>
             </div>
