@@ -24,6 +24,32 @@ export default function AdminDashboard() {
         graph: [] as number[] // Monthly revenue array
     });
 
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    // Format time: 14:39
+    const formattedTime = currentTime.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+
+    // Format AM/PM
+    const amPm = currentTime.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }).slice(-2);
+
+    // Format date: Dec 25, 2025
+    const formattedDate = currentTime.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -67,10 +93,10 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-right">
                         <div className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                            14:39 <span className="text-lg text-yellow-500 align-top mt-1 inline-block">PM</span>
+                            {formattedTime} <span className="text-lg text-yellow-500 align-top mt-1 inline-block">{amPm}</span>
                         </div>
                         <div className="text-sm font-bold text-gray-500 tracking-widest uppercase mt-1">
-                            Dec 25, 2025
+                            {formattedDate}
                         </div>
                     </div>
                 </header>
