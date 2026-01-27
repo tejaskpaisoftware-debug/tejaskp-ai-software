@@ -144,12 +144,12 @@ export default function EmployeeDashboard() {
             )}
 
             {/* Desktop Tabs (Hidden on Mobile) */}
-            <div className="hidden md:flex gap-4 mb-8">
-                {['overview', 'attendance', 'leaves', 'documents', 'submissions', 'earn', 'meetings', 'theme'].map((tab) => (
+            <div className="hidden md:flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                {['overview', 'attendance', 'leaves', 'documents', 'submissions', 'earn', 'meetings', 'profile', 'theme'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
-                        className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${activeTab === tab
+                        className={`px-6 py-2 rounded-full font-bold text-sm transition-all whitespace-nowrap ${activeTab === tab
                             ? 'bg-gold-theme text-black'
                             : 'bg-card text-muted-foreground hover:bg-card/80'
                             }`}
@@ -183,6 +183,7 @@ export default function EmployeeDashboard() {
                 )}
                 {activeTab === 'earn' && user && <ReferralSection userId={(user as any).id} />}
                 {activeTab === 'meetings' && user && <MeetingSection userId={(user as any).id} userName={(user as any).name} />}
+                {activeTab === 'profile' && user && <ProfileSection userId={(user as any).id} />}
                 {activeTab === 'theme' && <ThemeSelector />}
             </div>
 
@@ -195,11 +196,144 @@ export default function EmployeeDashboard() {
                 <NavButton active={activeTab === 'attendance'} onClick={() => setActiveTab('attendance')} icon={<Calendar size={20} />} label="Attend" />
                 <NavButton active={activeTab === 'submissions'} onClick={() => setActiveTab('submissions')} icon={<ClipboardList size={20} />} label="Tasks" />
                 <NavButton active={activeTab === 'meetings'} onClick={() => setActiveTab('meetings')} icon={<Video size={20} />} label="Meet" />
-                <NavButton active={activeTab === 'earn'} onClick={() => setActiveTab('earn')} icon={<TrendingUp size={20} />} label="Earn" />
-                <NavButton active={activeTab === 'documents'} onClick={() => setActiveTab('documents')} icon={<FileText size={20} />} label="Docs" />
+                <NavButton active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} icon={<span className="text-xl">👤</span>} label="Profile" />
                 <NavButton active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} icon={<Palette size={20} />} label="Theme" />
             </div>
         </div>
+    );
+}
+
+function ProfileSection({ userId }: { userId: string }) {
+    const [profile, setProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch(`/api/admin/users/${userId}`).then(res => res.json()).then(data => {
+            if (data.user) setProfile(data.user);
+            setLoading(false);
+        });
+    }, [userId]);
+
+    if (loading) return <div>Loading Profile...</div>;
+    if (!profile) return <div>Profile not found</div>;
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+            <div className="md:flex gap-8 items-start">
+                <div className="w-full md:w-1/3">
+                    <div className="bg-card glass-card-3d p-6 flex flex-col items-center text-center">
+                        <div className="w-32 h-32 rounded-full border-4 border-gold-500 overflow-hidden mb-4 shadow-[0_0_20px_rgba(234,179,8,0.3)] bg-gray-800">
+                            {profile.photoUrl ? (
+                                <img src={profile.photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-4xl">👤</div>
+                            )}
+                        </div>
+                        <h2 className="text-2xl font-bold text-3d">{profile.name}</h2>
+                        <p className="text-gold-500 font-bold tracking-widest text-sm mt-1">{profile.role}</p>
+                        <p className="text-gray-400 text-xs mt-1">{profile.designation || "No Designation"}</p>
+                        <div className="mt-4 w-full space-y-2">
+                            <div className="bg-white/5 p-2 rounded flex justify-between text-sm">
+                                <span className="text-gray-400">ID</span>
+                                <span className="font-mono font-bold text-white">{profile.employeeId || "-"}</span>
+                            </div>
+                            <div className="bg-white/5 p-2 rounded flex justify-between text-sm">
+                                <span className="text-gray-400">Joined</span>
+                                <span className="text-white">{profile.joiningDate || "-"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex-1 space-y-6 mt-6 md:mt-0">
+                    {/* Official Details */}
+                    <div className="bg-card glass-card-3d p-6">
+                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">📂 Official Details</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">Department</label>
+                                <p className="text-white font-medium">{profile.department || "-"}</p>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">Reporting Manager</label>
+                                <p className="text-white font-medium">{profile.reportingManager || "-"}</p>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">Email</label>
+                                <p className="text-white font-medium">{profile.email}</p>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">Mobile</label>
+                                <p className="text-white font-medium">{profile.mobile}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Personal & Emergency */}
+                    <div className="bg-card glass-card-3d p-6">
+                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">🚑 Personal & Emergency</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">DOB</label>
+                                <p className="text-white font-medium">{profile.dob || "-"}</p>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">Blood Group</label>
+                                <p className="text-white font-medium">{profile.bloodGroup || "-"}</p>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="text-xs text-gray-500 uppercase">Emergency Contact</label>
+                                <p className="text-white font-medium break-words">
+                                    {profile.emergencyContact || "-"}
+                                </p>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="text-xs text-gray-500 uppercase">Address</label>
+                                <p className="text-gray-300 text-sm">{profile.currentAddress || "-"}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Skills */}
+                    <div className="bg-card glass-card-3d p-6">
+                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">⚡ Skills</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {profile.skills ? profile.skills.split(',').map((skill: string, i: number) => (
+                                <span key={i} className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/30">
+                                    {skill.trim()}
+                                </span>
+                            )) : <p className="text-gray-500 italic">No skills listed</p>}
+                        </div>
+                    </div>
+
+                    {/* Bank Details (Masked) */}
+                    <div className="bg-card glass-card-3d p-6">
+                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">🏦 Bank Details (Confidential)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">Bank Name</label>
+                                <p className="text-white font-medium">{profile.bankName || "-"}</p>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">Account Number</label>
+                                <p className="text-white font-medium font-mono">
+                                    {profile.accountNumber ? "XXXX-XXXX-" + profile.accountNumber.slice(-4) : "-"}
+                                </p>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">IFSC Code</label>
+                                <p className="text-white font-medium">{profile.ifscCode || "-"}</p>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 uppercase">PAN Number</label>
+                                <p className="text-white font-medium">{profile.panNumber || "-"}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </motion.div>
     );
 }
 

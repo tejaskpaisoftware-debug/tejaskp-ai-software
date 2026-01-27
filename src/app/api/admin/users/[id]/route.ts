@@ -67,7 +67,11 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         if (!id) return NextResponse.json({ message: "ID Required" }, { status: 400 });
 
         const body = await request.json();
-        const { name, email, mobile, course, role, status, totalFees, paidAmount } = body;
+        const {
+            name, email, mobile, course, role, status, totalFees, paidAmount,
+            department, designation, employeeId, photoUrl, reportingManager,
+            skills, dob, bloodGroup, currentAddress, permanentAddress, emergencyContact
+        } = body;
 
         // Calculate pending if financial data is provided
         let pendingAmount = undefined;
@@ -89,7 +93,20 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                     totalFees: totalFees !== undefined ? Number(totalFees) : undefined,
                     paidAmount: paidAmount !== undefined ? Number(paidAmount) : undefined,
                     pendingAmount: pendingAmount, // Auto-calculated
-                    salaryDetails: body.salaryDetails // Save JSON string
+                    salaryDetails: body.salaryDetails, // Save JSON string
+
+                    // New Extended Profile Fields
+                    department,
+                    designation,
+                    employeeId,
+                    photoUrl,
+                    reportingManager,
+                    skills, // Just save as string/JSON
+                    dob,
+                    bloodGroup,
+                    currentAddress,
+                    permanentAddress,
+                    emergencyContact // Save JSON string
                 }
             });
 

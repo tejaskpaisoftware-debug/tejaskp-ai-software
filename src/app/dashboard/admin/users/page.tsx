@@ -26,6 +26,19 @@ interface User {
     joiningDate?: string;
     salarySlips?: any[];
     salaryDetails?: string; // JSON
+
+    // Extended Profile
+    department?: string;
+    designation?: string;
+    employeeId?: string;
+    photoUrl?: string;
+    reportingManager?: string;
+    skills?: string;
+    dob?: string;
+    bloodGroup?: string;
+    currentAddress?: string;
+    permanentAddress?: string;
+    emergencyContact?: string;
 }
 
 export default function UsersPage() {
@@ -486,154 +499,268 @@ export default function UsersPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4"
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
-                            className="bg-card border border-gold-theme/30 p-8 rounded-2xl w-full max-w-lg shadow-2xl"
+                            className="bg-[#121212] border border-gold-theme/30 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]"
                         >
-                            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-gold-600 mb-6">
-                                Edit User
-                            </h2>
-                            <form onSubmit={handleUpdateUser} className="space-y-4">
-                                <div>
-                                    <label className="block text-xs text-gray-400 mb-1">Full Name</label>
-                                    <input
-                                        type="text"
-                                        value={editingUser.name || ''}
-                                        onChange={e => setEditingUser({ ...editingUser, name: e.target.value })}
-                                        className="w-full bg-background border border-theme rounded p-2 text-foreground focus:border-gold-theme outline-none"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Mobile</label>
-                                        <input
-                                            type="text"
-                                            value={editingUser.mobile || ''}
-                                            onChange={e => setEditingUser({ ...editingUser, mobile: e.target.value })}
-                                            className="w-full bg-background border border-theme rounded p-2 text-foreground focus:border-gold-theme outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Email</label>
-                                        <input
-                                            type="email"
-                                            value={editingUser.email || ''}
-                                            onChange={e => setEditingUser({ ...editingUser, email: e.target.value })}
-                                            className="w-full bg-background border border-theme rounded p-2 text-foreground focus:border-gold-theme outline-none"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs text-gray-400 mb-1">Course</label>
-                                    <input
-                                        type="text"
-                                        value={editingUser.course || ''}
-                                        onChange={e => setEditingUser({ ...editingUser, course: e.target.value })}
-                                        className="w-full bg-black/30 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Total Fees</label>
-                                        <input
-                                            type="number"
-                                            value={editingUser.totalFees || 0}
-                                            onChange={e => setEditingUser({ ...editingUser, totalFees: Number(e.target.value) })}
-                                            className="w-full bg-black/30 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Paid Amount</label>
-                                        <input
-                                            type="number"
-                                            value={editingUser.paidAmount || 0}
-                                            onChange={e => setEditingUser({ ...editingUser, paidAmount: Number(e.target.value) })}
-                                            className="w-full bg-black/30 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs text-gray-400 mb-1">Status</label>
-                                    <select
-                                        value={editingUser.status}
-                                        onChange={e => setEditingUser({ ...editingUser, status: e.target.value })}
-                                        className="w-full bg-black/30 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    >
-                                        <option value="ACTIVE">ACTIVE</option>
-                                        <option value="BLOCKED">BLOCKED</option>
-                                        <option value="PENDING">PENDING</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs text-gray-400 mb-1">Role</label>
-                                    <select
-                                        value={editingUser.role}
-                                        onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}
-                                        className="w-full bg-black/30 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                    >
-                                        <option value="STUDENT">STUDENT</option>
-                                        <option value="EMPLOYEE">EMPLOYEE</option>
-                                        <option value="ADMIN">ADMIN</option>
-                                        <option value="CLIENT">CLIENT</option>
-                                    </select>
-                                </div>
+                            {/* Header - Fixed */}
+                            <div className="p-8 border-b border-white/5 shrink-0 flex justify-between items-center bg-[#1a1a1a] rounded-t-2xl">
+                                <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-gold-600">
+                                    Edit User Profile
+                                </h2>
+                                <button
+                                    onClick={() => setEditingUser(null)}
+                                    className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            </div>
 
-                                {editingUser.role === 'EMPLOYEE' && (
-                                    <div className="border-t border-white/10 pt-4 mt-4">
-                                        <h3 className="text-gold-400 font-bold mb-4">Salary Structure (Monthly)</h3>
-                                        {(() => {
-                                            const details = editingUser.salaryDetails ? JSON.parse(editingUser.salaryDetails) : { basic: 15000, hra: 6000, special: 4000, pf: 1800, pt: 200 };
-                                            const updateDetails = (key: string, val: number) => {
-                                                const newDetails = { ...details, [key]: val };
-                                                setEditingUser({ ...editingUser, salaryDetails: JSON.stringify(newDetails) });
-                                            };
-                                            return (
-                                                <div className="grid grid-cols-2 gap-4">
+                            {/* Scrollable Content */}
+                            <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-[#121212]">
+                                <form id="editUserForm" onSubmit={handleUpdateUser} className="space-y-6">
+                                    <div className="flex items-center justify-center mb-6">
+                                        <div className="w-24 h-24 rounded-full border-2 border-gold-500/50 overflow-hidden bg-black flex items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.2)]">
+                                            {editingUser.photoUrl ? (
+                                                <img src={editingUser.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-3xl">👤</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Core Details */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Full Name</label>
+                                            <input
+                                                type="text"
+                                                value={editingUser.name || ''}
+                                                onChange={e => setEditingUser({ ...editingUser, name: e.target.value })}
+                                                className="input-3d w-full"
+                                                placeholder="Enter full name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Mobile</label>
+                                            <input
+                                                type="text"
+                                                value={editingUser.mobile || ''}
+                                                onChange={e => setEditingUser({ ...editingUser, mobile: e.target.value })}
+                                                className="input-3d w-full"
+                                                placeholder="10 digit mobile"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Email</label>
+                                            <input
+                                                type="email"
+                                                value={editingUser.email || ''}
+                                                onChange={e => setEditingUser({ ...editingUser, email: e.target.value })}
+                                                className="input-3d w-full"
+                                                placeholder="john@example.com"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Role Configuration */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-white/5 rounded-xl border border-white/5">
+                                        <div>
+                                            <label className="block text-xs uppercase text-gold-500 font-bold mb-2 ml-1">Role</label>
+                                            <select
+                                                value={editingUser.role}
+                                                onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}
+                                                className="input-3d w-full appearance-none cursor-pointer"
+                                            >
+                                                <option value="STUDENT">Student</option>
+                                                <option value="EMPLOYEE">Employee</option>
+                                                <option value="ADMIN">Admin</option>
+                                                <option value="CLIENT">Client</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Account Status</label>
+                                            <select
+                                                value={editingUser.status}
+                                                onChange={e => setEditingUser({ ...editingUser, status: e.target.value })}
+                                                className="input-3d w-full appearance-none cursor-pointer"
+                                            >
+                                                <option value="ACTIVE">Active</option>
+                                                <option value="BLOCKED">Blocked</option>
+                                                <option value="PENDING">Pending</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Role Specific Sections */}
+                                    {editingUser.role === 'STUDENT' && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                                            <h3 className="text-lg font-bold text-white border-l-4 border-gold-500 pl-3">Student Details</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Course Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editingUser.course || ''}
+                                                        onChange={e => setEditingUser({ ...editingUser, course: e.target.value })}
+                                                        className="input-3d w-full"
+                                                        placeholder="e.g. Full Stack Development"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Total Fees</label>
+                                                    <input
+                                                        type="number"
+                                                        value={editingUser.totalFees || 0}
+                                                        onChange={e => setEditingUser({ ...editingUser, totalFees: Number(e.target.value) })}
+                                                        className="input-3d w-full"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Paid Amount</label>
+                                                    <input
+                                                        type="number"
+                                                        value={editingUser.paidAmount || 0}
+                                                        onChange={e => setEditingUser({ ...editingUser, paidAmount: Number(e.target.value) })}
+                                                        className="input-3d w-full"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {editingUser.role === 'EMPLOYEE' && (
+                                        <div className="space-y-8 animate-in fade-in slide-in-from-top-4">
+                                            {/* Official Section */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-lg font-bold text-gold-400 border-b border-white/10 pb-2 flex items-center gap-2">
+                                                    <span>🏢</span> Official Details
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                     <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">Basic Salary</label>
-                                                        <input type="number" value={details.basic || 0} onChange={e => updateDetails('basic', Number(e.target.value))} className="w-full bg-black/30 border border-theme rounded p-2 text-foreground outline-none" />
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Employee ID</label>
+                                                        <input type="text" value={editingUser.employeeId || ''} onChange={e => setEditingUser({ ...editingUser, employeeId: e.target.value })} className="input-3d w-full" placeholder="EMP-001" />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">HRA</label>
-                                                        <input type="number" value={details.hra || 0} onChange={e => updateDetails('hra', Number(e.target.value))} className="w-full bg-black/30 border border-theme rounded p-2 text-foreground outline-none" />
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Designation</label>
+                                                        <input type="text" value={editingUser.designation || ''} onChange={e => setEditingUser({ ...editingUser, designation: e.target.value })} className="input-3d w-full" placeholder="e.g. Senior Developer" />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">Special Allowance</label>
-                                                        <input type="number" value={details.special || 0} onChange={e => updateDetails('special', Number(e.target.value))} className="w-full bg-black/30 border border-theme rounded p-2 text-foreground outline-none" />
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Department</label>
+                                                        <input type="text" value={editingUser.department || ''} onChange={e => setEditingUser({ ...editingUser, department: e.target.value })} className="input-3d w-full" placeholder="e.g. Engineering" />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">PF (Deduction)</label>
-                                                        <input type="number" value={details.pf || 0} onChange={e => updateDetails('pf', Number(e.target.value))} className="w-full bg-black/30 border border-theme rounded p-2 text-foreground outline-none" />
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Reporting Manager</label>
+                                                        <input type="text" value={editingUser.reportingManager || ''} onChange={e => setEditingUser({ ...editingUser, reportingManager: e.target.value })} className="input-3d w-full" />
                                                     </div>
-                                                    <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">Prof. Tax</label>
-                                                        <input type="number" value={details.pt || 0} onChange={e => updateDetails('pt', Number(e.target.value))} className="w-full bg-black/30 border border-theme rounded p-2 text-foreground outline-none" />
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Photo URL</label>
+                                                        <input type="text" value={editingUser.photoUrl || ''} onChange={e => setEditingUser({ ...editingUser, photoUrl: e.target.value })} className="input-3d w-full" placeholder="https://..." />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Skills</label>
+                                                        <input type="text" value={editingUser.skills || ''} onChange={e => setEditingUser({ ...editingUser, skills: e.target.value })} className="input-3d w-full" placeholder="React, Node.js, TypeScript" />
                                                     </div>
                                                 </div>
-                                            )
-                                        })()}
-                                    </div>
-                                )}
+                                            </div>
 
-                                <div className="flex gap-4 mt-8 pt-4 border-t border-white/10">
-                                    <button
-                                        type="button"
-                                        onClick={() => setEditingUser(null)}
-                                        className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 py-2 rounded transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="flex-1 bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-2 rounded transition-colors"
-                                    >
-                                        Save Changes
-                                    </button>
-                                </div>
-                            </form>
+                                            {/* Personal Section */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-lg font-bold text-gold-400 border-b border-white/10 pb-2 flex items-center gap-2">
+                                                    <span>🚑</span> Personal & Emergency
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div>
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Date of Birth</label>
+                                                        <input type="date" value={editingUser.dob || ''} onChange={e => setEditingUser({ ...editingUser, dob: e.target.value })} className="input-3d w-full text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Blood Group</label>
+                                                        <input type="text" value={editingUser.bloodGroup || ''} onChange={e => setEditingUser({ ...editingUser, bloodGroup: e.target.value })} className="input-3d w-full" placeholder="O+" />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Current Address</label>
+                                                        <textarea
+                                                            value={editingUser.currentAddress || ''}
+                                                            onChange={e => setEditingUser({ ...editingUser, currentAddress: e.target.value })}
+                                                            className="input-3d w-full min-h-[100px] resize-none"
+                                                            placeholder="Full address details..."
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Emergency Contact</label>
+                                                        <textarea
+                                                            value={editingUser.emergencyContact || ''}
+                                                            onChange={e => setEditingUser({ ...editingUser, emergencyContact: e.target.value })}
+                                                            className="input-3d w-full min-h-[80px] resize-none"
+                                                            placeholder="Name: John Doe, Relation: Father, Mobile: 9876543210"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Salary Section */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-lg font-bold text-gold-400 border-b border-white/10 pb-2 flex items-center gap-2">
+                                                    <span>💰</span> Salary Structure
+                                                </h3>
+                                                {(() => {
+                                                    const details = editingUser.salaryDetails ? JSON.parse(editingUser.salaryDetails) : { basic: 15000, hra: 6000, special: 4000, pf: 1800, pt: 200 };
+                                                    const updateDetails = (key: string, val: number) => {
+                                                        const newDetails = { ...details, [key]: val };
+                                                        setEditingUser({ ...editingUser, salaryDetails: JSON.stringify(newDetails) });
+                                                    };
+                                                    return (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/5 p-4 rounded-xl border border-white/5">
+                                                            <div>
+                                                                <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Basic Salary</label>
+                                                                <input type="number" value={details.basic || 0} onChange={e => updateDetails('basic', Number(e.target.value))} className="input-3d w-full" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">HRA</label>
+                                                                <input type="number" value={details.hra || 0} onChange={e => updateDetails('hra', Number(e.target.value))} className="input-3d w-full" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Special Allowance</label>
+                                                                <input type="number" value={details.special || 0} onChange={e => updateDetails('special', Number(e.target.value))} className="input-3d w-full" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">PF (Deduction)</label>
+                                                                <input type="number" value={details.pf || 0} onChange={e => updateDetails('pf', Number(e.target.value))} className="input-3d w-full text-red-400" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs uppercase text-gray-400 font-bold mb-2 ml-1">Prof. Tax</label>
+                                                                <input type="number" value={details.pt || 0} onChange={e => updateDetails('pt', Number(e.target.value))} className="input-3d w-full text-red-400" />
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })()}
+                                            </div>
+                                        </div>
+                                    )}
+                                </form>
+                            </div>
+
+                            {/* Footer - Fixed */}
+                            <div className="p-6 border-t border-white/10 flex gap-4 bg-[#1a1a1a] rounded-b-2xl shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingUser(null)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 py-3 rounded-xl font-bold transition-colors border border-white/5"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    form="editUserForm"
+                                    type="submit"
+                                    className="flex-1 btn-3d bg-gold-500 text-black py-3 rounded-xl font-bold hover:brightness-110 shadow-lg"
+                                >
+                                    💾 Save Changes
+                                </button>
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

@@ -16,7 +16,23 @@ model User {
   name      String?
   role      String   @default("USER")
   status    String   @default("PENDING")
+  status    String   @default("PENDING")
   details   String?  // JSON string for address, ID proof, etc.
+
+  // Extended Profile
+  employeeId       String?  @unique
+  photoUrl         String?
+  department       String?
+  designation      String?
+  reportingManager String?
+  skills           String?  // Comma separated or JSON
+  
+  // Personal Details
+  dob              String?
+  bloodGroup       String?
+  currentAddress   String?
+  permanentAddress String?
+  emergencyContact String?  // JSON: { name, relation, mobile }
   
   // Student Specific Fields
   course        String?
