@@ -25,8 +25,8 @@
 [data-theme='light'] {
   --background: #f8fafc;
   --foreground: #0f172a;
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(148, 163, 184, 0.2);
+  --card-bg: rgba(255,255,255,0.9);
+  --card-border: rgba(148,163,184,0.2);
   --card-foreground: #0f172a;
   --muted: #eff6ff;
   /* Background Muted (Light Blue) */
@@ -54,9 +54,9 @@
   /* Slate 900 */
   --foreground: #f8fafc;
   /* Slate 50 */
-  --card-bg: rgba(30, 41, 59, 0.8);
+  --card-bg: rgba(30,41,59,0.8);
   /* Slate 800 */
-  --card-border: rgba(148, 163, 184, 0.3);
+  --card-border: rgba(148,163,184,0.3);
   --card-foreground: #f8fafc;
   --muted: #1e293b;
   /* Slate 800 (Background for inputs) */
@@ -72,8 +72,8 @@
   --background: #0a0a0a;
   --foreground: #e2e8f0;
   /* Slate 200 */
-  --card-bg: rgba(24, 24, 27, 0.85);
-  --card-border: rgba(63, 63, 70, 0.4);
+  --card-bg: rgba(24,24,27,0.85);
+  --card-border: rgba(63,63,70,0.4);
   --card-foreground: #e2e8f0;
   --muted: #27272a;
   --muted-foreground: #a1a1aa;
@@ -87,8 +87,8 @@
   /* Orange 50 */
   --foreground: #7c2d12;
   /* Orange 900 */
-  --card-bg: rgba(255, 255, 255, 0.85);
-  --card-border: rgba(253, 186, 116, 0.4);
+  --card-bg: rgba(255,255,255,0.85);
+  --card-border: rgba(253,186,116,0.4);
   --card-foreground: #7c2d12;
   --muted: #fff1f2;
   --muted-foreground: #c2410c;
@@ -102,8 +102,8 @@
   /* Pink 50 */
   --foreground: #831843;
   /* Pink 900 */
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(244, 114, 182, 0.3);
+  --card-bg: rgba(255,255,255,0.9);
+  --card-border: rgba(244,114,182,0.3);
   --card-foreground: #831843;
   --muted: #fce7f3;
   --muted-foreground: #be185d;
@@ -117,8 +117,8 @@
   /* Slate 100 */
   --foreground: #334155;
   /* Slate 700 */
-  --card-bg: rgba(255, 255, 255, 0.85);
-  --card-border: rgba(148, 163, 184, 0.3);
+  --card-bg: rgba(255,255,255,0.85);
+  --card-border: rgba(148,163,184,0.3);
   --card-foreground: #334155;
   --muted: #e2e8f0;
   --muted-foreground: #64748b;
@@ -130,8 +130,8 @@
 [data-avenger='iron-man'] {
   --background: #100202;
   --foreground: #fff5d6;
-  --card-bg: rgba(45, 10, 10, 0.95);
-  --card-border: rgba(255, 215, 0, 0.6);
+  --card-bg: rgba(45,10,10,0.95);
+  --card-border: rgba(255,215,0,0.6);
   --card-foreground: #fff5d6;
   --muted: #450a0a;
   --muted-foreground: #fde68a;
@@ -143,7 +143,7 @@
 
 [data-avenger='iron-man'] * {
   font-family: var(--font-orbitron), monospace !important;
-  text-shadow: 0 0 2px rgba(234, 179, 8, 0.2);
+  text-shadow: 0 0 2px rgba(234,179,8,0.2);
 }
 
 /* Specific overrides for key elements to pop in Iron Man */
@@ -152,13 +152,13 @@
 [data-avenger='iron-man'] h3,
 [data-avenger='iron-man'] .text-foreground {
   color: #ffde7d !important;
-  text-shadow: 0 0 10px rgba(255, 160, 0, 0.6) !important;
+  text-shadow: 0 0 10px rgba(255,160,0,0.6) !important;
 }
 
 [data-avenger='iron-man'] .bg-white {
-  background-color: rgba(30, 5, 5, 0.95) !important;
-  border: 1px solid rgba(255, 215, 0, 0.4) !important;
-  box-shadow: 0 0 15px rgba(234, 179, 8, 0.1) !important;
+  background-color: rgba(30,5,5,0.95) !important;
+  border: 1px solid rgba(255,215,0,0.4) !important;
+  box-shadow: 0 0 15px rgba(234,179,8,0.1) !important;
   color: #fffbeb !important;
 }
 
@@ -308,10 +308,10 @@
 /* SNOW */
 .snow-bg {
   background-image:
-    radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.7) 50%, transparent),
-    radial-gradient(2px 2px at 40% 70%, rgba(255, 255, 255, 0.7) 50%, transparent),
-    radial-gradient(2px 2px at 60% 20%, rgba(255, 255, 255, 0.7) 50%, transparent),
-    radial-gradient(2px 2px at 80% 80%, rgba(255, 255, 255, 0.7) 50%, transparent);
+    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.7) 50%, transparent),
+    radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.7) 50%, transparent),
+    radial-gradient(2px 2px at 60% 20%, rgba(255,255,255,0.7) 50%, transparent),
+    radial-gradient(2px 2px at 80% 80%, rgba(255,255,255,0.7) 50%, transparent);
   background-size: 500px 500px;
   animation: snowDrop 20s linear infinite;
   opacity: 0.5;
@@ -319,9 +319,9 @@
 
 .snow-mid {
   background-image:
-    radial-gradient(3px 3px at 15% 15%, rgba(255, 255, 255, 0.9) 50%, transparent),
-    radial-gradient(3px 3px at 35% 55%, rgba(255, 255, 255, 0.9) 50%, transparent),
-    radial-gradient(3px 3px at 75% 25%, rgba(255, 255, 255, 0.9) 50%, transparent);
+    radial-gradient(3px 3px at 15% 15%, rgba(255,255,255,0.9) 50%, transparent),
+    radial-gradient(3px 3px at 35% 55%, rgba(255,255,255,0.9) 50%, transparent),
+    radial-gradient(3px 3px at 75% 25%, rgba(255,255,255,0.9) 50%, transparent);
   background-size: 400px 400px;
   animation: snowDrop 12s linear infinite;
   opacity: 0.7;
@@ -358,7 +358,7 @@
 
 /* SUMMER */
 .sun-flare {
-  background: radial-gradient(circle at 90% 10%, rgba(255, 200, 0, 0.4) 0%, rgba(255, 150, 0, 0.1) 30%, transparent 60%);
+  background: radial-gradient(circle at 90% 10%, rgba(255,200,0,0.4) 0%, rgba(255,150,0,0.1) 30%, transparent 60%);
   animation: sunPulse 6s ease-in-out infinite alternate;
   mix-blend-mode: screen;
 }
@@ -398,7 +398,7 @@
 .cloud-shape {
   background: #ffffff;
   border-radius: 50%;
-  box-shadow: inset -10px -10px 0 0 rgba(0, 0, 0, 0.05), 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: inset -10px -10px 0 0 rgba(0,0,0,0.05), 0 8px 16px rgba(0,0,0,0.1);
 }
 
 /* ANGRY SUN */
@@ -471,7 +471,7 @@
 
 .heat-overlay {
   animation: heatWave 2s ease-in-out infinite;
-  background: radial-gradient(circle, rgba(255, 69, 0, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,69,0,0.2) 0%, transparent 70%);
   pointer-events: none;
   z-index: 40;
 }
@@ -505,34 +505,34 @@
 
 @layer utilities {
   .glass-card-3d {
-    @apply bg-gradient-to-br from-[#1e1e1e] to-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_8px_16px_rgba(0, 0, 0, 0.4)] backdrop-blur-xl transition-all duration-300;
+    @apply bg-gradient-to-br from-[#1e1e1e] to-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-all duration-300;
   }
 
   .glass-card-3d:hover {
-    @apply shadow-[0_12px_24px_rgba(0, 0, 0, 0.5)] border-white/20 transform -translate-y-1;
+    @apply shadow-[0_12px_24px_rgba(0,0,0,0.5)] border-white/20 transform -translate-y-1;
   }
 
   .text-3d {
-    @apply bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-300 to-yellow-600 drop-shadow-[0_2px_2px_rgba(0, 0, 0, 0.8)];
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-300 to-yellow-600 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)];
   }
 
   .text-3d-silver {
-    @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_2px_2px_rgba(0, 0, 0, 0.8)];
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)];
   }
 
   .btn-3d {
-    @apply bg-gradient-to-b from-[#2a2a2a] to-black border border-white/10 shadow-[0_4px_6px_rgba(0, 0, 0, 0.3), inset_0_1px_0_rgba(255, 255, 255, 0.1)] hover:border-yellow-500/30 text-yellow-500 transition-all active:scale-95;
+    @apply bg-gradient-to-b from-[#2a2a2a] to-black border border-white/10 shadow-[0_4px_6px_rgba(0,0,0,0.3), inset_0_1px_0_rgba(255,255,255,0.1)] hover:border-yellow-500/30 text-yellow-500 transition-all active:scale-95;
   }
 
   .btn-3d-primary {
-    @apply bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold shadow-[0_4px_6px_rgba(0, 0, 0, 0.3), inset_0_1px_0_rgba(255, 255, 255, 0.4)] border border-yellow-500/50 hover:brightness-110 active:scale-95;
+    @apply bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold shadow-[0_4px_6px_rgba(0,0,0,0.3), inset_0_1px_0_rgba(255,255,255,0.4)] border border-yellow-500/50 hover:brightness-110 active:scale-95;
   }
 
   .input-3d {
-    @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white shadow-[inset_0_2px_4px_rgba(0, 0, 0, 0.5)] focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/30 outline-none transition-all placeholder:text-gray-600;
+    @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/30 outline-none transition-all placeholder:text-gray-600;
   }
 
   .line-3d {
-    @apply h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent shadow-[0_0_10px_rgba(234, 179, 8, 0.5)];
+    @apply h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent shadow-[0_0_10px_rgba(234,179,8,0.5)];
   }
 }
