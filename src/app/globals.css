@@ -252,22 +252,12 @@
 [data-avenger='iron-man'] label,
 [data-avenger='iron-man'] td,
 [data-avenger='iron-man'] th {
-  color: inherit !important;
-  font-family: inherit !important;
+  color: inherit;
+  font-family: inherit;
 }
 
 /* Exceptions for Status Badges (Green/Red/Yellow) so they don't turn white */
-[class*="text-green-"],
-[class*="text-red-"],
-[class*="text-yellow-"],
-[class*="text-gold-"],
-[class*="bg-"] {
-  color: inherit;
-  /* Allow specific color utilities to work if specifically applied? No, precedence issue. */
-  /* Actually, relying on the !important inherited from parent above is safer for visibility. */
-  /* Let's try to simply NOT override these if possible, but CSS doesn't support "not parent". */
-  /* Start with the blanket override to fix "Nothing displaying". Visibility is P0. */
-}
+/* [class*="text-"] block removed to allow utilities to work */
 
 /* Light Theme Overrides (For Spring/Summer/Cloudy) - Force Dark Bold Robotic Text */
 [data-theme='summer'] *,

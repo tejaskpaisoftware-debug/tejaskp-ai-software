@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "npx prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "sh deploy.sh"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

@@ -16,8 +16,8 @@ export default function LoginPage() {
     const [newPassword, setNewPassword] = useState(""); // For first time setup
     const [confirmPassword, setConfirmPassword] = useState("");
 
-    // Auth State: 'LOGIN' | 'SET_PASSWORD'
-    const [authStep, setAuthStep] = useState<"LOGIN" | "SET_PASSWORD">("LOGIN");
+    // Auth State: 'LOGIN' | 'SET_PASSWORD' | 'FORGOT_PASSWORD'
+    const [authStep, setAuthStep] = useState<"LOGIN" | "SET_PASSWORD" | "FORGOT_PASSWORD">("LOGIN");
 
     const [error, setError] = useState("");
     const router = useRouter();
@@ -107,6 +107,18 @@ export default function LoginPage() {
         }
     };
 
+    const handleForgotPassword = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!mobile || mobile.length < 10) {
+            setError("Please enter a valid mobile number.");
+            return;
+        }
+        // In a real app, we would verify the mobile number here or send an OTP.
+        // For this environment, we assume valid and proceed to reset.
+        setError("");
+        setAuthStep("SET_PASSWORD");
+    };
+
     return (
         <div className="min-h-screen bg-[#050505] text-gold-100 font-sans flex items-center justify-center relative overflow-hidden">
             {/* CSS-Only Stars Background (Mobile Optimized, Visually Identical) */}
@@ -129,7 +141,7 @@ export default function LoginPage() {
                         <img src="/logo.jpg" alt="Logo" className="w-16 h-16 rounded-full border-2 border-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.3)]" />
                         <div>
                             <h1 className="text-3xl font-bold text-[#FFD700] tracking-wider drop-shadow-md">TEJASKP AI</h1>
-                            <p className="text-yellow-200 tracking-[0.2em] text-sm font-medium">FUTURE IS HERE</p>
+                            <p className="!text-yellow-200 tracking-[0.2em] text-sm font-medium">FUTURE IS HERE</p>
                         </div>
                     </div>
                     <p className="text-gray-200 leading-relaxed text-lg font-light">
@@ -162,7 +174,7 @@ export default function LoginPage() {
                                     onClick={() => { setActiveRole(role as Role); setAuthStep("LOGIN"); setError(""); }}
                                     className={`flex-1 py-4 text-xs font-bold tracking-wider transition-all relative ${activeRole === role
                                         ? "text-black bg-[#FFD700]"
-                                        : "text-gray-300 hover:text-white hover:bg-white/10"
+                                        : "!text-white hover:text-white hover:bg-white/10"
                                         }`}
                                 >
                                     {role}
@@ -192,18 +204,20 @@ export default function LoginPage() {
                                                 activeRole === 'STUDENT' ? 'Student Portal' :
                                                     activeRole === 'EMPLOYEE' ? 'Staff Access' : 'Client Dashboard'}
                                     </h2>
-                                    <p className="text-gray-300 text-sm">
+                                    <p className="!text-white text-sm">
                                         {authStep === "SET_PASSWORD"
                                             ? "Create a secure password for your account"
-                                            : "Please sign in with your mock credentials"}
+                                            : authStep === "FORGOT_PASSWORD"
+                                                ? "Enter your mobile number to reset password"
+                                                : "Please sign in with your TEJASKP AI SOFTWARE credentials"}
                                     </p>
                                 </div>
 
-                                <form className="space-y-4" onSubmit={handleLogin}>
-                                    {/* Mobile/User Input */}
-                                    {authStep === "LOGIN" && (
+                                <form className="space-y-4" onSubmit={authStep === "FORGOT_PASSWORD" ? handleForgotPassword : handleLogin}>
+                                    {/* Mobile/User Input - Visible for LOGIN and FORGOT_PASSWORD */}
+                                    {(authStep === "LOGIN" || authStep === "FORGOT_PASSWORD") && (
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">
+                                            <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">
                                                 Mobile or Username
                                             </label>
                                             <input
@@ -219,7 +233,7 @@ export default function LoginPage() {
                                     {/* Password Input (Active for Admin or Normal Login) */}
                                     {authStep === "LOGIN" && (
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">Password</label>
+                                            <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">Password</label>
                                             <input
                                                 type="password"
                                                 value={password}
@@ -227,7 +241,7 @@ export default function LoginPage() {
                                                 className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium border-opacity-50"
                                                 placeholder={activeRole === "ADMIN" ? "admin123" : "pass123 (or leave blank to test setup)"}
                                             />
-                                            {activeRole !== "ADMIN" && <p className="text-[11px] text-gray-400 font-medium">*First time? Enter mobile & leave password blank</p>}
+                                            {activeRole !== "ADMIN" && <p className="text-[11px] !text-white font-medium">*First time? Enter mobile & leave password blank</p>}
                                         </div>
                                     )}
 
@@ -235,7 +249,7 @@ export default function LoginPage() {
                                     {authStep === "SET_PASSWORD" && (
                                         <>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">New Password</label>
+                                                <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">New Password</label>
                                                 <input
                                                     type="password"
                                                     value={newPassword}
@@ -245,7 +259,7 @@ export default function LoginPage() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold text-yellow-500 uppercase tracking-wider">Confirm Password</label>
+                                                <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">Confirm Password</label>
                                                 <input
                                                     type="password"
                                                     value={confirmPassword}
@@ -259,19 +273,27 @@ export default function LoginPage() {
 
                                     {error && <p className="text-red-500 text-xs text-center font-bold tracking-wide">{error}</p>}
 
-                                    <div className="flex items-center justify-between text-xs text-gray-400">
+                                    <div className="flex items-center justify-between text-xs !text-white">
                                         <label className="flex items-center gap-2 cursor-pointer hover:text-white">
                                             <input type="checkbox" className="rounded border-gray-600 bg-transparent text-yellow-500 focus:ring-offset-0 focus:ring-yellow-500" />
                                             Remember me
                                         </label>
-                                        <a href="#" className="hover:text-yellow-400 transition-colors">Forgot Password?</a>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setAuthStep("FORGOT_PASSWORD"); setError(""); }}
+                                            className="hover:text-yellow-400 transition-colors"
+                                        >
+                                            Forgot Password?
+                                        </button>
                                     </div>
 
                                     <button className="w-full bg-[#EAB308] hover:bg-[#CA8A04] text-black font-extrabold py-4 rounded-lg shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] transition-all transform active:scale-95 text-base tracking-wide">
-                                        {authStep === "SET_PASSWORD" ? "SET PASSWORD & LOGIN" : "ACCESS DASHBOARD"}
+                                        {authStep === "SET_PASSWORD" ? "SET PASSWORD & LOGIN"
+                                            : authStep === "FORGOT_PASSWORD" ? "PROCEED TO RESET"
+                                                : "ACCESS DASHBOARD"}
                                     </button>
 
-                                    {authStep === "SET_PASSWORD" && (
+                                    {(authStep === "SET_PASSWORD" || authStep === "FORGOT_PASSWORD") && (
                                         <button
                                             type="button"
                                             onClick={() => setAuthStep("LOGIN")}
@@ -285,7 +307,7 @@ export default function LoginPage() {
                         </div>
 
                         <div className="bg-obsidian/50 p-4 text-center border-t border-gold-500/10">
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs !text-white">
                                 Protected by TEJASKP Security Systems v1.0
                             </p>
                         </div>
