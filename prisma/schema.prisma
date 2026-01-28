@@ -16,7 +16,6 @@ model User {
   name      String?
   role      String   @default("USER")
   status    String   @default("PENDING")
-  status    String   @default("PENDING")
   details   String?  // JSON string for address, ID proof, etc.
 
   // Extended Profile
@@ -69,6 +68,7 @@ model User {
   accountNumber String?
   ifscCode      String?
   panNumber     String?
+  aadharCard    String?
   
   // Chat System
   isChatEnabled Boolean @default(false)
@@ -83,6 +83,7 @@ model User {
   referredBy    String?
   
   myReferrals   Referral[] // Referrals made by this user
+  pendingUpdate String?    // JSON string for profile approval requests
 
   @@map("users")
 }

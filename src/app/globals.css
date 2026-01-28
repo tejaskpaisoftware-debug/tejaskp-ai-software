@@ -504,39 +504,98 @@
    ========================================= */
 
 @layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-2xl border border-white/10;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+  }
+
+  /* Premium Glass Card with 3D feel */
   .glass-card-3d {
-    @apply bg-gradient-to-br from-[#1e1e1e] to-[#0a0a0a] border border-white/10 rounded-2xl backdrop-blur-xl transition-all duration-300;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    @apply relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-2xl backdrop-blur-xl transition-all duration-500 ease-out;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .glass-card-3d:hover {
-    @apply border-white/20 transform -translate-y-1;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+    @apply border-white/20 -translate-y-2 saturate-150 brightness-110;
+    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.6);
+    transform: perspective(1000px) rotateX(2deg) translateY(-5px);
+  }
+
+  .glass-card-3d::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent);
+    transition: 0.5s;
+  }
+
+  .glass-card-3d:hover::before {
+    left: 100%;
+  }
+
+  /* Neon Text */
+  .text-glow {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(234, 179, 8, 0.3);
   }
 
   .text-3d {
     @apply bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-300 to-yellow-600;
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
 
   .text-3d-silver {
     @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400;
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
 
+  /* 3D Button */
   .btn-3d {
-    @apply bg-gradient-to-b from-[#2a2a2a] to-black border border-white/10 hover:border-yellow-500/30 text-yellow-500 transition-all active:scale-95;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    @apply relative overflow-hidden bg-gradient-to-b from-[#333] to-black border border-white/10 text-white font-bold transition-all duration-300 active:scale-95;
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-3d:hover {
+    @apply border-yellow-500/50 text-yellow-500;
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
   }
 
   .btn-3d-primary {
-    @apply bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold border border-yellow-500/50 hover:brightness-110 active:scale-95;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    @apply relative overflow-hidden bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-black border border-yellow-300/50 transition-all duration-300 active:scale-95;
+    box-shadow:
+      0 10px 20px rgba(234, 179, 8, 0.2),
+      inset 0 2px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .btn-3d-primary:hover {
+    @apply brightness-110 -translate-y-1;
+    box-shadow: 0 15px 30px rgba(234, 179, 8, 0.4);
   }
 
   .input-3d {
-    @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/30 outline-none transition-all placeholder:text-gray-600;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/30 outline-none transition-all placeholder:text-gray-600 shadow-inner;
   }
 
   .line-3d {

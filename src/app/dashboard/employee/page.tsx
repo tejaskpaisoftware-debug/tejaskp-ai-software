@@ -10,6 +10,8 @@ import ReferralSection from "@/components/student/ReferralSection";
 import MeetingSection from "@/components/common/MeetingSection";
 import ThemeSelector from "@/components/common/ThemeSelector";
 import SalarySlipTemplate from "@/components/documents/SalarySlipTemplate";
+import ProfileSection from "@/components/employee/ProfileSection";
+import SplashScreen from "@/components/common/SplashScreen";
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import { useRef } from "react";
@@ -27,19 +29,34 @@ const getAuthHeader = (): HeadersInit => {
 };
 
 export default function EmployeeDashboard() {
-    const [user, setUser] = useState<{ id: string; name: string; mobile: string; createdAt: string } | null>(null);
+    const [user, setUser] = useState<{ id: string; name: string; mobile: string; createdAt: string; photoUrl?: string } | null>(null);
     const router = useRouter();
+    const [showSplash, setShowSplash] = useState(true);
 
     useEffect(() => {
         const stored = sessionStorage.getItem("currentUser");
         if (stored) {
-            setUser(JSON.parse(stored));
+            const parsedUser = JSON.parse(stored);
+            setUser(parsedUser);
+
+            // FETCH FRESH DATA (Background)
+            fetch(`/api/user/me?userId=${parsedUser.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.id) {
+                        setUser(prev => ({ ...prev, ...data }));
+                        // Optional: Update session storage to keep it fresh for next reload
+                        sessionStorage.setItem("currentUser", JSON.stringify({ ...parsedUser, ...data }));
+                    }
+                })
+                .catch(err => console.error("Failed to refresh user data", err));
+
         } else {
             router.push("/login");
         }
     }, [router]);
 
-    const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'leaves' | 'documents' | 'submissions' | 'earn' | 'meetings' | 'theme'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'leaves' | 'documents' | 'submissions' | 'earn' | 'meetings' | 'profile' | 'theme'>('overview');
 
     const handleLogout = async () => {
         if (user) {
@@ -94,248 +111,134 @@ export default function EmployeeDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans p-8 transition-colors duration-500 relative z-10">
-            <header className="flex justify-between items-center mb-8 border-b border-gold-500/20 pb-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-widest">EMPLOYEE PORTAL</h1>
-                    <p className="text-gold-500/60">Welcome, <span className="text-foreground font-bold">{user?.name || "Employee"}</span></p>
-                </div>
-                <div className="flex items-center gap-4">
-                    {/* Notification Badge */}
-                    <div className="relative cursor-pointer hover:scale-110 transition-transform" onClick={() => setActiveTab('overview')}>
-                        <span className="text-2xl">🔔</span>
-                        {notifications.some(n => !n.isRead) && (
-                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border border-theme"></span>
-                        )}
-                    </div>
-
-                    <button onClick={handleLogout} className="px-4 py-2 border border-theme rounded hover:bg-gold-theme hover:text-black transition-colors text-sm font-bold">LOGOUT</button>
-                </div>
-            </header>
-
-            {/* Notifications Alert */}
-            {notifications.length > 0 && notifications.some(n => !n.isRead) && (
-                <div className="mb-6 space-y-2">
-                    {notifications.filter(n => !n.isRead).map(n => {
-                        const isSuccess = n.type === 'SUCCESS' || n.title.includes('Approved');
-                        return (
-                            <div key={n.id} className={`relative p-4 rounded-lg flex items-start gap-4 animate-in fade-in slide-in-from-top-2 group border ${isSuccess
-                                ? 'bg-green-500/10 border-green-500/50'
-                                : 'bg-red-500/10 border-red-500/50'
-                                }`}>
-                                <span className="text-xl">{isSuccess ? '🎉' : '⚠️'}</span>
-                                <div className="flex-1">
-                                    <h3 className={`font-bold text-sm tracking-wide ${isSuccess ? 'text-green-500' : 'text-red-500'}`}>{n.title}</h3>
-                                    <p className="text-gray-300 text-sm mt-1">{n.message}</p>
-                                </div>
-                                <button
-                                    onClick={() => handleDismiss(n.id)}
-                                    className={`absolute top-2 right-2 p-1 rounded-full transition-colors ${isSuccess
-                                        ? 'text-green-400 hover:text-green-200 hover:bg-green-500/20'
-                                        : 'text-red-400 hover:text-red-200 hover:bg-red-500/20'
-                                        }`}
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-                        );
-                    })}
-                </div>
+        <>
+            {showSplash && user && (
+                <SplashScreen
+                    // key={user.photoUrl || 'default'} // Removed to avoid base64 key issues
+                    user={user}
+                    onFinish={() => setShowSplash(false)}
+                />
             )}
-
-            {/* Desktop Tabs (Hidden on Mobile) */}
-            <div className="hidden md:flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-                {['overview', 'attendance', 'leaves', 'documents', 'submissions', 'earn', 'meetings', 'profile', 'theme'].map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab as any)}
-                        className={`px-6 py-2 rounded-full font-bold text-sm transition-all whitespace-nowrap ${activeTab === tab
-                            ? 'bg-gold-theme text-black'
-                            : 'bg-card text-muted-foreground hover:bg-card/80'
-                            }`}
-                    >
-                        {tab.toUpperCase()}
-                    </button>
-                ))}
-            </div>
-
-            {/* Content Area with bottom padding for mobile nav */}
-            <div className="mb-24 md:mb-0">
-                {activeTab === 'overview' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <div className="grid md:grid-cols-3 gap-6">
-                            <Card title="Attendance" value="92%" />
-                            <Card title="Assignments" value="4 Pending" />
-                            <Card title="Performance" value="Excellent" />
-                        </div>
-                        <FinancialSection userId={user?.id || ""} />
-                        <DailyUpdatesSection />
-                    </motion.div>
-                )}
-
-                {activeTab === 'attendance' && user && <AttendanceSection userId={(user as any).id} />}
-                {activeTab === 'leaves' && user && <LeaveSection userId={(user as any).id} />}
-                {activeTab === 'documents' && user && <DocumentsSection userId={(user as any).id} createdAt={user.createdAt} />}
-                {activeTab === 'submissions' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <StudentSubmissionsPage />
-                    </motion.div>
-                )}
-                {activeTab === 'earn' && user && <ReferralSection userId={(user as any).id} />}
-                {activeTab === 'meetings' && user && <MeetingSection userId={(user as any).id} userName={(user as any).name} />}
-                {activeTab === 'profile' && user && <ProfileSection userId={(user as any).id} />}
-                {activeTab === 'theme' && <ThemeSelector />}
-            </div>
-
-            {/* Draggable AI Button (Overlay) */}
-            <DraggableAIButton />
-
-            {/* Mobile Bottom Navigation Bar */}
-            <div className="fixed bottom-0 left-0 w-full bg-card border-t border-theme p-4 flex justify-between items-center md:hidden z-50 safe-area-bottom">
-                <NavButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<Home size={20} />} label="Home" />
-                <NavButton active={activeTab === 'attendance'} onClick={() => setActiveTab('attendance')} icon={<Calendar size={20} />} label="Attend" />
-                <NavButton active={activeTab === 'submissions'} onClick={() => setActiveTab('submissions')} icon={<ClipboardList size={20} />} label="Tasks" />
-                <NavButton active={activeTab === 'meetings'} onClick={() => setActiveTab('meetings')} icon={<Video size={20} />} label="Meet" />
-                <NavButton active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} icon={<span className="text-xl">👤</span>} label="Profile" />
-                <NavButton active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} icon={<Palette size={20} />} label="Theme" />
-            </div>
-        </div>
-    );
-}
-
-function ProfileSection({ userId }: { userId: string }) {
-    const [profile, setProfile] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        fetch(`/api/admin/users/${userId}`).then(res => res.json()).then(data => {
-            if (data.user) setProfile(data.user);
-            setLoading(false);
-        });
-    }, [userId]);
-
-    if (loading) return <div>Loading Profile...</div>;
-    if (!profile) return <div>Profile not found</div>;
-
-    return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-            <div className="md:flex gap-8 items-start">
-                <div className="w-full md:w-1/3">
-                    <div className="bg-card glass-card-3d p-6 flex flex-col items-center text-center">
-                        <div className="w-32 h-32 rounded-full border-4 border-gold-500 overflow-hidden mb-4 shadow-[0_0_20px_rgba(234,179,8,0.3)] bg-gray-800">
-                            {profile.photoUrl ? (
-                                <img src={profile.photoUrl} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl">👤</div>
+            <div data-theme="dark" className="min-h-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] text-foreground font-sans p-4 md:p-8 transition-colors duration-500 relative z-10 selection:bg-gold-500/30">
+                <header className="sticky top-4 z-40 glass-panel rounded-2xl px-6 py-4 mb-12 flex justify-between items-center transform transition-all hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] border-gold-500/10">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500 tracking-widest drop-shadow-lg font-orbitron">
+                            EMPLOYEE PORTAL
+                        </h1>
+                        <p className="text-gold-500/80 font-bold tracking-wider text-xs md:text-sm mt-1">
+                            WELCOME BACK, <span className="text-white text-glow">{user?.name || "COMMANDER"}</span>
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        {/* Notification Badge */}
+                        <div className="relative cursor-pointer hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/5 active:scale-95" onClick={() => setActiveTab('overview')}>
+                            <span className="text-2xl filter drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">🔔</span>
+                            {notifications.some(n => !n.isRead) && (
+                                <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+                            )}
+                            {notifications.some(n => !n.isRead) && (
+                                <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border border-black shadow-[0_0_10px_red]"></span>
                             )}
                         </div>
-                        <h2 className="text-2xl font-bold text-3d">{profile.name}</h2>
-                        <p className="text-gold-500 font-bold tracking-widest text-sm mt-1">{profile.role}</p>
-                        <p className="text-gray-400 text-xs mt-1">{profile.designation || "No Designation"}</p>
-                        <div className="mt-4 w-full space-y-2">
-                            <div className="bg-white/5 p-2 rounded flex justify-between text-sm">
-                                <span className="text-gray-400">ID</span>
-                                <span className="font-mono font-bold text-white">{profile.employeeId || "-"}</span>
-                            </div>
-                            <div className="bg-white/5 p-2 rounded flex justify-between text-sm">
-                                <span className="text-gray-400">Joined</span>
-                                <span className="text-white">{profile.joiningDate || "-"}</span>
-                            </div>
-                        </div>
+
+                        <button onClick={handleLogout} className="btn-3d px-6 py-2 rounded-xl text-xs tracking-widest font-bold text-red-400 border-red-500/30 hover:bg-red-500/10 hover:border-red-500 hover:text-red-400">
+                            LOGOUT
+                        </button>
                     </div>
+                </header>
+
+                {/* Notifications Alert */}
+                {notifications.length > 0 && notifications.some(n => !n.isRead) && (
+                    <div className="mb-6 space-y-2">
+                        {notifications.filter(n => !n.isRead).map(n => {
+                            const isSuccess = n.type === 'SUCCESS' || n.title.includes('Approved');
+                            return (
+                                <div key={n.id} className={`relative p-4 rounded-lg flex items-start gap-4 animate-in fade-in slide-in-from-top-2 group border ${isSuccess
+                                    ? 'bg-green-500/10 border-green-500/50'
+                                    : 'bg-red-500/10 border-red-500/50'
+                                    }`}>
+                                    <span className="text-xl">{isSuccess ? '🎉' : '⚠️'}</span>
+                                    <div className="flex-1">
+                                        <h3 className={`font-bold text-sm tracking-wide ${isSuccess ? 'text-green-500' : 'text-red-500'}`}>{n.title}</h3>
+                                        <p className="text-gray-300 text-sm mt-1">{n.message}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDismiss(n.id)}
+                                        className={`absolute top-2 right-2 p-1 rounded-full transition-colors ${isSuccess
+                                            ? 'text-green-400 hover:text-green-200 hover:bg-green-500/20'
+                                            : 'text-red-400 hover:text-red-200 hover:bg-red-500/20'
+                                            }`}
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {/* Desktop Tabs (3D Floating Pills) */}
+                <div className="hidden md:flex flex-wrap gap-3 mb-12 justify-center perspective-[1000px]">
+                    {['overview', 'attendance', 'leaves', 'documents', 'submissions', 'earn', 'meetings', 'profile', 'theme'].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab as any)}
+                            className={`px-8 py-3 rounded-xl font-bold text-sm tracking-wider transition-all duration-300 transform preserve-3d active:scale-95 ${activeTab === tab
+                                ? 'bg-gradient-to-r from-gold-500 to-yellow-600 text-black shadow-[0_10px_20px_-5px_rgba(234,179,8,0.5)] -translate-y-1'
+                                : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:-translate-y-1 hover:border-gold-500/30 hover:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.5)]'
+                                }`}
+                        >
+                            {tab.replace('-', ' ').toUpperCase()}
+                        </button>
+                    ))}
                 </div>
 
-                <div className="flex-1 space-y-6 mt-6 md:mt-0">
-                    {/* Official Details */}
-                    <div className="bg-card glass-card-3d p-6">
-                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">📂 Official Details</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">Department</label>
-                                <p className="text-white font-medium">{profile.department || "-"}</p>
+                {/* Content Area with bottom padding for mobile nav */}
+                <div className="mb-24 md:mb-0">
+                    {activeTab === 'overview' && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <div className="grid md:grid-cols-3 gap-6">
+                                <Card title="Attendance" value="92%" />
+                                <Card title="Assignments" value="4 Pending" />
+                                <Card title="Performance" value="Excellent" />
                             </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">Reporting Manager</label>
-                                <p className="text-white font-medium">{profile.reportingManager || "-"}</p>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">Email</label>
-                                <p className="text-white font-medium">{profile.email}</p>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">Mobile</label>
-                                <p className="text-white font-medium">{profile.mobile}</p>
-                            </div>
-                        </div>
-                    </div>
+                            <FinancialSection userId={user?.id || ""} />
+                            <DailyUpdatesSection />
+                        </motion.div>
+                    )}
 
-                    {/* Personal & Emergency */}
-                    <div className="bg-card glass-card-3d p-6">
-                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">🚑 Personal & Emergency</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">DOB</label>
-                                <p className="text-white font-medium">{profile.dob || "-"}</p>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">Blood Group</label>
-                                <p className="text-white font-medium">{profile.bloodGroup || "-"}</p>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="text-xs text-gray-500 uppercase">Emergency Contact</label>
-                                <p className="text-white font-medium break-words">
-                                    {profile.emergencyContact || "-"}
-                                </p>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="text-xs text-gray-500 uppercase">Address</label>
-                                <p className="text-gray-300 text-sm">{profile.currentAddress || "-"}</p>
-                            </div>
-                        </div>
-                    </div>
+                    {activeTab === 'attendance' && user && <AttendanceSection userId={(user as any).id} />}
+                    {activeTab === 'leaves' && user && <LeaveSection userId={(user as any).id} />}
+                    {activeTab === 'documents' && user && <DocumentsSection userId={(user as any).id} createdAt={user.createdAt} />}
+                    {activeTab === 'submissions' && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <StudentSubmissionsPage />
+                        </motion.div>
+                    )}
+                    {activeTab === 'earn' && user && <ReferralSection userId={(user as any).id} />}
+                    {activeTab === 'meetings' && user && <MeetingSection userId={(user as any).id} userName={(user as any).name} />}
+                    {activeTab === 'profile' && user && <ProfileSection userId={(user as any).id} />}
+                    {activeTab === 'theme' && <ThemeSelector />}
+                </div>
 
-                    {/* Skills */}
-                    <div className="bg-card glass-card-3d p-6">
-                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">⚡ Skills</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {profile.skills ? profile.skills.split(',').map((skill: string, i: number) => (
-                                <span key={i} className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/30">
-                                    {skill.trim()}
-                                </span>
-                            )) : <p className="text-gray-500 italic">No skills listed</p>}
-                        </div>
-                    </div>
+                {/* Draggable AI Button (Overlay) */}
+                <DraggableAIButton />
 
-                    {/* Bank Details (Masked) */}
-                    <div className="bg-card glass-card-3d p-6">
-                        <h3 className="text-lg font-bold text-gold-400 mb-4 border-b border-white/10 pb-2">🏦 Bank Details (Confidential)</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">Bank Name</label>
-                                <p className="text-white font-medium">{profile.bankName || "-"}</p>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">Account Number</label>
-                                <p className="text-white font-medium font-mono">
-                                    {profile.accountNumber ? "XXXX-XXXX-" + profile.accountNumber.slice(-4) : "-"}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">IFSC Code</label>
-                                <p className="text-white font-medium">{profile.ifscCode || "-"}</p>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-500 uppercase">PAN Number</label>
-                                <p className="text-white font-medium">{profile.panNumber || "-"}</p>
-                            </div>
-                        </div>
-                    </div>
-
+                {/* Mobile Bottom Navigation Bar */}
+                <div className="fixed bottom-0 left-0 w-full bg-card border-t border-theme p-4 flex justify-between items-center md:hidden z-50 safe-area-bottom">
+                    <NavButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<Home size={20} />} label="Home" />
+                    <NavButton active={activeTab === 'attendance'} onClick={() => setActiveTab('attendance')} icon={<Calendar size={20} />} label="Attend" />
+                    <NavButton active={activeTab === 'submissions'} onClick={() => setActiveTab('submissions')} icon={<ClipboardList size={20} />} label="Tasks" />
+                    <NavButton active={activeTab === 'meetings'} onClick={() => setActiveTab('meetings')} icon={<Video size={20} />} label="Meet" />
+                    <NavButton active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} icon={<span className="text-xl">👤</span>} label="Profile" />
+                    <NavButton active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} icon={<Palette size={20} />} label="Theme" />
                 </div>
             </div>
-        </motion.div>
+        </>
     );
 }
+
+
 
 
 
@@ -415,7 +318,7 @@ function DocumentsSection({ userId, createdAt }: { userId: string, createdAt?: s
             <div className="grid md:grid-cols-3 gap-6">
                 <div
                     onClick={() => router.push('/dashboard/student/joining-letter')}
-                    className="bg-card border border-theme rounded-xl p-6 cursor-pointer hover:border-gold-500 hover:bg-white/5 transition-all group"
+                    className="glass-card-3d p-6 cursor-pointer hover:border-gold-500 hover:bg-white/5 transition-all group"
                 >
                     <div className="flex items-center gap-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
@@ -438,7 +341,7 @@ function DocumentsSection({ userId, createdAt }: { userId: string, createdAt?: s
                             alert("Please wait for 75 days from joining to unlock your Experience Certificate. Keep up the good work!");
                         }
                     }}
-                    className={`bg-card border border-theme rounded-xl p-6 transition-all group relative overflow-hidden ${unlocked ? 'cursor-pointer hover:border-gold-500 hover:bg-white/5 opacity-100' : 'opacity-60 cursor-not-allowed'}`}
+                    className={`glass-card-3d p-6 transition-all group relative overflow-hidden ${unlocked ? 'cursor-pointer hover:border-gold-500 hover:bg-white/5 opacity-100' : 'opacity-60 cursor-not-allowed'}`}
                 >
                     <div className="flex items-center gap-4 mb-4">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${unlocked ? 'bg-gold-500/10 text-gold-500' : 'bg-white/5 text-gray-500'}`}>
@@ -604,7 +507,8 @@ function AttendanceSection({ userId }: { userId: string }) {
             <h2 className="text-2xl font-bold text-foreground">Attendance Management</h2>
 
             {/* Action Card */}
-            <div className="bg-card border border-theme rounded-xl p-8 flex flex-col items-center justify-center text-center">
+            {/* Action Card */}
+            <div className="glass-card-3d p-8 flex flex-col items-center justify-center text-center">
                 <h3 className="text-gray-400 uppercase tracking-widest text-sm mb-4">Today's Status</h3>
 
                 {!todayRecord ? (
@@ -727,7 +631,7 @@ function LeaveSection({ userId }: { userId: string }) {
     return (
         <div className="grid md:grid-cols-2 gap-8">
             <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
-                <div className="bg-card border border-theme rounded-xl p-6">
+                <div className="glass-card-3d p-6">
                     <h3 className="text-xl font-bold text-foreground mb-6">Apply for Leave</h3>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -840,7 +744,7 @@ function FinancialSection({ userId }: { userId: string }) {
 
     return (
         <div className="mt-8 grid grid-cols-1 gap-6">
-            <div className="bg-card border border-gold-500/20 rounded-xl p-6">
+            <div className="glass-card-3d p-6">
                 <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                     💰 Financial Status
                 </h3>
@@ -902,8 +806,11 @@ function FinancialSection({ userId }: { userId: string }) {
 
 function Card({ title, value }: { title: string, value: string }) {
     return (
-        <motion.div whileHover={{ scale: 1.02 }} className="bg-card border border-theme p-6 rounded-xl">
-            <h3 className="text-gray-500 text-sm uppercase tracking-wider mb-2">{title}</h3>
+        <motion.div whileHover={{ scale: 1.05, rotateX: 5 }} className="glass-card-3d p-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                <Sparkles size={40} className="text-gold-500" />
+            </div>
+            <h3 className="text-gray-400 text-xs uppercase tracking-widest mb-2 font-bold">{title}</h3>
             <div className="text-2xl font-bold text-foreground">{value}</div>
         </motion.div>
     )

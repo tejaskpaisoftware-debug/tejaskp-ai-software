@@ -70,7 +70,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         const {
             name, email, mobile, course, role, status, totalFees, paidAmount,
             department, designation, employeeId, photoUrl, reportingManager,
-            skills, dob, bloodGroup, currentAddress, permanentAddress, emergencyContact
+            skills, dob, bloodGroup, currentAddress, permanentAddress, emergencyContact,
+            bankName, accountNumber, ifscCode, panNumber, aadharCard,
+            bankState, bankCity, bankArea, bankBranch
         } = body;
 
         // Calculate pending if financial data is provided
@@ -95,18 +97,29 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                     pendingAmount: pendingAmount, // Auto-calculated
                     salaryDetails: body.salaryDetails, // Save JSON string
 
-                    // New Extended Profile Fields
+                    // Extended Profile Fields
                     department,
                     designation,
                     employeeId,
                     photoUrl,
                     reportingManager,
-                    skills, // Just save as string/JSON
+                    skills,
                     dob,
                     bloodGroup,
                     currentAddress,
                     permanentAddress,
-                    emergencyContact // Save JSON string
+                    emergencyContact,
+
+                    // Bank & ID Details
+                    bankName,
+                    accountNumber,
+                    ifscCode,
+                    panNumber,
+                    aadharCard,
+                    bankState,
+                    bankCity,
+                    bankArea,
+                    bankBranch
                 }
             });
 

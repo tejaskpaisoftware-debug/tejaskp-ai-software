@@ -39,6 +39,12 @@ interface User {
     currentAddress?: string;
     permanentAddress?: string;
     emergencyContact?: string;
+    pendingUpdate?: string;
+    bankName?: string;
+    accountNumber?: string;
+    ifscCode?: string;
+    panNumber?: string;
+    aadharCard?: string;
 }
 
 export default function UsersPage() {
@@ -50,6 +56,7 @@ export default function UsersPage() {
     const [uploadMsg, setUploadMsg] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [approvalUser, setApprovalUser] = useState<User | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Salary Slip View State
@@ -203,6 +210,35 @@ export default function UsersPage() {
             console.error(err);
             setUploadStatus('error');
             setUploadMsg('Network error');
+        }
+    };
+
+    const handleApprovalAction = async (userId: string, action: 'APPROVE' | 'REJECT') => {
+        setUploadStatus('uploading');
+        setUploadMsg(`${action === 'APPROVE' ? 'Approving' : 'Rejecting'} update...`);
+
+        try {
+            const res = await fetch('/api/admin/profile-approval', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, action })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setUploadStatus('success');
+                setUploadMsg(data.message);
+                setApprovalUser(null);
+                fetchUsers();
+                setTimeout(() => setUploadStatus('idle'), 3000);
+            } else {
+                setUploadStatus('error');
+                setUploadMsg(data.message || 'Action failed');
+            }
+        } catch (error) {
+            console.error(error);
+            setUploadStatus('error');
+            setUploadMsg("Network error");
         }
     };
 
@@ -728,6 +764,35 @@ export default function UsersPage() {
                                                 </div>
                                             </div>
 
+                                            {/* Bank & ID Details */}
+                                            <div className="relative p-6 rounded-2xl bg-gradient-to-b from-white/[0.03] to-transparent border border-white/5">
+                                                <div className="absolute -top-3 left-6 px-3 bg-[#0a0a0a] text-orange-400 text-xs font-bold uppercase tracking-widest border border-orange-500/20 rounded-full flex items-center gap-2 shadow-lg z-10">
+                                                    <span>💳</span> Bank & ID Details
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                                                    <div className="group">
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-orange-400 transition-colors">PAN Number</label>
+                                                        <input type="text" value={editingUser.panNumber || ''} onChange={e => setEditingUser({ ...editingUser, panNumber: e.target.value.toUpperCase() })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-mono outline-none focus:border-orange-500/50 focus:bg-[#0f0f0f] transition-all" placeholder="ABCDE1234F" />
+                                                    </div>
+                                                    <div className="group">
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-orange-400 transition-colors">Aadhar Card</label>
+                                                        <input type="text" value={editingUser.aadharCard || ''} onChange={e => setEditingUser({ ...editingUser, aadharCard: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-mono outline-none focus:border-orange-500/50 focus:bg-[#0f0f0f] transition-all" placeholder="XXXX XXXX XXXX" />
+                                                    </div>
+                                                    <div className="group">
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-orange-400 transition-colors">Bank Name</label>
+                                                        <input type="text" value={editingUser.bankName || ''} onChange={e => setEditingUser({ ...editingUser, bankName: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white outline-none focus:border-orange-500/50 focus:bg-[#0f0f0f] transition-all" placeholder="HDFC Bank" />
+                                                    </div>
+                                                    <div className="group">
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-orange-400 transition-colors">IFSC Code</label>
+                                                        <input type="text" value={editingUser.ifscCode || ''} onChange={e => setEditingUser({ ...editingUser, ifscCode: e.target.value.toUpperCase() })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-mono outline-none focus:border-orange-500/50 focus:bg-[#0f0f0f] transition-all" placeholder="HDFC0001234" />
+                                                    </div>
+                                                    <div className="md:col-span-2 group">
+                                                        <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-orange-400 transition-colors">Account Number</label>
+                                                        <input type="text" value={editingUser.accountNumber || ''} onChange={e => setEditingUser({ ...editingUser, accountNumber: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white font-mono outline-none focus:border-orange-500/50 focus:bg-[#0f0f0f] transition-all" placeholder="50100XXXXXXXX" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             {/* Salary Section */}
                                             <div className="relative p-6 rounded-2xl bg-gradient-to-b from-white/[0.03] to-transparent border border-white/5">
                                                 <div className="absolute -top-3 left-6 px-3 bg-[#0a0a0a] text-green-400 text-xs font-bold uppercase tracking-widest border border-green-500/20 rounded-full flex items-center gap-2 shadow-lg z-10">
@@ -991,6 +1056,7 @@ export default function UsersPage() {
                                                 onStatusUpdate={handleUpdateStatus}
                                                 onDelete={handleDelete}
                                                 onSalarySlip={openSalarySlipModal}
+                                                onProfileApproval={setApprovalUser}
                                             />
                                         ))}
                                 </div>
@@ -999,6 +1065,101 @@ export default function UsersPage() {
                     </AnimatePresence>
                 </div>
             )}
+
+            {/* PROFILE APPROVAL MODAL */}
+            <AnimatePresence>
+                {approvalUser && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-[#0a0a0a] border border-yellow-500/30 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-[0_0_50px_rgba(234,179,8,0.1)]"
+                        >
+                            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-yellow-500/10 to-transparent flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <span className="text-yellow-500">🔔</span> Profile Update Request
+                                    </h2>
+                                    <p className="text-xs text-gray-400 mt-1">Review changes requested by {approvalUser.name}</p>
+                                </div>
+                                <button onClick={() => setApprovalUser(null)} className="text-gray-500 hover:text-white transition-colors">✕</button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                {(() => {
+                                    const requested = JSON.parse(approvalUser.pendingUpdate || '{}');
+                                    const fields = [
+                                        { label: 'Mobile', key: 'mobile', current: approvalUser.mobile, requested: requested.mobile },
+                                        { label: 'Address', key: 'currentAddress', current: approvalUser.currentAddress, requested: requested.currentAddress },
+                                        { label: 'Emergency', key: 'emergencyContact', current: approvalUser.emergencyContact, requested: requested.emergencyContact },
+                                        { label: 'PAN Card', key: 'panCard', current: approvalUser.panNumber, requested: requested.panCard },
+                                        { label: 'Aadhar Card', key: 'aadharCard', current: (approvalUser as any).aadharCard, requested: requested.aadharCard },
+                                        { label: 'Skills', key: 'skills', current: approvalUser.skills, requested: requested.skills },
+                                        { label: 'Bank Name', key: 'bankName', current: approvalUser.bankName, requested: requested.bankDetails?.bankName },
+                                        { label: 'Account No', key: 'accountNo', current: approvalUser.accountNumber, requested: requested.bankDetails?.accountNo },
+                                        { label: 'IFSC Code', key: 'ifscCode', current: approvalUser.ifscCode, requested: requested.bankDetails?.ifsc },
+                                    ];
+
+                                    return (
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest px-2">
+                                                <span>Current Value</span>
+                                                <span className="text-yellow-500/80">Requested Value</span>
+                                            </div>
+                                            {fields.map(f => {
+                                                const hasChanged = f.current !== f.requested && f.requested !== undefined;
+                                                if (!hasChanged) return null;
+                                                return (
+                                                    <div key={f.key} className="bg-white/5 border border-white/5 rounded-xl p-4 transition-all hover:bg-white/10">
+                                                        <label className="text-[10px] font-bold text-purple-400 uppercase block mb-2">{f.label}</label>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="text-sm text-gray-500 line-through truncate">{f.current || 'Empty'}</div>
+                                                            <div className="text-sm text-white font-medium break-words">{f.requested || 'Empty'}</div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {requested.photoUrl && requested.photoUrl !== approvalUser.photoUrl && (
+                                                <div className="bg-white/5 border border-white/5 rounded-xl p-4">
+                                                    <label className="text-[10px] font-bold text-purple-400 uppercase block mb-4">Profile Photo Update</label>
+                                                    <div className="flex items-center gap-8">
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <span className="text-[10px] text-gray-500">OLD</span>
+                                                            <img src={approvalUser.photoUrl || '/placeholder.png'} className="w-20 h-20 rounded-full border border-white/10 object-cover opacity-50" />
+                                                        </div>
+                                                        <div className="text-2xl text-yellow-500">→</div>
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <span className="text-[10px] text-yellow-500">NEW</span>
+                                                            <img src={requested.photoUrl} className="w-20 h-20 rounded-full border-2 border-yellow-500 object-cover shadow-[0_0_20px_rgba(234,179,8,0.2)]" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })()}
+                            </div>
+
+                            <div className="p-6 border-t border-white/10 bg-white/5 flex gap-4">
+                                <button
+                                    onClick={() => handleApprovalAction(approvalUser.id, 'APPROVE')}
+                                    className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_4px_15px_rgba(22,163,74,0.3)] active:scale-95"
+                                >
+                                    Approve & Update
+                                </button>
+                                <button
+                                    onClick={() => handleApprovalAction(approvalUser.id, 'REJECT')}
+                                    className="flex-1 bg-red-600/20 hover:bg-red-600/30 text-red-500 border border-red-500/30 font-bold py-3 rounded-xl transition-all active:scale-95"
+                                >
+                                    Reject Request
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
         </>
     );

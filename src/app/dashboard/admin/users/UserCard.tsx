@@ -21,6 +21,7 @@ export interface UserProp {
     salarySlips?: any[];
     joiningLetters?: any[]; // Added joiningLetters
     salaryDetails?: string;
+    pendingUpdate?: string;
 }
 
 interface UserCardProps {
@@ -29,9 +30,10 @@ interface UserCardProps {
     onStatusUpdate: (userId: string, newStatus: string) => void;
     onDelete: (userId: string) => void;
     onSalarySlip: (user: UserProp) => void;
+    onProfileApproval: (user: UserProp) => void;
 }
 
-export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip }: UserCardProps) {
+export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip, onProfileApproval }: UserCardProps) {
     const [isExpanded, setIsExpanded] = useState(true);
 
     // Helper to get course name
@@ -82,6 +84,11 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                             </span>
                             <span className="text-gray-400 text-xs">{user.mobile}</span>
                         </div>
+                        {user.pendingUpdate && (
+                            <div className="mt-2 flex items-center gap-1 text-[10px] text-yellow-500 font-bold animate-pulse">
+                                <span>🔔</span> PROFILE UPDATE REQUESTED
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -162,12 +169,21 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                                 >
                                     ✏️ Edit
                                 </button>
-                                <button
-                                    onClick={() => window.location.href = `/dashboard/admin/users/${user.id}`}
-                                    className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 py-2 rounded text-xs font-bold transition-all"
-                                >
-                                    📜 History
-                                </button>
+                                {user.pendingUpdate ? (
+                                    <button
+                                        onClick={() => onProfileApproval(user)}
+                                        className="bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 border border-yellow-500/30 py-2 rounded text-xs font-bold transition-all animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.2)]"
+                                    >
+                                        👀 Approval
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => window.location.href = `/dashboard/admin/users/${user.id}`}
+                                        className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 py-2 rounded text-xs font-bold transition-all"
+                                    >
+                                        📜 History
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => window.location.href = `/dashboard/admin/documents/joining-letter?userId=${user.id}`}
                                     className="bg-orange-600/20 hover:bg-orange-600/30 text-orange-400 border border-orange-500/30 py-2 rounded text-xs font-bold transition-all"
