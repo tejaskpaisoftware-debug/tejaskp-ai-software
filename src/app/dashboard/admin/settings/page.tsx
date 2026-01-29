@@ -72,7 +72,7 @@ const themes = [
 ];
 
 export default function SettingsPage() {
-    const { theme, setTheme, isLoading, setAvengersCharacter } = useTheme() as any; // Cast to access new props safely
+    const { theme, setTheme, setLocalTheme, isLoading, setAvengersCharacter } = useTheme() as any; // Cast to access new props safely
     const [saving, setSaving] = useState(false);
     const [showHeroModal, setShowHeroModal] = useState(false);
 
@@ -85,6 +85,9 @@ export default function SettingsPage() {
         }
 
         setSaving(true);
+        // Clear local override so Admin sees the Global change immediately
+        setLocalTheme(null);
+
         try {
             await setTheme(newTheme);
             console.log("✅ Theme State Updated via Context:", newTheme);

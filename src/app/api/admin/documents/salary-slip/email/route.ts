@@ -1,61 +1,39 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { adminTransporter, ADMIN_SENDER_IDENTITY } from "@/lib/admin-mailer";
 
 export async function POST(request: Request) {
     try {
-        const { email, name, month, year, pdfBase64 } = await request.json();
+        const { email, name, month, pdfBase64 } = await request.json();
 
         if (!email || !pdfBase64) {
-            return NextResponse.json({ success: false, error: "Missing email or PDF data" }, { status: 400 });
+            return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
         }
 
-        // Authentication (Using Gmail App Password)
-        const USER = "tejaskpaisoftware@gmail.com";
-        const PASS = "jskr uhvo wxbr pahe";
-
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: USER,
-                pass: PASS,
-            },
-        });
-
         const mailOptions = {
-            from: `"TejasKP AI Software" <${USER}>`,
+            from: ADMIN_SENDER_IDENTITY,
             to: email,
-            subject: `Salary Slip - ${month} ${year} - TejasKP AI Software`,
-            text: `Dear ${name},\n\nPlease find attached your Salary Slip for ${month} ${year}.\n\nIf you have any queries regarding this slip, please contact HR.\n\nBest regards,\nTejasKP AI Software\nVododara, Gujarat\n\n📞 Contact: 9104630598`,
+            subject: `Salary Slip for ${month} - TejasKP AI Software`,
+            text: `Dear ${name},\n\nPlease find attached your Salary Slip for ${month}.\n\nBest regards,\nTejasKP AI Software`,
             html: `
-                <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #d4a017;">Salary Slip: ${month}</h2>
                     <p>Dear <strong>${name}</strong>,</p>
-                    
-                    <p>Please find attached your Salary Slip for <strong>${month} ${year}</strong>.</p>
-                    
-                    <p>If you have any queries regarding this slip, please contact HR.</p>
-                    
+                    <p>Please find attached your official <strong>Salary Slip</strong> for the month of ${month}.</p>
                     <br/>
-                    <p>Best regards,</p>
-                    <p><strong>TejasKP AI Software</strong><br>
-                    Vadodara, Gujarat</p>
-                    
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-                     <p style="font-size: 13px; color: #555;">
-                        Confidential: This message contains confidential information intended only for the individual named. 
-                        If you are not the named addressee you should not disseminate, distribute or copy this e-mail.
-                     </p>
+                    <p>Best Regards,</p>
+                    <p><strong>TejasKP AI Software</strong></p>
                 </div>
             `,
             attachments: [
                 {
-                    filename: `SalarySlip_${month}_${year}.pdf`,
+                    filename: `Salary_Slip_${name.replace(/\s+/g, "_")}_${month}.pdf`,
                     content: pdfBase64.split("base64,")[1],
                     encoding: 'base64',
                 },
             ],
         };
 
-        await transporter.sendMail(mailOptions);
+        await adminTransporter.sendMail(mailOptions);
         return NextResponse.json({ success: true, message: "Salary Slip email sent successfully" });
 
     } catch (error: any) {

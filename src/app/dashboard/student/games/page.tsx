@@ -3,11 +3,11 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Gamepad2, Brain, Sparkles } from "lucide-react";
+import { ChevronLeft, Gamepad2, Brain, Flag } from "lucide-react";
 import MemoryGame from "./MemoryGame";
 import TicTacToe from "./TicTacToe";
 import F1RacingGame from "./F1RacingGame";
-import { Flag } from "lucide-react";
+import TejasKPLogo from "@/components/common/TejasKPLogo";
 
 export default function GamesPage() {
     const router = useRouter();
@@ -44,7 +44,7 @@ export default function GamesPage() {
             id: 'coming-soon',
             title: 'System Locked',
             description: 'Advanced simulation modules currently under development.',
-            icon: <Sparkles size={48} className="text-gray-500" />,
+            icon: <TejasKPLogo size={48} className="text-gray-500" />,
             color: 'from-gray-800/50 to-black/50',
             border: 'border-gray-700/50',
             bgImage: ''

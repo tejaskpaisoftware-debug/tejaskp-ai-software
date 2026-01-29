@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import TejasKPLogo from "@/components/common/TejasKPLogo";
 
 interface SplashScreenProps {
     user: {
@@ -17,6 +17,7 @@ interface SplashScreenProps {
 export default function SplashScreen({ user, onFinish }: SplashScreenProps) {
     const [quote, setQuote] = useState<{ quote: string; author: string } | null>(null);
     const [loading, setLoading] = useState(true);
+    const timerStarted = useRef(false);
 
     useEffect(() => {
         // Fetch AI Quote
@@ -28,7 +29,7 @@ export default function SplashScreen({ user, onFinish }: SplashScreenProps) {
                     body: JSON.stringify({
                         name: user.name,
                         role: user.role || 'Employee',
-                        image: user.photoUrl // Send photo for visual analysis
+                        image: user.photoUrl
                     })
                 });
                 const data = await res.json();
@@ -42,14 +43,16 @@ export default function SplashScreen({ user, onFinish }: SplashScreenProps) {
         };
 
         fetchQuote();
+    }, [user.id, user.name]); // Stable dependencies for quote fetching
 
-        // Auto dismiss after 4.5 seconds (giving enough time to read)
+    useEffect(() => {
+        // Auto dismiss after 5 seconds - runs only once on mount
         const timer = setTimeout(() => {
             onFinish();
-        }, 4500);
+        }, 5000);
 
         return () => clearTimeout(timer);
-    }, [user, onFinish]);
+    }, [onFinish]);
 
     // Derived photo URL (handle null/undefined)
     const photoUrl = user.photoUrl || `https://ui-avatars.com/api/?name=${user.name}&background=random`;
@@ -95,7 +98,7 @@ export default function SplashScreen({ user, onFinish }: SplashScreenProps) {
                         transition={{ repeat: Infinity, duration: 4 }}
                         className="absolute -top-4 -right-4 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] z-30"
                     >
-                        <Sparkles size={40} fill="currentColor" className="text-gold-300" />
+                        <TejasKPLogo size={60} className="text-gold-300" />
                     </motion.div>
                 </motion.div>
 

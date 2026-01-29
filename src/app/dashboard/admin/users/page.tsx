@@ -44,6 +44,7 @@ interface User {
     accountNumber?: string;
     ifscCode?: string;
     panNumber?: string;
+    leaveBalances?: any[];
     aadharCard?: string;
 }
 

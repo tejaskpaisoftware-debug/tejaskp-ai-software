@@ -15,8 +15,8 @@ export async function GET() {
         // We order by createdAt desc
         const announcements: any = await prisma.$queryRaw`
             SELECT * FROM announcements 
-            WHERE isActive = true OR isActive = 1 
-            ORDER BY createdAt DESC 
+            WHERE "isActive" = true OR "isActive" = 1 
+            ORDER BY "createdAt" DESC 
             LIMIT 5
         `;
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         // If it fails, we might need valueOf(). But usually it works.
         // We use parameterized query for safety.
         await prisma.$executeRaw`
-            INSERT INTO announcements (id, title, content, isActive, createdAt, updatedAt)
+            INSERT INTO announcements (id, title, content, "isActive", "createdAt", "updatedAt")
             VALUES (${id}, ${title}, ${content}, ${isActive}, ${now}, ${now})
         `;
 

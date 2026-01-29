@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 
 const menuItems = [
     { name: "Overview", href: "/dashboard/admin", icon: "📊" },
+    { name: "Mail Server", href: "/dashboard/admin/mailbox", icon: "📧" },
     {
         name: "Users",
         href: "#", // Parent doesn't navigate, toggles
@@ -15,6 +16,7 @@ const menuItems = [
             { name: "All Users", href: "/dashboard/admin/users", icon: "👥" },
             { name: "Attendance", href: "/dashboard/admin/attendance", icon: "🕒" },
             { name: "Leaves", href: "/dashboard/admin/leaves", icon: "🌴" },
+            { name: "Tasks", href: "/dashboard/admin/tasks", icon: "📋" },
         ]
     },
     {
@@ -26,6 +28,7 @@ const menuItems = [
             { name: "Experience Certificate", href: "/dashboard/admin/documents/certificate", icon: "🏅" },
             { name: "Salary Slip", href: "/dashboard/admin/documents/salary-slip", icon: "💳" },
             { name: "Weekly Submissions", href: "/dashboard/admin/submissions", icon: "upload" },
+            { name: "NOC Submissions", href: "/dashboard/admin/documents/noc", icon: "📄" },
         ]
     },
     { name: "Register New", href: "/dashboard/admin/register", icon: "📝" },

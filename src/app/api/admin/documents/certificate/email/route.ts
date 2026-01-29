@@ -1,32 +1,19 @@
-
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { adminTransporter, ADMIN_SENDER_IDENTITY } from "@/lib/admin-mailer";
 
 export async function POST(request: Request) {
     try {
-        const { email, name, pdfBase64, subject, course, duration } = await request.json();
+        const { email, name, certificateType, pdfBase64 } = await request.json();
 
         if (!email || !pdfBase64) {
-            return NextResponse.json({ success: false, error: "Missing email or PDF data" }, { status: 400 });
+            return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
         }
 
-        // HARDCODED CREDENTIALS (Reusing from Joining Letter)
-        const USER = "tejaskpaisoftware@gmail.com";
-        const PASS = "jskr uhvo wxbr pahe";
-
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: USER,
-                pass: PASS,
-            },
-        });
-
         const mailOptions = {
-            from: `"TejasKP AI Software" <${USER}>`,
+            from: ADMIN_SENDER_IDENTITY,
             to: email,
-            subject: subject || "Internship Completion Certificate - TejasKP AI Software",
-            text: `Dear ${name},\n\nCongratulations on successfully completing your internship program at TEJASKP AI SOFTWARE.\n\nPlease find attached your internship completion certificate.\n\nIntern Details:\nName: ${name}\nDomain: ${course || 'N/A'}\nDuration: ${duration || 'N/A'}\n\nWe appreciate your contribution and wish you the best for your future endeavors.\n\nWarm regards,\n\nTejas Patel\nDirector\nTEJASKP AI SOFTWARE`,
+            subject: `Experience Certificate - TejasKP AI Software`,
+            text: `Dear ${name},\n\nPlease find attached your Experience Certificate.\n\nBest regards,\nTejasKP AI Software`,
             html: `
                 <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
                      <p>Dear <strong>${name}</strong>,</p>
@@ -34,12 +21,6 @@ export async function POST(request: Request) {
                      <p>Congratulations on successfully completing your internship program at <strong>TEJASKP AI SOFTWARE</strong>.</p>
                      
                      <p>Please find attached your official internship completion certificate.</p>
-                     
-                     <div style="background: #fdf6e3; padding: 15px; border-left: 4px solid #b8860b; margin: 20px 0;">
-                        <h3 style="margin-top: 0; color: #1a1a1a;">Intern Details:</h3>
-                        <p style="margin: 5px 0;"><strong>Name:</strong> ${name}</p>
-                        <p style="margin: 5px 0;"><strong>Domain:</strong> ${course || 'N/A'}</p>
-                        <p style="margin: 5px 0;"><strong>Duration:</strong> ${duration || 'N/A'}</p>
                      </div>
 
                      <p>We appreciate your dedication and contribution during your time with us. We hope this experience has been valuable for your professional growth.</p>
@@ -69,7 +50,7 @@ export async function POST(request: Request) {
             ],
         };
 
-        await transporter.sendMail(mailOptions);
+        await adminTransporter.sendMail(mailOptions);
 
         return NextResponse.json({ success: true, message: "Certificate sent successfully" });
 

@@ -51,18 +51,30 @@ export default function AdminDashboard() {
     });
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchStats = async () => {
             try {
                 const res = await fetch(`/api/admin/dashboard/stats?year=${year}`);
                 const data = await res.json();
-                if (data.success) {
+                if (data.success && isMounted) {
                     setStats(data.stats);
                 }
             } catch (error) {
                 console.error("Failed to load dashboard stats", error);
             }
         };
+
+        // Initial Fetch
         fetchStats();
+
+        // Polling Interval
+        const intervalId = setInterval(fetchStats, 5000);
+
+        return () => {
+            isMounted = false;
+            clearInterval(intervalId);
+        };
     }, [year]);
 
     const formatCurrency = (amount: number) => {

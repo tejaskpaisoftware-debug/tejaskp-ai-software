@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { adminTransporter, ADMIN_SENDER_IDENTITY } from "@/lib/admin-mailer";
 
 export async function POST(request: Request) {
     try {
@@ -9,20 +9,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: "Missing email or PDF data" }, { status: 400 });
         }
 
-        // Authentication (Using Gmail App Password)
-        const USER = "tejaskpaisoftware@gmail.com";
-        const PASS = "jskr uhvo wxbr pahe";
-
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: USER,
-                pass: PASS,
-            },
-        });
-
         const mailOptions = {
-            from: `"TejasKP AI Software" <${USER}>`,
+            from: ADMIN_SENDER_IDENTITY,
             to: email,
             subject: `Invoice #${invoiceNumber} from TejasKP AI Software`,
             text: `Dear ${name},\n\nPlease find attached Invoice ${invoiceNumber} for your reference.\n\nWe kindly request you to process the payment at your earliest convenience.\nIf the payment has already been made, please ignore this message.\n\nShould you require any clarification, feel free to reach out.\n\nThank you for your cooperation.\n\nBest regards,\nTejasKP AI Software\nVadodara, Gujarat\n\n📞 Contact: 9104630598\n🌐 Website: www.tejaskpaisoftware.com`,
@@ -60,7 +48,7 @@ export async function POST(request: Request) {
             ],
         };
 
-        await transporter.sendMail(mailOptions);
+        await adminTransporter.sendMail(mailOptions);
         return NextResponse.json({ success: true, message: "Invoice email sent successfully" });
 
     } catch (error: any) {

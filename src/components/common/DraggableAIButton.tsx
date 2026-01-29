@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, MessageCircle, X } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import TejasKPLogo from "@/components/common/TejasKPLogo";
 
 export default function DraggableAIButton() {
     const router = useRouter();
@@ -30,7 +31,7 @@ export default function DraggableAIButton() {
                         onClick={() => setIsOpen(!isOpen)}
                         className="w-14 h-14 rounded-full bg-gold-500 text-obsidian shadow-[0_0_20px_rgba(250,204,21,0.5)] flex items-center justify-center hover:scale-105 transition-transform"
                     >
-                        {isOpen ? <X size={24} /> : <Sparkles size={24} />}
+                        {isOpen ? <X size={24} /> : <TejasKPLogo size={24} />}
                     </button>
 
                     {/* Menu Items */}
@@ -43,7 +44,7 @@ export default function DraggableAIButton() {
                                 className="flex items-center gap-2 bg-obsidian border border-gold-500/50 px-4 py-2 rounded-lg text-gold-400 font-bold shadow-xl whitespace-nowrap"
                             >
                                 <span>TejasKP AI</span>
-                                <Sparkles size={16} />
+                                <TejasKPLogo size={16} />
                             </motion.button>
 
                             <motion.button
@@ -51,7 +52,7 @@ export default function DraggableAIButton() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 }}
                                 onClick={() => router.push('/dashboard/user/chat')}
-                                className="flex items-center gap-2 bg-obsidian border border-gold-500/50 px-4 py-2 rounded-lg text-white font-bold shadow-xl whitespace-nowrap"
+                                className="flex items-center gap-2 bg-white border border-gold-500/50 px-4 py-2 rounded-lg text-obsidian font-bold shadow-xl whitespace-nowrap"
                             >
                                 <span>Support Chat</span>
                                 <MessageCircle size={16} />

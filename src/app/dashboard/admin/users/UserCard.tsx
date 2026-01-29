@@ -1,7 +1,54 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+function LeaveBalanceSection({ user }: { user: UserProp }) {
+    const [balance, setBalance] = useState<any>(null);
+    const currentYear = new Date().getFullYear();
+
+    useEffect(() => {
+        // If passed in props (e.g. after server restart), use it
+        if (user.leaveBalances && user.leaveBalances.length > 0) {
+            const b = user.leaveBalances.find((b: any) => b.year === currentYear);
+            if (b) {
+                setBalance(b);
+                return;
+            }
+        }
+
+        // Otherwise fetch client-side
+        fetch(`/api/user/leave-balance?userId=${user.id}&year=${currentYear}`)
+            .then(res => res.json())
+            .then(data => setBalance(data))
+            .catch(e => console.error(e));
+    }, [user, currentYear]);
+
+    if (!balance && (!user.leaveBalances || user.leaveBalances.length === 0)) return null;
+
+    // Use fetched balance or default 0s
+    const displayBalance = balance || { cl: 0, sl: 0, pl: 0 };
+
+    return (
+        <div className="bg-white/5 rounded-lg p-3 border border-white/5">
+            <div className="text-[10px] text-gray-400 uppercase mb-2">Leave Balance ({currentYear})</div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                    <div className="text-[10px] text-gold-500/70">CL</div>
+                    <div className="text-sm font-bold text-gold-400">{displayBalance.cl || 0}</div>
+                </div>
+                <div>
+                    <div className="text-[10px] text-blue-500/70">SL</div>
+                    <div className="text-sm font-bold text-blue-400">{displayBalance.sl || 0}</div>
+                </div>
+                <div>
+                    <div className="text-[10px] text-green-500/70">PL</div>
+                    <div className="text-sm font-bold text-green-400">{displayBalance.pl || 0}</div>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 // Define interface locally to avoid circular dependency with page.tsx
 export interface UserProp {
@@ -19,9 +66,11 @@ export interface UserProp {
     pendingAmount?: number;
     joiningDate?: string;
     salarySlips?: any[];
-    joiningLetters?: any[]; // Added joiningLetters
+    joiningLetters?: any[];
+    leaveBalances?: any[];
     salaryDetails?: string;
     pendingUpdate?: string;
+    photoUrl?: string;
 }
 
 interface UserCardProps {
@@ -63,13 +112,17 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                 <div className="flex items-center gap-4">
                     {/* Avatar / Icon */}
                     <div className={`
-                        w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold shadow-inner
+                        w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold shadow-inner overflow-hidden
                         ${user.role === 'ADMIN' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
                             user.role === 'EMPLOYEE' ? 'bg-purple-500/20 text-purple-500 border border-purple-500/30' :
                                 user.role === 'CLIENT' ? 'bg-blue-500/20 text-blue-500 border border-blue-500/30' :
                                     'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30'}
                     `}>
-                        {user.name.charAt(0).toUpperCase()}
+                        {user.photoUrl ? (
+                            <img src={user.photoUrl} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                            user.name.charAt(0).toUpperCase()
+                        )}
                     </div>
 
                     <div>
@@ -142,6 +195,11 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                                     <div className="text-gray-300">{getCourseName()}</div>
                                 </div>
                             </div>
+
+                            {/* Leave Balances (New) */}
+                            {user.role === 'EMPLOYEE' && (
+                                <LeaveBalanceSection user={user} />
+                            )}
 
                             {/* Financials (If Applicable) */}
                             {((user.totalFees || 0) > 0 || (user.paidAmount || 0) > 0) && (

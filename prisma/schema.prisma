@@ -3,103 +3,159 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String?  @unique
-  mobile    String   @unique
-  password  String?
-  name      String?
-  role      String   @default("USER")
-  status    String   @default("PENDING")
-  details   String?  // JSON string for address, ID proof, etc.
-
-  // Extended Profile
-  employeeId       String?  @unique
-  photoUrl         String?
-  department       String?
-  designation      String?
-  reportingManager String?
-  skills           String?  // Comma separated or JSON
-  
-  // Personal Details
-  dob              String?
+  id               String          @id @default(uuid())
+  email            String?         @unique
+  mobile           String          @unique
+  password         String?
+  name             String?
+  role             String          @default("USER")
+  status           String          @default("PENDING")
+  details          String?
+  course           String?
+  college          String?
+  university       String?
+  paymentMode      String?
+  totalFees        Float?
+  paidAmount       Float?
+  pendingAmount    Float?
+  studyMode        String?
+  duration         String?
+  joiningDate      String?
+  endDate          String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  salaryDetails    String?
+  bankName         String?
+  bankState        String?
+  bankCity         String?
+  bankArea         String?
+  bankBranch       String?
+  accountNumber    String?
+  ifscCode         String?
+  panNumber        String?
+  isChatEnabled    Boolean         @default(false)
+  referralCode     String?         @unique
+  walletBalance    Float           @default(0.0)
+  referredBy       String?
+  aadharCard       String?
   bloodGroup       String?
   currentAddress   String?
+  department       String?
+  designation      String?
+  dob              String?
+  emergencyContact String?
+  employeeId       String?         @unique
+  pendingUpdate    String?
   permanentAddress String?
-  emergencyContact String?  // JSON: { name, relation, mobile }
-  
-  // Student Specific Fields
-  course        String?
-  college       String?
-  university    String?
-  paymentMode   String?
-  totalFees     Float?
-  paidAmount    Float?
-  pendingAmount Float?
-  studyMode     String?
-  duration      String?
-  joiningDate   String?
-  endDate       String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  logs       SystemLog[]
-  sessions   Session[]
-  invoices   Invoice[]
-  attendance Attendance[]
-  leaves     Leave[]
-  joiningLetters JoiningLetter[]
-  certificates   Certificate[]
-  salarySlips    SalarySlip[]
-  salaryDetails  String?  // JSON for default Basic, HRA, Deductions
-  
-  // Bank Details
-  bankName      String?
-  bankState     String?
-  bankCity      String?
-  bankArea      String?
-  bankBranch    String?
-  accountNumber String?
-  ifscCode      String?
-  panNumber     String?
-  aadharCard    String?
-  
-  // Chat System
-  isChatEnabled Boolean @default(false)
-  conversations Conversation[] @relation("UserConversations")
-  messages      Message[]
-  submissions   Submission[]
-  notifications Notification[]
-
-  // Refer & Earn
-  referralCode  String?  @unique
-  walletBalance Float    @default(0.0)
-  referredBy    String?
-  
-  myReferrals   Referral[] // Referrals made by this user
-  pendingUpdate String?    // JSON string for profile approval requests
+  photoUrl         String?
+  reportingManager String?
+  skills           String?
+  attendance       Attendance[]
+  certificates     Certificate[]
+  invoices         Invoice[]
+  joiningLetters   JoiningLetter[]
+  leaveBalances    LeaveBalance[]
+  leaves           Leave[]
+  mailbox          Mailbox?
+  messages         Message[]
+  notifications    Notification[]
+  myReferrals      Referral[]
+  salarySlips      SalarySlip[]
+  sessions         Session[]
+  submissions      Submission[]
+  logs             SystemLog[]
+  tasks            Task[]          @relation("AssignedTasks")
+  conversations    Conversation[]  @relation("UserConversations")
+  documents        StudentDocument[]
 
   @@map("users")
 }
 
-model Attendance {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  date        String   // YYYY-MM-DD
-  loginTime   DateTime @default(now())
-  logoutTime  DateTime?
-  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  adminRemarks String?
+model StudentDocument {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   @default("NOC")
+  fileUrl   String
+  fileName  String?
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  @@index([userId])
+  @@map("student_documents")
+}
+
+model Task {
+  id           String           @id @default(uuid())
+  title        String
+  description  String?
+  projectName  String?
+  priority     String           @default("MEDIUM")
+  status       String           @default("TODO")
+  deadline     String?
+  assignedToId String
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  attachments  TaskAttachment[]
+  comments     TaskComment[]
+  history      TaskHistory[]
+  assignedTo   User             @relation("AssignedTasks", fields: [assignedToId], references: [id])
+
+  @@map("tasks")
+}
+
+model TaskHistory {
+  id        String   @id @default(uuid())
+  taskId    String
+  change    String
+  updatedBy String?
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_histories")
+}
+
+model TaskComment {
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_comments")
+}
+
+model TaskAttachment {
+  id         String   @id @default(uuid())
+  taskId     String
+  fileUrl    String
+  fileName   String
+  fileType   String?
+  uploadedAt DateTime @default(now())
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_attachments")
+}
+
+model Attendance {
+  id           String    @id @default(uuid())
+  userId       String
+  date         String
+  loginTime    DateTime  @default(now())
+  logoutTime   DateTime?
+  status       String    @default("PENDING")
+  adminRemarks String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([date])
@@ -107,26 +163,53 @@ model Attendance {
 }
 
 model Leave {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  startDate String
-  endDate   String
-  reason    String
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  type      String   @default("CL")      // CL, SL, LWP
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  userId         String
+  startDate      String
+  endDate        String
+  reason         String
+  status         String   @default("PENDING")
+  type           String   @default("CL")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  isHalfDay      Boolean  @default(false)
+  managerRemarks String?
+  user           User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@map("leaves")
 }
 
+model LeaveBalance {
+  id        String   @id @default(uuid())
+  userId    String
+  year      Int
+  cl        Float    @default(0)
+  sl        Float    @default(0)
+  pl        Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, year])
+  @@map("leave_balances")
+}
+
+model Holiday {
+  id          String   @id @default(uuid())
+  date        String
+  name        String
+  type        String   @default("PUBLIC")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("holidays")
+}
+
 model Certificate {
   id        String   @id @default(uuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
   name      String
   email     String?
   mobile    String?
@@ -135,10 +218,10 @@ model Certificate {
   endDate   String
   issueDate String
   duration  String?
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+  user      User?    @relation(fields: [userId], references: [id])
+
   @@map("certificates")
 }
 
@@ -146,8 +229,8 @@ model Invoice {
   id            String   @id @default(uuid())
   invoiceNumber String   @unique
   customerName  String
-  type          String   // INTERNSHIP, TRAINING
-  items         String   // JSON string of items
+  type          String
+  items         String
   subtotal      Float
   discount      Float    @default(0)
   sgst          Float
@@ -156,12 +239,10 @@ model Invoice {
   paidAmount    Float
   dueDate       String
   status        String   @default("PENDING")
-  
   userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
-  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  user          User?    @relation(fields: [userId], references: [id])
 
   @@map("invoices")
 }
@@ -169,10 +250,10 @@ model Invoice {
 model Session {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@map("sessions")
@@ -181,41 +262,35 @@ model Session {
 model SystemLog {
   id        String   @id @default(uuid())
   action    String
-  details   String?  
+  details   String?
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
   timestamp DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([timestamp])
   @@map("system_logs")
 }
 
-// Enums are not supported in SQLite, using String
-// Role: USER, ADMIN, STUDENT, EMPLOYEE, CLIENT, DEVELOPER
-// Status: PENDING, ACTIVE, BLOCKED
-
 model JoiningLetter {
-  id                String   @id @default(uuid())
-  userId            String?
-  user              User?    @relation(fields: [userId], references: [id])
-  
-  name              String
-  email             String
-  mobile            String
-  university        String?
-  date              String
-  startDate         String
-  endDate           String
-  designation       String
-  internshipType    String
-  stipend           String
-  location          String
-  reportingManager  String
+  id                 String   @id @default(uuid())
+  userId             String?
+  name               String
+  email              String
+  mobile             String
+  university         String?
+  date               String
+  startDate          String
+  endDate            String
+  designation        String
+  internshipType     String
+  stipend            String
+  location           String
+  reportingManager   String
   managerDesignation String
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@map("joining_letters")
@@ -225,9 +300,8 @@ model Purchase {
   id          String   @id @default(uuid())
   amount      Float
   description String?
-  category    String?  // e.g. "Office", "Software", "Salary"
+  category    String?
   date        DateTime @default(now())
-
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -235,14 +309,12 @@ model Purchase {
 }
 
 model Conversation {
-  id        String    @id @default(uuid())
-  type      String    @default("DIRECT") // DIRECT, GROUP
-  
-  participants User[] @relation("UserConversations")
+  id           String    @id @default(uuid())
+  type         String    @default("DIRECT")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   messages     Message[]
-  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  participants User[]    @relation("UserConversations")
 
   @@map("conversations")
 }
@@ -250,29 +322,24 @@ model Conversation {
 model Message {
   id             String       @id @default(uuid())
   conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  
   senderId       String
-  sender         User         @relation(fields: [senderId], references: [id])
-  
   content        String?
-  type           String       @default("TEXT") // TEXT, IMAGE, DOC, VIDEO
+  type           String       @default("TEXT")
   fileUrl        String?
-  
   createdAt      DateTime     @default(now())
-  
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
+
   @@map("messages")
 }
 
 model AiSession {
   id        String      @id @default(uuid())
-  userId    String?     // Optional if we can't link to User easily, but preferred
+  userId    String?
   title     String      @default("New Chat")
-  
-  messages  AiMessage[]
-  
   createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt // For sorting by last activity
+  updatedAt DateTime    @updatedAt
+  messages  AiMessage[]
 
   @@index([userId])
   @@map("ai_sessions")
@@ -281,34 +348,28 @@ model AiSession {
 model AiMessage {
   id        String    @id @default(uuid())
   sessionId String
-  session   AiSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
-  role      String    // 'user', 'assistant' (or 'model')
+  role      String
   content   String
-  type      String    @default("text") // text, data, image
-  data      String?   // JSON string for any structured data
-  
+  type      String    @default("text")
+  data      String?
   createdAt DateTime  @default(now())
-  
+  session   AiSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
   @@index([sessionId])
   @@map("ai_messages")
 }
 
 model Submission {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
-  weekStartDate String // Store Monday of the week (YYYY-MM-DD)
-  
-  pdfPath   String?
-  excelPath String?
-  
-  submittedAt DateTime @default(now())
-  status      String   @default("PENDING") // PENDING, SUBMITTED, LATE
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String
+  weekStartDate String
+  pdfPath       String?
+  excelPath     String?
+  submittedAt   DateTime @default(now())
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
 
   @@index([userId, weekStartDate])
   @@map("submissions")
@@ -317,14 +378,12 @@ model Submission {
 model Notification {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
   title     String
   message   String
-  type      String   @default("INFO") // INFO, WARNING, SUCCESS, ERROR
+  type      String   @default("INFO")
   isRead    Boolean  @default(false)
-  
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@map("notifications")
@@ -333,36 +392,31 @@ model Notification {
 model Referral {
   id             String   @id @default(uuid())
   referrerId     String
-  referrer       User     @relation(fields: [referrerId], references: [id])
-  
-  referredUserId String?  // Optional: Linked User if type is ENROLLMENT
-  projectId      String?  // Optional: Linked Project if type is PROJECT
-  project        Project? @relation(fields: [projectId], references: [id])
-  
-  type           String   // ENROLLMENT, PROJECT
-  status         String   @default("PENDING") // PENDING, APPROVED, REJECTED, PAID
+  referredUserId String?
+  projectId      String?
+  type           String
+  status         String   @default("PENDING")
   amount         Float    @default(0.0)
   description    String?
-  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  project        Project? @relation(fields: [projectId], references: [id])
+  referrer       User     @relation(fields: [referrerId], references: [id])
 
   @@index([referrerId])
   @@map("referrals")
 }
 
 model Project {
-  id             String   @id @default(uuid())
+  id             String     @id @default(uuid())
   title          String
   description    String
-  category       String   // Web, App, AI, etc.
-  status         String   @default("OPEN") // OPEN, CLOSED, ASSIGNED
-  commissionRate Float    @default(5.0) // Percentage
-  
+  category       String
+  status         String     @default("OPEN")
+  commissionRate Float      @default(5.0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
   referrals      Referral[]
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
 
   @@map("projects")
 }
@@ -372,97 +426,80 @@ model Announcement {
   title     String
   content   String
   isActive  Boolean  @default(true)
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("announcements")
 }
 
-// --- Multiplayer Racing Game ---
-
 model RacingSession {
-  id        String   @id @default(uuid())
-  code      String   @unique @default(cuid()) // Short code for joining
-  status    String   @default("WAITING") // WAITING, RACING, FINISHED
+  id        String         @id @default(uuid())
+  code      String         @unique @default(cuid())
+  status    String         @default("WAITING")
   startTime DateTime?
-  
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
   players   RacingPlayer[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@map("racing_sessions")
 }
 
 model RacingPlayer {
-  id            String   @id @default(uuid())
+  id            String        @id @default(uuid())
   sessionId     String
-  session       RacingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
   userId        String?
   name          String
-  carColor      String   @default("red")
-  
-  score         Int      @default(0)
-  speed         Float    @default(0.0)
-  positionX     Float    @default(0.0) // For ghost rendering
-  status        String   @default("READY") // READY, RACING, CRASHED, FINISHED
-  
-  lastHeartbeat DateTime @default(now()) // To detect disconnects
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  carColor      String        @default("red")
+  score         Int           @default(0)
+  speed         Float         @default(0.0)
+  positionX     Float         @default(0.0)
+  status        String        @default("READY")
+  lastHeartbeat DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  session       RacingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@map("racing_players")
 }
 
 model RacingLeaderboard {
-  id        String   @id @default(uuid())
-  userId    String?
-  name      String
-  score     Int
-  date      DateTime @default(now())
+  id     String   @id @default(uuid())
+  userId String?
+  name   String
+  score  Int
+  date   DateTime @default(now())
 
   @@map("racing_leaderboard")
 }
 
 model SalarySlip {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
-  month     String
-  year      String
-  
-  // Earnings
-  basicSalary Float
-  hra         Float
-  special     Float
-  conveyance  Float
-  medical     Float
-  bonus       Float
-  
-  // Deductions
-  pf          Float
+  id              String   @id @default(uuid())
+  userId          String
+  month           String
+  year            String
+  basicSalary     Float
+  hra             Float
+  special         Float
+  conveyance      Float
+  medical         Float
+  bonus           Float
+  pf              Float
   professionalTax Float
-  tds         Float
-  loan        Float
+  tds             Float
+  loan            Float
   otherDeductions Float
-  
-  // Details
-  bankName      String?
-  bankState     String?
-  bankCity      String?
-  bankArea      String?
-  bankBranch    String?
-  accountNumber String?
-  ifscCode      String?
-  panNumber     String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  bankName        String?
+  bankState       String?
+  bankCity        String?
+  bankArea        String?
+  bankBranch      String?
+  accountNumber   String?
+  ifscCode        String?
+  panNumber       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@map("salary_slips")
@@ -470,11 +507,70 @@ model SalarySlip {
 
 model SystemSettings {
   id        String   @id @default(uuid())
-  key       String   @unique @default("global") // Ensure only one row usually, or use key for diff settings
-  appTheme  String   @default("light") // light, dark, snow, summer, rain, cloudy, spring
-  
-  updatedBy String?  // User ID of admin who changed it
+  key       String   @unique @default("global")
+  appTheme  String   @default("light")
+  updatedBy String?
   updatedAt DateTime @updatedAt
-  
+
   @@map("system_settings")
+}
+
+model Mailbox {
+  id              String           @id @default(uuid())
+  userId          String           @unique
+  emailAddress    String           @unique
+  storageUsed     Float            @default(0)
+  storageLimit    Float            @default(5368709120)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  emailRecipients EmailRecipient[]
+  emailsSent      Email[]          @relation("SentEmails")
+  user            User             @relation(fields: [userId], references: [id])
+
+  @@map("mailboxes")
+}
+
+model Email {
+  id             String            @id @default(uuid())
+  subject        String
+  body           String
+  senderId       String?
+  isDraft        Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  externalName   String?
+  externalSender String?
+  isExternal     Boolean           @default(false)
+  attachments    EmailAttachment[]
+  recipients     EmailRecipient[]
+  sender         Mailbox?          @relation("SentEmails", fields: [senderId], references: [id])
+
+  @@map("emails")
+}
+
+model EmailRecipient {
+  id        String  @id @default(uuid())
+  emailId   String
+  mailboxId String
+  role      String  @default("TO")
+  folder    String  @default("INBOX")
+  isRead    Boolean @default(false)
+  isStarred Boolean @default(false)
+  email     Email   @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  mailbox   Mailbox @relation(fields: [mailboxId], references: [id])
+
+  @@index([mailboxId, folder])
+  @@map("email_recipients")
+}
+
+model EmailAttachment {
+  id       String  @id @default(uuid())
+  emailId  String
+  fileUrl  String
+  fileName String
+  fileSize Float
+  fileType String?
+  email    Email   @relation(fields: [emailId], references: [id], onDelete: Cascade)
+
+  @@map("email_attachments")
 }

@@ -20,6 +20,40 @@ export async function GET(request: Request) {
             return NextResponse.json(history);
         }
 
+        if (type === 'stats') {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const today = now.toISOString().split('T')[0];
+
+            // Get all records for this month
+            const monthlyRecords = await prisma.attendance.findMany({
+                where: {
+                    userId,
+                    date: { gte: firstDay, lte: today }
+                }
+            });
+
+            // Count Present (PRESENT or LATE)
+            const presentDays = monthlyRecords.filter(r => r.status === 'PRESENT' || r.status === 'LATE').length;
+
+            // Calculate total days elapsed (simple count of days passed)
+            // A more accurate way would be to count working days, but for now we'll use calendar days excluding Sundays if possible, 
+            // or just simple present count if that's what user expects.
+            // Let's used Days Elapsed (Calendar Days) for the denominator to show "Consistency"
+            const start = new Date(now.getFullYear(), now.getMonth(), 1);
+            const diffTime = Math.abs(now.getTime() - start.getTime());
+            const daysElapsed = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include today
+
+            const percentage = daysElapsed > 0 ? (presentDays / daysElapsed) * 100 : 0;
+
+            return NextResponse.json({
+                percentage: parseFloat(percentage.toFixed(1)),
+                presentDays,
+                totalDays: daysElapsed,
+                month: now.toLocaleString('default', { month: 'long' })
+            });
+        }
+
         // Default: Get Today's Status
         const today = new Date().toISOString().split('T')[0];
         const attendance = await prisma.attendance.findFirst({

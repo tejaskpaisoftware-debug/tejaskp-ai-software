@@ -4,14 +4,20 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { userId, startDate, endDate, reason, type } = body;
+        console.log("Apply Leave Request Body:", body); // DEBUG LOG
+
+        const { userId, startDate, endDate, reason, type, isHalfDay } = body;
 
         if (!userId || !startDate || !endDate || !reason) {
+            console.error("Missing fields:", { userId, startDate, endDate, reason });
             return NextResponse.json(
                 { message: "All fields are required" },
                 { status: 400 }
             );
         }
+
+        // Ensure isHalfDay is boolean
+        const halfDayBool = isHalfDay === true || isHalfDay === "true";
 
         const leave = await prisma.leave.create({
             data: {
@@ -20,7 +26,8 @@ export async function POST(request: Request) {
                 endDate,
                 reason,
                 type: type || "CL",
-                status: "PENDING"
+                status: "PENDING",
+                isHalfDay: halfDayBool
             }
         });
 
@@ -28,7 +35,10 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Apply leave error:", error);
         return NextResponse.json(
-            { message: "Internal Server Error" },
+            {
+                message: "Internal Server Error",
+                details: error instanceof Error ? error.message : String(error)
+            },
             { status: 500 }
         );
     }

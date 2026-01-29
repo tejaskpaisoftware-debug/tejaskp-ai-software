@@ -25,6 +25,20 @@ async function main() {
         }
     });
 
+    // Provision Mailbox for Admin
+    const mailbox = await prisma.mailbox.upsert({
+        where: { userId: user.id },
+        update: {},
+        create: {
+            userId: user.id,
+            emailAddress: `admin@tejaskpaiportal.com`,
+            storageLimit: 10 * 1024 * 1024 * 1024 // 10GB
+        }
+    });
+
+    console.log("Admin seeded:", user);
+    console.log("Admin Mailbox:", mailbox);
+
     console.log("Admin seeded:", user);
 }
 

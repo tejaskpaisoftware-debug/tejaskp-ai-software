@@ -292,7 +292,7 @@ function NightWind() {
 interface ThemeContextType {
     theme: Theme;
     setTheme: (theme: Theme) => void;
-    setLocalTheme: (theme: Theme) => void; // New: Local override
+    setLocalTheme: (theme: Theme | null) => void; // New: Local override
     isLoading: boolean;
     avengersCharacter: string;
     setAvengersCharacter: (char: string) => void;
@@ -386,10 +386,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const updateLocalTheme = (newTheme: Theme) => {
+    const updateLocalTheme = (newTheme: Theme | null) => {
         console.log("🎨 [ThemeProvider] Setting Local Theme:", newTheme);
         setLocalThemeState(newTheme);
-        localStorage.setItem("user_theme_preference", newTheme);
+        if (newTheme) {
+            localStorage.setItem("user_theme_preference", newTheme);
+        } else {
+            localStorage.removeItem("user_theme_preference");
+        }
     };
 
     return (

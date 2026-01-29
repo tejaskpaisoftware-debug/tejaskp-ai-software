@@ -3,12 +3,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Home, Calendar, FileText, ClipboardList, MessageCircle, Sparkles, TrendingUp, Gamepad2, Video, Palette } from "lucide-react";
+import { X, Home, Calendar, FileText, ClipboardList, MessageCircle, TrendingUp, Gamepad2, Video, Palette } from "lucide-react";
 import StudentSubmissionsPage from "./submissions/page";
 import DraggableAIButton from "@/components/common/DraggableAIButton";
 import ReferralSection from "@/components/student/ReferralSection";
 import MeetingSection from "@/components/common/MeetingSection";
 import ThemeSelector from "@/components/common/ThemeSelector";
+import TejasKPLogo from "@/components/common/TejasKPLogo";
 
 // Helper for Auth Header
 const getAuthHeader = (): HeadersInit => {
@@ -162,7 +163,8 @@ export default function StudentDashboard() {
                     onClick={() => router.push('/dashboard/student/ai')}
                     className="px-6 py-2 rounded-full font-bold text-sm transition-all bg-gold-theme text-black border border-gold-theme hover:bg-gold-theme/90 hover:scale-105 flex items-center gap-2 shadow-[0_0_15px_rgba(250,204,21,0.3)]"
                 >
-                    ✨ TEJASKP AI
+                    <TejasKPLogo size={20} />
+                    TEJASKP AI
                 </button>
                 <button
                     onClick={() => router.push('/dashboard/student/games')}
@@ -214,7 +216,7 @@ export default function StudentDashboard() {
                 </button>
                 {/* Chat & AI grouped or specialized */}
                 <button onClick={() => router.push('/dashboard/student/ai')} className="flex flex-col items-center gap-1 text-gold-500">
-                    <Sparkles size={20} />
+                    <TejasKPLogo size={20} />
                     <span className="text-[10px] font-bold">AI</span>
                 </button>
             </div>
@@ -289,6 +291,23 @@ function DocumentsSection({ userId, createdAt }: { userId: string, createdAt?: s
                             Wait 75 Days
                         </div>
                     )}
+                </div>
+
+                {/* NOC Submission */}
+                <div
+                    onClick={() => router.push('/dashboard/student/noc')}
+                    className="bg-card border border-theme rounded-xl p-6 cursor-pointer hover:border-gold-500 hover:bg-foreground/5 transition-all group"
+                >
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            📄
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-foreground">NOC Submission</h3>
+                            <p className="text-xs text-gold-theme">University / College NOC</p>
+                        </div>
+                    </div>
+                    <p className="text-muted-foreground text-sm">Upload your No Objection Certificate (NOC) here.</p>
                 </div>
             </div>
         </motion.div>
