@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 // Helper to get user from auth header (Basic implementation matching dashboard)
 // In a real app, middleware handles this. Here we trust the client sends userId or we check session.
@@ -24,24 +22,18 @@ export async function POST(request: Request) {
 
         const buffer = Buffer.from(await file.arrayBuffer());
 
-        // Ensure directory exists
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "noc");
-        await mkdir(uploadDir, { recursive: true });
-
-        // Unique filename
-        const filename = `noc-${userId}-${Date.now()}.pdf`;
-        const filepath = path.join(uploadDir, filename);
-
-        // Save file
-        await writeFile(filepath, buffer);
-        const fileUrl = `/uploads/noc/${filename}`;
+        // Vercel/Serverless Fix: Filesystem is read-only.
+        // We will store the file as a Base64 Data URI in the database.
+        // NOTE: This creates large DB records. For production scaling, use S3/Blob storage.
+        const base64Data = buffer.toString("base64");
+        const fileUrl = `data:${file.type};base64,${base64Data}`;
 
         // Create DB Record
         const doc = await prisma.studentDocument.create({
             data: {
                 userId,
                 type: "NOC",
-                fileUrl,
+                fileUrl: fileUrl, // Storing entire file in DB column
                 fileName: file.name,
                 status: "PENDING"
             }
