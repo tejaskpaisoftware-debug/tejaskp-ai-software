@@ -46,6 +46,26 @@ export default function AdminNocPage() {
         }
     };
 
+    // Helper to safely view Base64 PDF
+    const viewDocument = (base64Url: string) => {
+        if (!base64Url) return;
+
+        // If it's a regular URL (not base64), just open it
+        if (!base64Url.startsWith('data:')) {
+            window.open(base64Url, '_blank');
+            return;
+        }
+
+        // Convert Base64 to Blob for reliable opening
+        const win = window.open();
+        if (win) {
+            win.document.write(
+                `<iframe src="${base64Url}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`
+            );
+            win.document.title = "NOC Document Viewer";
+        }
+    };
+
     const filteredDocs = documents.filter(doc =>
         doc.user.name.toLowerCase().includes(search.toLowerCase()) ||
         doc.user.mobile.includes(search) ||
@@ -106,15 +126,13 @@ export default function AdminNocPage() {
                                             <span className="text-[10px] text-muted-foreground/70">{new Date(doc.createdAt).toLocaleTimeString()}</span>
                                         </td>
                                         <td className="p-6">
-                                            <a
-                                                href={doc.fileUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-2 text-gold-500 hover:text-gold-400 hover:underline transition-all"
+                                            <button
+                                                onClick={() => viewDocument(doc.fileUrl)}
+                                                className="flex items-center gap-2 text-gold-500 hover:text-gold-400 hover:underline transition-all bg-transparent border-0 cursor-pointer"
                                             >
                                                 <FileText size={16} />
                                                 <span className="text-sm font-bold">View PDF</span>
-                                            </a>
+                                            </button>
                                         </td>
                                         <td className="p-6 text-center">
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold border ${doc.status === 'APPROVED' ? 'bg-green-500/10 text-green-500 border-green-500/30' :
