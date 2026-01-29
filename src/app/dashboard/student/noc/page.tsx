@@ -208,8 +208,8 @@ export default function StudentNOCPage() {
                                             </td>
                                             <td className="p-4">
                                                 <span className={`text-xs px-2 py-1 rounded font-bold ${doc.status === 'APPROVED' ? 'bg-green-500/10 text-green-500' :
-                                                        doc.status === 'REJECTED' ? 'bg-red-500/10 text-red-500' :
-                                                            'bg-yellow-500/10 text-yellow-500'
+                                                    doc.status === 'REJECTED' ? 'bg-red-500/10 text-red-500' :
+                                                        'bg-yellow-500/10 text-yellow-500'
                                                     }`}>
                                                     {doc.status}
                                                 </span>

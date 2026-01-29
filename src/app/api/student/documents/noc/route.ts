@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 // Helper to get user from auth header (Basic implementation matching dashboard)
 // In a real app, middleware handles this. Here we trust the client sends userId or we check session.
 // For this route, we'll expect userId in the formData or verify session if possible.
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
         const fileUrl = `data:${file.type};base64,${base64Data}`;
 
         // Create DB Record
-        const doc = await prisma.studentDocument.create({
+        const doc = await (prisma as any).studentDocument.create({
             data: {
                 userId,
                 type: "NOC",
@@ -56,7 +58,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "UserId required" }, { status: 400 });
         }
 
-        const documents = await prisma.studentDocument.findMany({
+        const documents = await (prisma as any).studentDocument.findMany({
             where: {
                 userId,
                 type: "NOC"
