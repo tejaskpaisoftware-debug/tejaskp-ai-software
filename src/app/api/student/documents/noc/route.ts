@@ -56,7 +56,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "UserId required" }, { status: 400 });
         }
 
-        const doc = await prisma.studentDocument.findFirst({
+        const documents = await prisma.studentDocument.findMany({
             where: {
                 userId,
                 type: "NOC"
@@ -64,7 +64,10 @@ export async function GET(request: Request) {
             orderBy: { createdAt: 'desc' }
         });
 
-        return NextResponse.json({ success: true, document: doc });
+        // The latest document is the first one
+        const latestDoc = documents[0] || null;
+
+        return NextResponse.json({ success: true, document: latestDoc, documents });
     } catch (error: any) {
         return NextResponse.json({ error: "Failed to fetch NOC status" }, { status: 500 });
     }
