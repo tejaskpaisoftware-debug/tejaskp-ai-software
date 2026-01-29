@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, FileText, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 
 export default function StudentNOCPage() {
     const router = useRouter();

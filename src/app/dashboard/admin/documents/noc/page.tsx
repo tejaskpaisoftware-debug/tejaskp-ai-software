@@ -7,8 +7,8 @@ export default function AdminNocPage() {
     const [documents, setDocuments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [viewingUrl, setViewingUrl] = useState<string | null>(null);
 
     useEffect(() => {
         fetchDocuments();
@@ -57,28 +57,22 @@ export default function AdminNocPage() {
         }
 
         try {
-            // Convert Base64 using Blob (More robust than iframe)
-            const arr = base64Url.split(',');
-            const mimeMatch = arr[0].match(/:(.*?);/);
-            const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
+            if (base64Url.startsWith('data:')) {
+                const arr = base64Url.split(',');
+                const mimeMatch = arr[0].match(/:(.*?);/);
+                const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                const blob = new Blob([u8arr], { type: mime });
+                const url = URL.createObjectURL(blob);
+                setViewingUrl(url);
+            } else {
+                setViewingUrl(base64Url);
             }
-
-            const blob = new Blob([u8arr], { type: mime });
-            const url = URL.createObjectURL(blob);
-
-            // Open in new tab
-            const win = window.open(url, '_blank');
-            if (!win) {
-                alert("Please allow popups to view the document.");
-            }
-
-            // Clean up automatically after a minute
-            setTimeout(() => URL.revokeObjectURL(url), 60000);
         } catch (e) {
             console.error("PDF View Error:", e);
             alert("Could not open document. Try downloading it.");
@@ -196,6 +190,27 @@ export default function AdminNocPage() {
                     </table>
                 </div>
             </div>
+            {/* PDF Viewer Modal */}
+            {viewingUrl && (
+                <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
+                    <div className="w-full max-w-5xl h-[85vh] bg-white rounded-lg overflow-hidden flex flex-col items-center relative">
+                        <button
+                            onClick={() => {
+                                setViewingUrl(null);
+                                if (viewingUrl.startsWith('blob:')) URL.revokeObjectURL(viewingUrl);
+                            }}
+                            className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 z-10 shadow-lg"
+                        >
+                            <XCircle size={24} />
+                        </button>
+                        <iframe
+                            src={viewingUrl}
+                            className="w-full h-full"
+                            title="Document Viewer"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
