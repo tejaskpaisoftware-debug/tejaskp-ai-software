@@ -13,6 +13,34 @@ export default function StudentNOCPage() {
     const [error, setError] = useState("");
 
     const [history, setHistory] = useState<any[]>([]);
+    const [viewingUrl, setViewingUrl] = useState<string | null>(null);
+
+    // Helper to safely view Base64 PDF
+    const viewDocument = (base64Url: string) => {
+        if (!base64Url) return;
+
+        try {
+            if (base64Url.startsWith('data:')) {
+                const arr = base64Url.split(',');
+                const mimeMatch = arr[0].match(/:(.*?);/);
+                const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                const blob = new Blob([u8arr], { type: mime });
+                const url = URL.createObjectURL(blob);
+                setViewingUrl(url);
+            } else {
+                setViewingUrl(base64Url);
+            }
+        } catch (e) {
+            console.error("PDF View Error:", e);
+            alert("Could not open document. Try downloading it.");
+        }
+    };
 
     useEffect(() => {
         const stored = sessionStorage.getItem("currentUser");
@@ -120,14 +148,12 @@ export default function StudentNOCPage() {
                                 </span>
                             </div>
 
-                            <a
-                                href={existingDoc.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block mt-4 text-sm text-gold-500 hover:text-gold-400 font-bold underline"
+                            <button
+                                onClick={() => viewDocument(existingDoc.fileUrl)}
+                                className="inline-block mt-4 text-sm text-gold-500 hover:text-gold-400 font-bold underline cursor-pointer bg-transparent border-0"
                             >
                                 View Submitted Document
-                            </a>
+                            </button>
 
                             {existingDoc.status === 'REJECTED' && (
                                 <button
@@ -215,14 +241,12 @@ export default function StudentNOCPage() {
                                                 </span>
                                             </td>
                                             <td className="p-4 text-right">
-                                                <a
-                                                    href={doc.fileUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-gold-500 hover:text-gold-400 text-sm font-bold underline"
+                                                <button
+                                                    onClick={() => viewDocument(doc.fileUrl)}
+                                                    className="text-gold-500 hover:text-gold-400 text-sm font-bold underline bg-transparent border-0 cursor-pointer"
                                                 >
                                                     View
-                                                </a>
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -232,6 +256,27 @@ export default function StudentNOCPage() {
                     </section>
                 )}
             </div>
+            {/* PDF Viewer Modal */}
+            {viewingUrl && (
+                <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
+                    <div className="w-full max-w-5xl h-[85vh] bg-white rounded-lg overflow-hidden flex flex-col items-center relative">
+                        <button
+                            onClick={() => {
+                                setViewingUrl(null);
+                                if (viewingUrl.startsWith('blob:')) URL.revokeObjectURL(viewingUrl);
+                            }}
+                            className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 z-10 shadow-lg"
+                        >
+                            <XCircle size={24} />
+                        </button>
+                        <iframe
+                            src={viewingUrl}
+                            className="w-full h-full"
+                            title="Document Viewer"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
