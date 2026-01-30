@@ -710,7 +710,40 @@ function AttendanceSection({ userId }: { userId: string }) {
                 )}
             </div>
 
-            <h2 className="text-2xl font-bold text-foreground mt-10">History</h2>
+            {/* Policy Note */}
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6">
+                <h4 className="text-blue-400 font-bold mb-3 flex items-center gap-2">
+                    ℹ️ Attendance Policy & Correction
+                </h4>
+                <ul className="space-y-2 text-xs text-gray-400">
+                    <li className="flex gap-2">
+                        <span className="text-blue-500">•</span>
+                        <span>
+                            <strong className="text-gray-300">Mistaken Checkout:</strong> If you accidentally click "Check Out", you can use the <span className="text-gold-500">Resume Day</span> option to continue your session.
+                        </span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="text-blue-500">•</span>
+                        <span>
+                            <strong className="text-gray-300">Monthly Limit:</strong> You are allowed a maximum of <strong className="text-white">4 corrections per month</strong>. Once exceeded, you cannot resume a checked-out session.
+                        </span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="text-blue-500">•</span>
+                        <span>
+                            <strong className="text-gray-300">Late Mark:</strong> Check-in after 10:45 AM is marked as <span className="text-yellow-500">LATE</span>. 3 Late marks = 1 Absent.
+                        </span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="text-blue-500">•</span>
+                        <span>
+                            <strong className="text-gray-300">Minimum Hours:</strong> You must complete at least 4 hours to avoid being marked <span className="text-red-500">ABSENT</span>.
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <h2 className="text-2xl font-bold text-foreground mt-4">History</h2>
             <div className="bg-card border border-white/10 rounded-xl overflow-hidden overflow-x-auto">
                 <table className="w-full text-left min-w-[600px]">
                     <thead className="bg-white/5 text-gold-500">
