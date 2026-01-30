@@ -32,6 +32,28 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "TejasKP AI",
   },
+  openGraph: {
+    title: "TejasKP AI",
+    description: "Advanced dashboard for management",
+    url: "https://www.tejaskp.in",
+    siteName: "TejasKP AI",
+    images: [
+      {
+        url: "/logo.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TejasKP AI Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TejasKP AI",
+    description: "Advanced dashboard for management",
+    images: ["/logo.jpg"],
+  },
 };
 
 export default function RootLayout({
