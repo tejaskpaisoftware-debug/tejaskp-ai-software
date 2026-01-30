@@ -10,6 +10,7 @@ import { formatDistanceStrict } from "date-fns";
 export default function JoiningLetterPage() {
     // Form State
     const initialFormState = {
+        userId: "",
         name: "",
         university: "",
         email: "",
@@ -36,6 +37,7 @@ export default function JoiningLetterPage() {
         const params = new URLSearchParams(window.location.search);
         const userId = params.get('userId');
         if (userId) {
+            setFormData(prev => ({ ...prev, userId })); // Store userId immediately
             fetchLetterByUserId(userId);
         }
     }, []);
@@ -48,7 +50,7 @@ export default function JoiningLetterPage() {
             const data = await res.json();
 
             if (data.success && data.letter) {
-                setFormData(prev => ({ ...prev, ...data.letter }));
+                setFormData(prev => ({ ...prev, ...data.letter, userId }));
                 setStep('create');
             } else {
                 // 2. If no letter, try fetching user details to pre-fill
@@ -58,6 +60,7 @@ export default function JoiningLetterPage() {
                 if (userData.user) {
                     setFormData(prev => ({
                         ...prev,
+                        userId, // Ensure preserved
                         name: userData.user.name || "",
                         email: userData.user.email || "",
                         mobile: userData.user.mobile || "",

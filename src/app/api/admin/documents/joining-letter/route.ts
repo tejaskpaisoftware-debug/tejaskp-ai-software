@@ -149,10 +149,20 @@ export async function POST(request: Request) {
     try {
         const data = await request.json();
 
-        // Find user by mobile to link automatically
-        const user = await prisma.user.findUnique({
-            where: { mobile: data.mobile }
-        });
+        // Find user by ID (if provided) or mobile to link automatically
+        let user = null;
+        if (data.userId) {
+            user = await prisma.user.findUnique({
+                where: { id: data.userId }
+            });
+        }
+
+        // Fallback: Find by mobile if not found by ID
+        if (!user && data.mobile) {
+            user = await prisma.user.findUnique({
+                where: { mobile: data.mobile }
+            });
+        }
 
         const now = new Date();
 
