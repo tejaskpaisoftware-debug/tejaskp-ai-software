@@ -316,6 +316,23 @@ function DocumentsSection({ userId, createdAt }: { userId: string, createdAt?: s
                     </div>
                     <p className="text-muted-foreground text-sm">Upload your No Objection Certificate (NOC) here.</p>
                 </div>
+
+                {/* Assessment Submission */}
+                <div
+                    onClick={() => router.push('/dashboard/student/assessment')}
+                    className="bg-card border border-theme rounded-xl p-6 cursor-pointer hover:border-gold-500 hover:bg-foreground/5 transition-all group"
+                >
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            📝
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-foreground">Assessments</h3>
+                            <p className="text-xs text-gold-theme">Project & Task Uploads</p>
+                        </div>
+                    </div>
+                    <p className="text-muted-foreground text-sm">Upload your multiple assessment documents and project files here.</p>
+                </div>
             </div>
         </motion.div>
     );

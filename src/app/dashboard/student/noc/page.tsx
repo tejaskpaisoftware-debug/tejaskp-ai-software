@@ -109,6 +109,9 @@ export default function StudentNOCPage() {
         }
     };
 
+    const attemptCount = history.filter(h => h.type === 'NOC').length;
+    const canUpload = attemptCount < 3;
+
     return (
         <div className="min-h-screen bg-background text-foreground font-sans p-8">
             <button onClick={() => router.back()} className="flex items-center gap-2 text-gold-500 hover:text-gold-400 mb-8 transition-colors">
@@ -117,10 +120,15 @@ export default function StudentNOCPage() {
 
             <div className="max-w-4xl mx-auto space-y-12">
                 <section>
-                    <h1 className="text-3xl font-bold mb-2">NOC Submission</h1>
+                    <div className="flex justify-between items-end mb-2">
+                        <h1 className="text-3xl font-bold">NOC Submission</h1>
+                        <span className={`text-sm font-bold ${canUpload ? 'text-green-500' : 'text-red-500'}`}>
+                            Attempts Used: {attemptCount} / 3
+                        </span>
+                    </div>
                     <p className="text-muted-foreground mb-8">Upload your No Objection Certificate (NOC) PDF here.</p>
 
-                    {existingDoc ? (
+                    {existingDoc && attemptCount < 3 ? (
                         <div className="bg-card border border-theme rounded-xl p-8 text-center animate-in fade-in zoom-in">
                             <div className="w-20 h-20 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
                                 {existingDoc.status === 'APPROVED' ? '✅' : existingDoc.status === 'REJECTED' ? '❌' : '⏳'}
@@ -155,7 +163,7 @@ export default function StudentNOCPage() {
                                 View Submitted Document
                             </button>
 
-                            {existingDoc.status === 'REJECTED' && (
+                            {(existingDoc.status === 'REJECTED' || existingDoc) && canUpload && (
                                 <button
                                     onClick={() => setExistingDoc(null)}
                                     className="block mx-auto mt-6 text-sm text-muted-foreground underline hover:text-foreground"
@@ -166,44 +174,54 @@ export default function StudentNOCPage() {
                         </div>
                     ) : (
                         <div className="bg-card border border-theme rounded-xl p-8">
-                            <div className="border-2 border-dashed border-muted-foreground/20 rounded-xl p-10 flex flex-col items-center justify-center bg-background/30 hover:bg-background/50 transition-colors">
-                                <Upload className="text-gold-500 mb-4 h-10 w-10" />
-                                <h3 className="text-lg font-bold">Upload PDF</h3>
+                            {!canUpload ? (
+                                <div className="text-center p-8 border-2 border-red-500/20 rounded-xl bg-red-500/5">
+                                    <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                                    <h3 className="text-lg font-bold text-red-500 mb-2">Maximum Limit Reached</h3>
+                                    <p className="text-muted-foreground">You have used all 3 attempts for NOC submission. Please contact the administrator for further assistance.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="border-2 border-dashed border-muted-foreground/20 rounded-xl p-10 flex flex-col items-center justify-center bg-background/30 hover:bg-background/50 transition-colors">
+                                        <Upload className="text-gold-500 mb-4 h-10 w-10" />
+                                        <h3 className="text-lg font-bold">Upload PDF</h3>
 
-                                <input
-                                    type="file"
-                                    accept="application/pdf"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                    id="noc-upload"
-                                />
+                                        <input
+                                            type="file"
+                                            accept="application/pdf"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                            id="noc-upload"
+                                        />
 
-                                {!file ? (
-                                    <label
-                                        htmlFor="noc-upload"
-                                        className="mt-4 px-6 py-2 bg-gold-500 text-black font-bold rounded cursor-pointer hover:bg-gold-400"
-                                    >
-                                        Select File
-                                    </label>
-                                ) : (
-                                    <div className="flex items-center gap-2 mt-4 mb-4">
-                                        <FileText className="text-gold-500" />
-                                        <span className="text-sm">{file.name}</span>
-                                        <button onClick={() => setFile(null)} className="text-red-500 ml-2 hover:text-foreground"><AlertCircle size={16} /></button>
+                                        {!file ? (
+                                            <label
+                                                htmlFor="noc-upload"
+                                                className="mt-4 px-6 py-2 bg-gold-500 text-black font-bold rounded cursor-pointer hover:bg-gold-400"
+                                            >
+                                                Select File
+                                            </label>
+                                        ) : (
+                                            <div className="flex items-center gap-2 mt-4 mb-4">
+                                                <FileText className="text-gold-500" />
+                                                <span className="text-sm">{file.name}</span>
+                                                <button onClick={() => setFile(null)} className="text-red-500 ml-2 hover:text-foreground"><AlertCircle size={16} /></button>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
 
-                            {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+                                    {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
 
-                            {file && (
-                                <button
-                                    onClick={handleUpload}
-                                    disabled={uploading}
-                                    className="w-full mt-6 bg-gold-500 text-black font-bold py-3 rounded hover:bg-gold-400 disabled:opacity-50 transition-colors"
-                                >
-                                    {uploading ? "Uploading..." : "Submit NOC"}
-                                </button>
+                                    {file && (
+                                        <button
+                                            onClick={handleUpload}
+                                            disabled={uploading}
+                                            className="w-full mt-6 bg-gold-500 text-black font-bold py-3 rounded hover:bg-gold-400 disabled:opacity-50 transition-colors"
+                                        >
+                                            {uploading ? "Uploading..." : "Submit NOC"}
+                                        </button>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}

@@ -24,6 +24,18 @@ export async function POST(request: Request) {
 
         const buffer = Buffer.from(await file.arrayBuffer());
 
+        // Check for existing NOC limit (Max 3)
+        const existingCount = await (prisma as any).studentDocument.count({
+            where: {
+                userId,
+                type: "NOC"
+            }
+        });
+
+        if (existingCount >= 3) {
+            return NextResponse.json({ error: "Maximum limit reached (3 attempts allowed)" }, { status: 400 });
+        }
+
         // Vercel/Serverless Fix: Filesystem is read-only.
         // We will store the file as a Base64 Data URI in the database.
         // NOTE: This creates large DB records. For production scaling, use S3/Blob storage.
