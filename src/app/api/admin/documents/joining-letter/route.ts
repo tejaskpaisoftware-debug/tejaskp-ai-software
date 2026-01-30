@@ -204,7 +204,40 @@ export async function POST(request: Request) {
                     ${data.reportingManager}, ${data.managerDesignation}, ${user?.id || null}, ${now}, ${now}
                 )
             `;
+
+            // SYNC TO USER PROFILE (If linked)
+            if (user) {
+                try {
+                    // @ts-ignore
+                    await prisma.$executeRaw`
+                    UPDATE "users" SET 
+                        "name" = ${data.name},
+                        "email" = ${data.email},
+                        "university" = ${data.university || ""},
+                        "college" = ${data.university || ""}, -- Sync to both for compatibility
+                        "updatedAt" = ${now}
+                    WHERE "id" = ${user.id}
+                `;
+                } catch (eu) { console.error("Failed to sync user profile", eu); }
+            }
+
             return NextResponse.json({ success: true, letter: { id, ...data }, linkedUser: !!user, action: "created" });
+        }
+
+        // SYNC TO USER PROFILE (Shared logic for Update case)
+        if (existingLetter && user) {
+            try {
+                // @ts-ignore
+                await prisma.$executeRaw`
+                    UPDATE "users" SET 
+                        "name" = ${data.name},
+                        "email" = ${data.email},
+                        "university" = ${data.university || ""},
+                        "college" = ${data.university || ""}, -- Sync to both for compatibility
+                        "updatedAt" = ${now}
+                    WHERE "id" = ${user.id}
+                `;
+            } catch (eu) { console.error("Failed to sync user profile", eu); }
         }
 
     } catch (error: any) {
