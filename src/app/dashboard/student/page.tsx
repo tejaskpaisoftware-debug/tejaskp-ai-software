@@ -148,8 +148,8 @@ export default function StudentDashboard() {
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
                         className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${activeTab === tab
-                            ? 'bg-gold-theme text-black'
-                            : 'bg-card text-muted-foreground hover:bg-card/80'
+                            ? 'bg-gold-500 text-black shadow-[0_0_20px_rgba(234,179,8,0.4)]'
+                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
                             }`}
                     >
                         {tab.toUpperCase()}
@@ -157,13 +157,13 @@ export default function StudentDashboard() {
                 ))}
                 <button
                     onClick={() => router.push('/dashboard/user/chat')}
-                    className="px-6 py-2 rounded-full font-bold text-sm transition-all bg-card text-gold-theme border border-theme hover:bg-gold-theme hover:text-black flex items-center gap-2"
+                    className="px-6 py-2 rounded-full font-bold text-sm transition-all bg-black/40 text-gold-500 border border-gold-500/50 hover:bg-gold-500 hover:text-black flex items-center gap-2 backdrop-blur-sm"
                 >
                     💬 CHAT
                 </button>
                 <button
                     onClick={() => router.push('/dashboard/student/ai')}
-                    className="px-6 py-2 rounded-full font-bold text-sm transition-all bg-gold-theme text-black border border-gold-theme hover:bg-gold-theme/90 hover:scale-105 flex items-center gap-2 shadow-[0_0_15px_rgba(250,204,21,0.3)]"
+                    className="px-6 py-2 rounded-full font-bold text-sm transition-all bg-gradient-to-r from-yellow-400 to-yellow-600 text-black border border-yellow-400 hover:scale-105 flex items-center gap-2 shadow-[0_0_20px_rgba(250,204,21,0.5)]"
                 >
                     <TejasKPLogo size={20} />
                     TEJASKP AI
