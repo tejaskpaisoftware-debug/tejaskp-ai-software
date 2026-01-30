@@ -23,6 +23,8 @@ export const metadata: Metadata = {
   themeColor: "#FFD700",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
   icons: {
+    icon: "/logo.jpg",
+    shortcut: "/logo.jpg",
     apple: "/logo.jpg",
   },
   appleWebApp: {
