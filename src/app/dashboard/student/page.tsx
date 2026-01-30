@@ -449,34 +449,35 @@ function AttendanceSection({ userId }: { userId: string }) {
                 )}
             </div>
 
-            {/* Policy Note */}
-            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6">
-                <h4 className="text-blue-400 font-bold mb-3 flex items-center gap-2">
+            {/* Policy Note - Themed to match Admin Dashboard */}
+            <div className="bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-xl p-6 shadow-[0_8px_16px_rgba(0,0,0,0.5)]">
+                <h4 className="text-xl font-bold mb-4 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-[#FFF5C3] via-[#FDB931] to-[#9F6900]">
                     ℹ️ Attendance Policy & Correction
                 </h4>
-                <ul className="space-y-2 text-xs text-gray-400">
-                    <li className="flex gap-2">
-                        <span className="text-blue-500">•</span>
+                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-yellow-500/20 to-transparent mb-4"></div>
+                <ul className="space-y-3 text-xs text-gray-400 font-medium tracking-wide">
+                    <li className="flex gap-3 items-start">
+                        <span className="text-yellow-500 text-lg leading-none mt-0.5">•</span>
                         <span>
-                            <strong className="text-gray-300">Mistaken Checkout:</strong> If you accidentally click "Check Out", you can use the <span className="text-gold-500">Resume Day</span> option to continue your session.
+                            <strong className="text-gray-200">Mistaken Checkout:</strong> If you accidentally click "Check Out", you can use the <span className="text-yellow-400 font-bold border-b border-yellow-500/30 pb-0.5">Resume Day</span> option to continue your session.
                         </span>
                     </li>
-                    <li className="flex gap-2">
-                        <span className="text-blue-500">•</span>
+                    <li className="flex gap-3 items-start">
+                        <span className="text-yellow-500 text-lg leading-none mt-0.5">•</span>
                         <span>
-                            <strong className="text-gray-300">Monthly Limit:</strong> You are allowed a maximum of <strong className="text-white">4 corrections per month</strong>. Once exceeded, you cannot resume a checked-out session.
+                            <strong className="text-gray-200">Monthly Limit:</strong> You are allowed a maximum of <strong className="text-white border border-white/20 px-1 rounded bg-white/5">4 corrections per month</strong>. Once exceeded, you cannot resume.
                         </span>
                     </li>
-                    <li className="flex gap-2">
-                        <span className="text-blue-500">•</span>
+                    <li className="flex gap-3 items-start">
+                        <span className="text-yellow-500 text-lg leading-none mt-0.5">•</span>
                         <span>
-                            <strong className="text-gray-300">Late Mark:</strong> Check-in after 10:45 AM is marked as <span className="text-yellow-500">LATE</span>. 3 Late marks = 1 Absent.
+                            <strong className="text-gray-200">Late Mark:</strong> Check-in after 10:45 AM is marked as <span className="text-yellow-500 font-bold">LATE</span>. 3 Late marks = 1 Absent.
                         </span>
                     </li>
-                    <li className="flex gap-2">
-                        <span className="text-blue-500">•</span>
+                    <li className="flex gap-3 items-start">
+                        <span className="text-yellow-500 text-lg leading-none mt-0.5">•</span>
                         <span>
-                            <strong className="text-gray-300">Minimum Hours:</strong> You must complete at least 4 hours to avoid being marked <span className="text-red-500">ABSENT</span>.
+                            <strong className="text-gray-200">Minimum Hours:</strong> You must complete at least 4 hours to avoid being marked <span className="text-red-500 font-bold">ABSENT</span>.
                         </span>
                     </li>
                 </ul>
