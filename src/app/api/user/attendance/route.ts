@@ -137,9 +137,69 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { userId } = body;
+        const { userId, action } = body;
         const today = new Date().toISOString().split('T')[0];
         const now = new Date();
+
+        // --- MISTAKEN CHECKOUT CORRECTION ---
+        if (action === 'correct') {
+            const record = await prisma.attendance.findFirst({
+                where: { userId, date: today }
+            });
+
+            if (!record || !record.logoutTime) {
+                return NextResponse.json({ message: "No checkout to correct" }, { status: 400 });
+            }
+
+            // Check Limit (4 times per month)
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const correctionCount = await prisma.systemLog.count({
+                where: {
+                    userId,
+                    action: 'ATTENDANCE_CORRECTION',
+                    timestamp: { gte: firstDayOfMonth }
+                }
+            });
+
+            if (correctionCount >= 4) {
+                return NextResponse.json({ message: "Monthly correction limit reached (4/4)" }, { status: 403 });
+            }
+
+            // Restore Status (Logic: If it was PRESENT/LATE, keep it. If it became ABSENT due to early leave, revert to calculated check-in status)
+            const deadline = new Date(record.loginTime);
+            deadline.setHours(10, 45, 0, 0);
+
+            let originalStatus = "PRESENT";
+            if (new Date(record.loginTime) > deadline) {
+                originalStatus = "LATE";
+                // If it was ABSENT due to strikes, it would have been ABSENT in db. 
+                // But we can just trust if it's currently ABSENT and remarks contain "Early Leave", we revert.
+                // Simpler: Just revert to PRESENT or LATE based on time.
+            }
+
+            // Clean remarks
+            let newRemarks = record.adminRemarks ? record.adminRemarks.replace(", Early Leave (<4h)", "").replace("Early Leave (<4h)", "") : "";
+
+            // Log it
+            await prisma.systemLog.create({
+                data: {
+                    userId,
+                    action: 'ATTENDANCE_CORRECTION',
+                    details: `Resumed day for ${today}`
+                }
+            });
+
+            const updated = await prisma.attendance.update({
+                where: { id: record.id },
+                data: {
+                    logoutTime: null,
+                    status: originalStatus, // Reset to calculated status
+                    adminRemarks: newRemarks
+                }
+            });
+
+            return NextResponse.json({ ...updated, correctionCount: correctionCount + 1 });
+        }
 
         const record = await prisma.attendance.findFirst({
             where: { userId, date: today }

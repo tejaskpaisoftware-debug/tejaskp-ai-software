@@ -412,6 +412,39 @@ function AttendanceSection({ userId }: { userId: string }) {
                             {new Date(todayRecord.loginTime).toLocaleTimeString()} - {new Date(todayRecord.logoutTime).toLocaleTimeString()}
                         </p>
                         <span className="text-xs text-yellow-500 border border-yellow-500/30 px-2 py-1 rounded bg-yellow-500/10">Pending Approval</span>
+
+                        {/* Correction Feature */}
+                        <div className="mt-4 pt-4 border-t border-gray-800 w-full flex flex-col items-center">
+                            <p className="text-[10px] text-gray-500 mb-2 max-w-[200px] leading-tight">
+                                Mistakenly checked out? You can resume your day (Limit: 4 times/month).
+                            </p>
+                            <button
+                                onClick={async () => {
+                                    if (!confirm("Did you check out by mistake? This will resume your session.")) return;
+                                    setLoading(true);
+                                    try {
+                                        const res = await fetch('/api/user/attendance', {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                                            body: JSON.stringify({ userId, action: 'correct' })
+                                        });
+                                        const data = await res.json();
+                                        if (res.ok) {
+                                            alert("Session Resumed!");
+                                            fetchTodayStatus();
+                                            fetchHistory();
+                                        } else {
+                                            alert(data.message || "Failed to resume session");
+                                        }
+                                    } catch (e) { alert("Error"); }
+                                    finally { setLoading(false); }
+                                }}
+                                disabled={loading}
+                                className="text-xs text-gold-500 hover:text-gold-400 underline decoration-dotted"
+                            >
+                                Resume Day
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
