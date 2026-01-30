@@ -148,7 +148,7 @@ export default function StudentDashboard() {
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
                         className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${activeTab === tab
-                            ? 'bg-gold-500 text-black shadow-[0_0_20px_rgba(234,179,8,0.4)]'
+                            ? '!bg-[#FFD700] !text-black shadow-[0_0_20px_rgba(255,215,0,0.4)] scale-105'
                             : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
                             }`}
                     >

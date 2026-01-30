@@ -265,7 +265,7 @@ export default function EmployeeDashboard() {
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
                             className={`px-8 py-3 rounded-xl font-bold text-sm tracking-wider transition-all duration-300 transform preserve-3d active:scale-95 ${activeTab === tab
-                                ? 'bg-gradient-to-r from-gold-500 to-yellow-600 text-black shadow-[0_10px_20px_-5px_rgba(234,179,8,0.5)] -translate-y-1'
+                                ? '!bg-gradient-to-r !from-[#FFD700] !to-[#FFA000] !text-black shadow-[0_10px_20px_-5px_rgba(234,179,8,0.5)] -translate-y-1'
                                 : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:-translate-y-1 hover:border-gold-500/30 hover:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.5)]'
                                 }`}
                         >
