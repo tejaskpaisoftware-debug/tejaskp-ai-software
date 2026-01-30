@@ -23,7 +23,12 @@ const getAuthHeader = (): HeadersInit => {
     return {};
 };
 
+import { useTheme } from "@/components/providers/ThemeProvider";
+
 export default function StudentDashboard() {
+    const { theme, avengersCharacter } = useTheme();
+    const isIronMan = theme === 'avengers' && avengersCharacter === 'iron-man';
+
     const [user, setUser] = useState<{ id: string; name: string; mobile: string; createdAt: string } | null>(null);
     const router = useRouter();
 
@@ -90,7 +95,7 @@ export default function StudentDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans p-8 transition-colors duration-500">
+        <div className={`min-h-screen bg-background text-foreground font-sans transition-all duration-500 ${isIronMan ? 'p-16 scale-95 origin-center' : 'p-8'}`}>
             <header className="flex justify-between items-center mb-8 border-b border-theme pb-4">
                 <div>
                     <h1 className="text-4xl font-black tracking-[0.1em] font-cinzel bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-800 drop-shadow-[0_1px_0_#ffeb3b] drop-shadow-[0_2px_0_#fbc02d] drop-shadow-[0_3px_0_#f57f17] drop-shadow-[0_4px_0_#e65100] drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)] filter contrast-150 brightness-110 pb-2 select-none">

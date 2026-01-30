@@ -188,7 +188,7 @@ export default function EmployeeDashboard() {
                     onFinish={handleFinishSplash}
                 />
             )}
-            <div className="min-h-screen bg-background text-foreground font-sans p-4 md:p-8 transition-colors duration-500 relative z-10 selection:bg-gold-500/30">
+            <div className={`min-h-screen bg-background text-foreground font-sans transition-all duration-500 relative z-10 selection:bg-gold-500/30 ${isIronMan ? 'p-16 scale-95 origin-center' : 'p-4 md:p-8'}`}>
                 <header className="sticky top-4 z-40 glass-panel rounded-2xl px-6 py-4 mb-12 flex justify-between items-center transform transition-all hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] border-theme">
                     <div className="flex items-center gap-4">
                         {user?.photoUrl ? (
