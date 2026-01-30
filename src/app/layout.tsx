@@ -17,6 +17,7 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.tejaskp.in'),
   title: "TejasKP AI",
   description: "Advanced dashboard for management",
   manifest: "/manifest.json",
