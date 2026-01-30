@@ -400,7 +400,7 @@ export default function UsersPage() {
     };
 
     return (
-        <>
+        <div className="min-h-screen bg-[#050505] p-6 text-white font-sans selection:bg-gold-500/30">
             {/* Hidden Input */}
             <input
                 type="file"
@@ -910,7 +910,7 @@ export default function UsersPage() {
 
             <header className="flex justify-between items-center mb-10">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                    <h1 className="text-5xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-[#FFF5C3] via-[#FDB931] to-[#9F6900] pb-2 uppercase" style={{ filter: 'drop-shadow(0px 2px 0px #b46d0a) drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }}>
                         All Users
                     </h1>
                     <p className="text-gray-400 mt-2 text-sm font-medium tracking-wide drop-shadow-md">Manage all registered users categorized by their role.</p>
@@ -1162,6 +1162,7 @@ export default function UsersPage() {
                 )}
             </AnimatePresence>
 
-        </>
+
+        </div >
     );
 }

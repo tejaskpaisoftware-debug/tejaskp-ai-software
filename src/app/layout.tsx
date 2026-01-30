@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, Orbitron } from "next/font/google";
+import { Inter, Outfit, Orbitron, Cinzel } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
@@ -8,6 +8,11 @@ const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
 const orbitron = Orbitron({
   subsets: ["latin"],
   variable: '--font-orbitron',
+  display: 'swap',
+});
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  variable: '--font-cinzel',
   display: 'swap',
 });
 
@@ -33,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${orbitron.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${outfit.variable} ${orbitron.variable} ${cinzel.variable}`} suppressHydrationWarning>
       <body className={`${inter.className} antialiased bg-background text-foreground transition-colors duration-500`}>
         <ThemeProvider>
           {children}

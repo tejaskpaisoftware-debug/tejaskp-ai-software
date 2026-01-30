@@ -90,11 +90,13 @@ export default function StudentDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans p-8 transition-colors duration-500">
+        <div className="min-h-screen bg-[#050505] text-white font-sans p-8 transition-colors duration-500">
             <header className="flex justify-between items-center mb-8 border-b border-gold-500/20 pb-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-widest">STUDENT PORTAL</h1>
-                    <p className="text-gold-500/60">Welcome, <span className="text-foreground font-bold">{user?.name || "Student"}</span></p>
+                    <h1 className="text-4xl font-black tracking-[0.1em] font-cinzel bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-800 drop-shadow-[0_1px_0_#ffeb3b] drop-shadow-[0_2px_0_#fbc02d] drop-shadow-[0_3px_0_#f57f17] drop-shadow-[0_4px_0_#e65100] drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)] filter contrast-150 brightness-110 pb-2 select-none">
+                        STUDENT PORTAL
+                    </h1>
+                    <p className="text-gold-500/80 font-cinzel text-lg mt-2">Welcome, <span className="text-white font-bold">{user?.name || "Student"}</span></p>
                 </div>
                 <div className="flex items-center gap-4">
                     {/* Notification Badge */}

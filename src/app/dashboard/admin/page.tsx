@@ -96,11 +96,11 @@ export default function AdminDashboard() {
                     <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
 
                     <div>
-                        <h1 className="text-5xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-300 to-yellow-600 drop-shadow-[0_4px_3px_rgba(0,0,0,0.5)] filter contrast-125 pb-2">
+                        <h1 className="text-6xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-[#FFF5C3] via-[#FDB931] to-[#9F6900] pb-2 uppercase" style={{ filter: 'drop-shadow(0px 2px 0px #b46d0a) drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }}>
                             DASHBOARD
                         </h1>
-                        <p className="text-lg font-medium text-gray-400 tracking-wide mt-1 flex items-center gap-2">
-                            Welcome back, <span className="text-yellow-400 font-bold drop-shadow-sm">Administrator</span>
+                        <p className="text-xl text-gray-500 font-bold mt-1 tracking-wide">
+                            Welcome back, <span className="text-[#FDB931] font-black">Administrator</span>
                         </p>
                     </div>
                     <div className="text-right">

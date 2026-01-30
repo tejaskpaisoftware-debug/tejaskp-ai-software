@@ -188,7 +188,7 @@ export default function EmployeeDashboard() {
                     onFinish={handleFinishSplash}
                 />
             )}
-            <div className="min-h-screen bg-background text-foreground font-sans p-4 md:p-8 transition-colors duration-500 relative z-10 selection:bg-gold-500/30">
+            <div className="min-h-screen bg-[#050505] text-white font-sans p-4 md:p-8 transition-colors duration-500 relative z-10 selection:bg-gold-500/30">
                 <header className="sticky top-4 z-40 glass-panel rounded-2xl px-6 py-4 mb-12 flex justify-between items-center transform transition-all hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] border-gold-500/10">
                     <div className="flex items-center gap-4">
                         {user?.photoUrl ? (
@@ -203,7 +203,7 @@ export default function EmployeeDashboard() {
                             </div>
                         )}
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-widest drop-shadow-lg font-orbitron">
+                            <h1 className="text-4xl md:text-5xl font-black tracking-[0.1em] font-cinzel bg-clip-text text-transparent bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-800 drop-shadow-[0_1px_0_#ffeb3b] drop-shadow-[0_2px_0_#fbc02d] drop-shadow-[0_3px_0_#f57f17] drop-shadow-[0_4px_0_#e65100] drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)] filter contrast-150 brightness-110 pb-2 select-none">
                                 EMPLOYEE PORTAL
                             </h1>
                             <p className="text-gold-500/80 font-bold tracking-wider text-xs md:text-sm mt-1">
