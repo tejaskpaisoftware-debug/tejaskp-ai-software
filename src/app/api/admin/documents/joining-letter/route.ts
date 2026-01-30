@@ -154,27 +154,61 @@ export async function POST(request: Request) {
             where: { mobile: data.mobile }
         });
 
-        // Use Raw SQL fallback because the runtime Prisma Client is stale
-        const id = crypto.randomUUID();
         const now = new Date();
 
-        // @ts-ignore
-        await prisma.$executeRaw`
-            INSERT INTO "joining_letters" (
-                "id", "name", "email", "mobile", "university", "date", "startDate", "endDate", 
-                "designation", "internshipType", "stipend", "location", 
-                "reportingManager", "managerDesignation", "userId", "createdAt", "updatedAt"
-            ) VALUES (
-                ${id}, ${data.name}, ${data.email}, ${data.mobile}, ${data.university || ""}, ${data.date}, ${data.startDate}, ${data.endDate}, 
-                ${data.designation}, ${data.internshipType}, ${data.stipend}, ${data.location}, 
-                ${data.reportingManager}, ${data.managerDesignation}, ${user?.id || null}, ${now}, ${now}
-            )
-            `;
+        // Check if letter already exists for this user (robust raw check)
+        let existingLetter: any = null;
+        if (user) {
+            try {
+                // @ts-ignore
+                const letters: any = await prisma.$queryRaw`SELECT id FROM "joining_letters" WHERE "userId" = ${user.id} LIMIT 1`;
+                existingLetter = letters?.[0] || null;
+            } catch (e) { console.warn("Check exists failed", e); }
+        }
 
-        return NextResponse.json({ success: true, letter: { id, ...data }, linkedUser: !!user });
+        if (existingLetter) {
+            // UDPATE existing letter
+            // @ts-ignore
+            await prisma.$executeRaw`
+                UPDATE "joining_letters" SET 
+                    "name" = ${data.name},
+                    "email" = ${data.email},
+                    "mobile" = ${data.mobile},
+                    "university" = ${data.university || ""},
+                    "date" = ${data.date},
+                    "startDate" = ${data.startDate},
+                    "endDate" = ${data.endDate},
+                    "designation" = ${data.designation},
+                    "internshipType" = ${data.internshipType},
+                    "stipend" = ${data.stipend},
+                    "location" = ${data.location},
+                    "reportingManager" = ${data.reportingManager},
+                    "managerDesignation" = ${data.managerDesignation},
+                    "updatedAt" = ${now}
+                WHERE "id" = ${existingLetter.id}
+            `;
+            return NextResponse.json({ success: true, letter: { id: existingLetter.id, ...data }, linkedUser: !!user, action: "updated" });
+
+        } else {
+            // INSERT new letter
+            const id = crypto.randomUUID();
+            // @ts-ignore
+            await prisma.$executeRaw`
+                INSERT INTO "joining_letters" (
+                    "id", "name", "email", "mobile", "university", "date", "startDate", "endDate", 
+                    "designation", "internshipType", "stipend", "location", 
+                    "reportingManager", "managerDesignation", "userId", "createdAt", "updatedAt"
+                ) VALUES (
+                    ${id}, ${data.name}, ${data.email}, ${data.mobile}, ${data.university || ""}, ${data.date}, ${data.startDate}, ${data.endDate}, 
+                    ${data.designation}, ${data.internshipType}, ${data.stipend}, ${data.location}, 
+                    ${data.reportingManager}, ${data.managerDesignation}, ${user?.id || null}, ${now}, ${now}
+                )
+            `;
+            return NextResponse.json({ success: true, letter: { id, ...data }, linkedUser: !!user, action: "created" });
+        }
 
     } catch (error: any) {
-        console.error("Error creating joining letter:", error);
+        console.error("Error creating/updating joining letter:", error);
         return NextResponse.json({ success: false, error: error?.message || "Failed to save letter" }, { status: 500 });
     }
 }
