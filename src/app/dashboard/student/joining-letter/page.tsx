@@ -27,7 +27,7 @@ export default function StudentJoiningLetterPage() {
 
     const fetchLetter = async (userId: string) => {
         try {
-            const res = await fetch(`/api/admin/documents/joining-letter?userId=${userId}`);
+            const res = await fetch(`/api/admin/documents/joining-letter?userId=${userId}&t=${Date.now()}`);
             const data = await res.json();
             if (data.success && data.letter) {
                 setLetterData(data.letter);

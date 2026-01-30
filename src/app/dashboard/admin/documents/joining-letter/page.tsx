@@ -44,7 +44,7 @@ export default function JoiningLetterPage() {
         setIsVerifying(true);
         try {
             // 1. Try fetching existing letter
-            const res = await fetch(`/api/admin/documents/joining-letter?userId=${userId}`);
+            const res = await fetch(`/api/admin/documents/joining-letter?userId=${userId}&t=${new Date().getTime()}`);
             const data = await res.json();
 
             if (data.success && data.letter) {

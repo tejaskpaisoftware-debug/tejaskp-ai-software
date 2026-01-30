@@ -110,7 +110,7 @@ export async function GET(request: Request) {
             let letter = null;
             try {
                 // @ts-ignore
-                const letters: any = await prisma.$queryRaw`SELECT * FROM "joining_letters" WHERE "userId" = ${userId} LIMIT 1`;
+                const letters: any = await prisma.$queryRaw`SELECT * FROM "joining_letters" WHERE "userId" = ${userId} ORDER BY "updatedAt" DESC LIMIT 1`;
                 letter = letters?.[0] || null;
             } catch (e) {
                 console.error("Raw fetch by ID failed", e);
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
         if (user) {
             try {
                 // @ts-ignore
-                const letters: any = await prisma.$queryRaw`SELECT id FROM "joining_letters" WHERE "userId" = ${user.id} LIMIT 1`;
+                const letters: any = await prisma.$queryRaw`SELECT id FROM "joining_letters" WHERE "userId" = ${user.id} ORDER BY "updatedAt" DESC LIMIT 1`;
                 existingLetter = letters?.[0] || null;
             } catch (e) { console.warn("Check exists failed", e); }
         }
