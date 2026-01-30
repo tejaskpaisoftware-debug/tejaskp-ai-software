@@ -216,26 +216,31 @@ export async function POST(request: Request) {
             `;
 
             // SYNC TO USER PROFILE (If linked)
+            let syncError = null;
             if (user) {
                 try {
                     // @ts-ignore
                     await prisma.$executeRaw`
-                    UPDATE "users" SET 
-                        "name" = ${data.name},
-                        "email" = ${data.email},
-                        "university" = ${data.university || ""},
-                        "college" = ${data.university || ""}, -- Sync to both for compatibility
-                        "updatedAt" = ${now}
-                    WHERE "id" = ${user.id}
-                `;
-                } catch (eu) { console.error("Failed to sync user profile", eu); }
+                        UPDATE "users" SET 
+                            "name" = ${data.name},
+                            "email" = ${data.email},
+                            "university" = ${data.university || ""},
+                            "college" = ${data.university || ""}, -- Sync to both for compatibility
+                            "updatedAt" = ${now}
+                        WHERE "id" = ${user.id}
+                    `;
+                } catch (eu: any) {
+                    console.error("Failed to sync user profile", eu);
+                    syncError = eu.meta?.message || eu.message || "Unique constraint violation (Email/Mobile)";
+                }
             }
 
-            return NextResponse.json({ success: true, letter: { id, ...data }, linkedUser: !!user, action: "created" });
+            return NextResponse.json({ success: true, letter: { id, ...data }, linkedUser: !!user, action: "created", syncError });
         }
 
         // SYNC TO USER PROFILE (Shared logic for Update case)
         if (existingLetter && user) {
+            let syncError = null;
             try {
                 // @ts-ignore
                 await prisma.$executeRaw`
@@ -247,9 +252,12 @@ export async function POST(request: Request) {
                         "updatedAt" = ${now}
                     WHERE "id" = ${user.id}
                 `;
-            } catch (eu) { console.error("Failed to sync user profile", eu); }
+            } catch (eu: any) {
+                console.error("Failed to sync user profile", eu);
+                syncError = eu.meta?.message || eu.message || "Unique constraint violation (Email/Mobile)";
+                return NextResponse.json({ success: true, letter: { id: existingLetter.id, ...data }, linkedUser: !!user, action: "updated", syncError });
+            }
         }
-
     } catch (error: any) {
         console.error("Error creating/updating joining letter:", error);
         return NextResponse.json({ success: false, error: error?.message || "Failed to save letter" }, { status: 500 });

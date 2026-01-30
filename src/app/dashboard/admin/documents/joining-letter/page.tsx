@@ -134,7 +134,12 @@ export default function JoiningLetterPage() {
             const data = await res.json();
 
             if (data.success) {
-                alert(data.linkedUser ? "Letter saved and linked!" : "Letter saved successfully!");
+                let msg = "Letter saved successfully!";
+                if (data.linkedUser) msg += " (Linked to User)";
+                if (data.syncError) msg += `\n\nWARNING: User Profile NOT updated: ${data.syncError}`;
+                else if (data.linkedUser) msg += "\nUser Profile Updated.";
+
+                alert(msg);
             } else {
                 alert("Error saving letter: " + data.error);
             }
@@ -193,6 +198,7 @@ export default function JoiningLetterPage() {
             if (data.success) {
                 setFormData(prev => ({
                     ...prev,
+                    userId: data.user.id, // Capture User ID (Critical for Sync)
                     name: data.user.name || "",
                     email: data.user.email || "",
                     university: data.user.university || data.user.college || prev.university,
