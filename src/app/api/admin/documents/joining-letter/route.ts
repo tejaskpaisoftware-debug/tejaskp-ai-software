@@ -149,24 +149,18 @@ export async function POST(request: Request) {
     try {
         const data = await request.json();
 
-        // Find user by ID (if provided) or mobile to link automatically
+        // 1. Find user by ID (preferred) or Mobile
         let user = null;
         if (data.userId) {
-            user = await prisma.user.findUnique({
-                where: { id: data.userId }
-            });
+            user = await prisma.user.findUnique({ where: { id: data.userId } });
         }
-
-        // Fallback: Find by mobile if not found by ID
         if (!user && data.mobile) {
-            user = await prisma.user.findUnique({
-                where: { mobile: data.mobile }
-            });
+            user = await prisma.user.findUnique({ where: { mobile: data.mobile } });
         }
 
         const now = new Date();
 
-        // Check if letter already exists for this user (robust raw check)
+        // 2. Check for existing letter
         let existingLetter: any = null;
         if (user) {
             try {
@@ -176,8 +170,10 @@ export async function POST(request: Request) {
             } catch (e) { console.warn("Check exists failed", e); }
         }
 
+        // 3. Save Letter (Insert or Update)
+        const letterId = existingLetter ? existingLetter.id : crypto.randomUUID();
+
         if (existingLetter) {
-            // UDPATE existing letter
             // @ts-ignore
             await prisma.$executeRaw`
                 UPDATE "joining_letters" SET 
@@ -197,11 +193,7 @@ export async function POST(request: Request) {
                     "updatedAt" = ${now}
                 WHERE "id" = ${existingLetter.id}
             `;
-            return NextResponse.json({ success: true, letter: { id: existingLetter.id, ...data }, linkedUser: !!user, action: "updated" });
-
         } else {
-            // INSERT new letter
-            const id = crypto.randomUUID();
             // @ts-ignore
             await prisma.$executeRaw`
                 INSERT INTO "joining_letters" (
@@ -209,55 +201,41 @@ export async function POST(request: Request) {
                     "designation", "internshipType", "stipend", "location", 
                     "reportingManager", "managerDesignation", "userId", "createdAt", "updatedAt"
                 ) VALUES (
-                    ${id}, ${data.name}, ${data.email}, ${data.mobile}, ${data.university || ""}, ${data.date}, ${data.startDate}, ${data.endDate}, 
+                    ${letterId}, ${data.name}, ${data.email}, ${data.mobile}, ${data.university || ""}, ${data.date}, ${data.startDate}, ${data.endDate}, 
                     ${data.designation}, ${data.internshipType}, ${data.stipend}, ${data.location}, 
                     ${data.reportingManager}, ${data.managerDesignation}, ${user?.id || null}, ${now}, ${now}
                 )
             `;
-
-            // SYNC TO USER PROFILE (If linked)
-            let syncError = null;
-            if (user) {
-                try {
-                    // @ts-ignore
-                    await prisma.$executeRaw`
-                        UPDATE "users" SET 
-                            "name" = ${data.name},
-                            "email" = ${data.email},
-                            "university" = ${data.university || ""},
-                            "college" = ${data.university || ""}, -- Sync to both for compatibility
-                            "updatedAt" = ${now}
-                        WHERE "id" = ${user.id}
-                    `;
-                } catch (eu: any) {
-                    console.error("Failed to sync user profile", eu);
-                    syncError = eu.meta?.message || eu.message || "Unique constraint violation (Email/Mobile)";
-                }
-            }
-
-            return NextResponse.json({ success: true, letter: { id, ...data }, linkedUser: !!user, action: "created", syncError });
         }
 
-        // SYNC TO USER PROFILE (Shared logic for Update case)
-        if (existingLetter && user) {
-            let syncError = null;
+        // 4. Sync User Profile (Unified Block)
+        let syncError = null;
+        if (user) {
             try {
-                // @ts-ignore
-                await prisma.$executeRaw`
-                    UPDATE "users" SET 
-                        "name" = ${data.name},
-                        "email" = ${data.email},
-                        "university" = ${data.university || ""},
-                        "college" = ${data.university || ""}, -- Sync to both for compatibility
-                        "updatedAt" = ${now}
-                    WHERE "id" = ${user.id}
-                `;
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        name: data.name,
+                        email: data.email,
+                        university: data.university || "",
+                        college: data.university || "",
+                        // Avoid updating mobile here to prevent self-collision
+                    }
+                });
             } catch (eu: any) {
                 console.error("Failed to sync user profile", eu);
-                syncError = eu.meta?.message || eu.message || "Unique constraint violation (Email/Mobile)";
-                return NextResponse.json({ success: true, letter: { id: existingLetter.id, ...data }, linkedUser: !!user, action: "updated", syncError });
+                syncError = eu.meta?.message || eu.message || "Unique constraint violation (Email/Mobile etc)";
             }
         }
+
+        return NextResponse.json({
+            success: true,
+            letter: { id: letterId, ...data },
+            linkedUser: !!user,
+            action: existingLetter ? "updated" : "created",
+            syncError
+        });
+
     } catch (error: any) {
         console.error("Error creating/updating joining letter:", error);
         return NextResponse.json({ success: false, error: error?.message || "Failed to save letter" }, { status: 500 });
