@@ -16,7 +16,7 @@ export default function AdminAssessmentPage() {
 
     const fetchDocuments = async () => {
         try {
-            const res = await fetch("/api/admin/documents/assessment");
+            const res = await fetch("/api/admin/documents/assessment", { cache: "no-store" });
             const data = await res.json();
             if (data.success) {
                 setDocuments(data.documents);
@@ -87,9 +87,18 @@ export default function AdminAssessmentPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-black text-foreground">
-                Assessment Submissions
-            </h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-black text-foreground">
+                    Assessment Submissions
+                </h1>
+                <button
+                    onClick={fetchDocuments}
+                    className="flex items-center gap-2 bg-theme/10 hover:bg-gold-500/10 text-gold-500 px-4 py-2 rounded-lg transition-colors border border-theme"
+                >
+                    <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Refresh List
+                </button>
+            </div>
 
             {/* Filters */}
             <div className="flex items-center gap-4 bg-card border border-theme p-4 rounded-xl backdrop-blur-md">
