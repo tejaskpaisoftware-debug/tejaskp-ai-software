@@ -29,6 +29,7 @@ const menuItems = [
             { name: "Salary Slip", href: "/dashboard/admin/documents/salary-slip", icon: "💳" },
             { name: "Weekly Submissions", href: "/dashboard/admin/submissions", icon: "upload" },
             { name: "NOC Submissions", href: "/dashboard/admin/documents/noc", icon: "📄" },
+            { name: "Assessment Submissions", href: "/dashboard/admin/documents/assessment", icon: "📝" },
         ]
     },
     { name: "Register New", href: "/dashboard/admin/register", icon: "📝" },
