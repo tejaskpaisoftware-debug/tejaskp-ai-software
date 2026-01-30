@@ -162,6 +162,17 @@
   color: #fffbeb !important;
 }
 
+/* Fix for Content Overlap & Overflow */
+[data-avenger='iron-man'] .min-h-screen {
+  padding: 4rem !important;
+  /* Increase padding to fit inside HUD border (p-16 equivalent) */
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* =========================================
    3. UNIVERSAL TEXT VISIBILITY & ROBOTIC FONT OVERRIDES (The "Supernova" Option)
    Force ALL elements in dark themes to use the glowing white text and robotic font.
