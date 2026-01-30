@@ -8,9 +8,12 @@ import MemoryGame from "./MemoryGame";
 import TicTacToe from "./TicTacToe";
 import F1RacingGame from "./F1RacingGame";
 import TejasKPLogo from "@/components/common/TejasKPLogo";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 export default function GamesPage() {
     const router = useRouter();
+    const { theme, avengersCharacter } = useTheme();
+    const isIronMan = theme === 'avengers' && avengersCharacter === 'iron-man';
 
     const games = [
         {
@@ -54,10 +57,10 @@ export default function GamesPage() {
     const [selectedGame, setSelectedGame] = useState<string | null>(null);
 
     return (
-        <div className="min-h-screen bg-black text-white overflow-hidden relative font-sans selection:bg-purple-500/30">
+        <div className={`min-h-screen bg-black text-white overflow-hidden relative font-sans selection:bg-purple-500/30 transition-all duration-500 ${isIronMan ? 'p-12' : ''}`}>
 
             {/* Background "TEJASKP AI SOFTWARE" */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
+            <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden ${isIronMan ? 'opacity-20' : ''}`}>
                 <h1 className="text-[12vw] font-black text-transparent bg-clip-text bg-gradient-to-b from-white/5 to-white/0 tracking-tighter leading-none select-none whitespace-nowrap opacity-50 blur-sm"
                     style={{ WebkitTextStroke: '2px rgba(255,255,255,0.05)' }}>
                     TEJASKP AI
@@ -65,7 +68,7 @@ export default function GamesPage() {
             </div>
 
             {/* Header */}
-            <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-center z-50">
+            <div className={`absolute top-0 left-0 w-full flex justify-between items-center z-50 transition-all duration-500 ${isIronMan ? 'p-12 mt-4' : 'p-8'}`}>
                 <button
                     onClick={() => router.back()}
                     className="flex items-center gap-2 text-white/50 hover:text-white transition-colors uppercase tracking-widest text-sm font-bold group"
@@ -80,7 +83,7 @@ export default function GamesPage() {
             </div>
 
             {/* Main Content Area */}
-            <div className="relative z-10 w-full h-screen flex flex-col justify-center pl-[10vw]">
+            <div className={`relative z-10 w-full h-screen flex flex-col justify-center ${isIronMan ? 'pl-[5vw] scale-95' : 'pl-[10vw]'}`}>
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
