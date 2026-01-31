@@ -154,7 +154,7 @@ export default function StudentDashboard() {
                         onClick={() => setActiveTab(tab as any)}
                         className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${activeTab === tab
                             ? '!bg-[#FFD700] !text-black shadow-[0_0_20px_rgba(255,215,0,0.4)] scale-105'
-                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-black border border-gray-200'
                             }`}
                     >
                         {tab.toUpperCase()}

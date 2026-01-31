@@ -112,8 +112,8 @@ export default function AdminAssessmentPage() {
                 />
             </div>
 
-            {/* Table */}
-            <div className="bg-card border border-theme rounded-xl overflow-hidden shadow-2xl">
+            {/* Table (Desktop) */}
+            <div className="hidden md:block bg-card border border-theme rounded-xl overflow-hidden shadow-2xl">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-muted/50 text-gold-500 uppercase text-xs font-bold tracking-wider">
@@ -198,6 +198,63 @@ export default function AdminAssessmentPage() {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Mobile Cards (Visible only on mobile) */}
+            <div className="md:hidden space-y-4">
+                {loading ? (
+                    <div className="text-center text-muted-foreground py-8">Loading...</div>
+                ) : filteredDocs.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">No submissions found.</div>
+                ) : (
+                    filteredDocs.map((doc) => (
+                        <div key={doc.id} className="bg-card border border-theme rounded-xl p-4 shadow-lg flex flex-col gap-3">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-bold text-foreground text-lg">{doc.user.name}</h3>
+                                    <p className="text-xs text-muted-foreground">{doc.user.course || "N/A"}</p>
+                                </div>
+                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${doc.status === 'APPROVED' ? 'bg-green-500/10 text-green-500 border-green-500/30' :
+                                    doc.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
+                                        'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'
+                                    }`}>
+                                    {doc.status}
+                                </span>
+                            </div>
+
+                            <div className="text-xs text-muted-foreground space-y-1">
+                                <p>{doc.user.mobile}</p>
+                                <p className="text-blue-500">{doc.user.email}</p>
+                                <p className="opacity-70">{new Date(doc.createdAt).toLocaleDateString()} at {new Date(doc.createdAt).toLocaleTimeString()}</p>
+                            </div>
+
+                            <button
+                                onClick={() => viewDocument(doc.fileUrl)}
+                                className="flex items-center gap-2 text-gold-500 bg-gold-500/5 p-2 rounded-lg border border-gold-500/20 active:bg-gold-500/10"
+                            >
+                                <FileText size={16} />
+                                <span className="text-sm font-bold truncate flex-1">{doc.fileName || "View PDF"}</span>
+                            </button>
+
+                            {(doc.status === 'PENDING' || editingId === doc.id) && (
+                                <div className="flex gap-2 pt-2 border-t border-border">
+                                    <button
+                                        onClick={() => handleStatusUpdate(doc.id, 'APPROVED')}
+                                        className="flex-1 bg-green-500/10 text-green-500 py-2 rounded-lg font-bold text-sm border border-green-500/30 active:bg-green-500/20 flex items-center justify-center gap-2"
+                                    >
+                                        <CheckCircle size={16} /> Approve
+                                    </button>
+                                    <button
+                                        onClick={() => handleStatusUpdate(doc.id, 'REJECTED')}
+                                        className="flex-1 bg-red-500/10 text-red-500 py-2 rounded-lg font-bold text-sm border border-red-500/30 active:bg-red-500/20 flex items-center justify-center gap-2"
+                                    >
+                                        <XCircle size={16} /> Reject
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ))
+                )}
             </div>
             {/* PDF Viewer Modal */}
             {viewingUrl && (

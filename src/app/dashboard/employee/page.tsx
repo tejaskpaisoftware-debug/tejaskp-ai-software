@@ -17,6 +17,7 @@ import TejasKPLogo from "@/components/common/TejasKPLogo";
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import { useRef } from "react";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 // Helper for Auth Header
 const getAuthHeader = (): HeadersInit => {
@@ -34,6 +35,8 @@ export default function EmployeeDashboard() {
     const [user, setUser] = useState<{ id: string; name: string; mobile: string; createdAt: string; photoUrl?: string } | null>(null);
     const router = useRouter();
     const [showSplash, setShowSplash] = useState(true);
+    const { theme, avengersCharacter } = useTheme();
+    const isIronMan = theme === 'avengers' && avengersCharacter === 'iron-man';
 
     // Fail-safe: Force hide splash if it hangs for more than 7 seconds
     useEffect(() => {
@@ -266,7 +269,7 @@ export default function EmployeeDashboard() {
                             onClick={() => setActiveTab(tab as any)}
                             className={`px-8 py-3 rounded-xl font-bold text-sm tracking-wider transition-all duration-300 transform preserve-3d active:scale-95 ${activeTab === tab
                                 ? '!bg-gradient-to-r !from-[#FFD700] !to-[#FFA000] !text-black shadow-[0_10px_20px_-5px_rgba(234,179,8,0.5)] -translate-y-1'
-                                : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:-translate-y-1 hover:border-gold-500/30 hover:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.5)]'
+                                : 'bg-gray-100 border border-gray-200 text-gray-600 hover:text-black hover:bg-gray-200 hover:-translate-y-1 hover:border-gold-500/30 hover:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1)]'
                                 }`}
                         >
                             {tab.replace('-', ' ').toUpperCase()}
