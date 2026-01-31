@@ -64,3 +64,29 @@ export async function PUT(request: Request) {
         );
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get("id");
+
+        if (!id) {
+            return NextResponse.json(
+                { message: "Attendance ID is required" },
+                { status: 400 }
+            );
+        }
+
+        await prisma.attendance.delete({
+            where: { id }
+        });
+
+        return NextResponse.json({ success: true, message: "Record deleted" });
+    } catch (error) {
+        console.error("Delete attendance error:", error);
+        return NextResponse.json(
+            { message: "Internal Server Error" },
+            { status: 500 }
+        );
+    }
+}

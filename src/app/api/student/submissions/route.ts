@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
 // Helper: Get Auth User
 async function getAuthUser() {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
+    let token = cookieStore.get('auth_token')?.value;
+
+    if (!token) {
+        const headersList = await headers();
+        const authHeader = headersList.get('authorization');
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        }
+    }
 
     if (!token) return null;
 

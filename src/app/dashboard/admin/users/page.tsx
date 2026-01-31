@@ -46,6 +46,7 @@ interface User {
     panNumber?: string;
     leaveBalances?: any[];
     aadharCard?: string;
+    faceDescriptor?: string | null;
 }
 
 export default function UsersPage() {
@@ -235,6 +236,46 @@ export default function UsersPage() {
             } else {
                 setUploadStatus('error');
                 setUploadMsg(data.message || 'Action failed');
+            }
+        } catch (error) {
+            console.error(error);
+            setUploadStatus('error');
+            setUploadMsg("Network error");
+        }
+    };
+
+    const handleFaceAction = async (userId: string, action: 'unblock' | 'reset') => {
+        const confirmMsg = action === 'reset'
+            ? "⚠️ DANGER: Are you sure you want to RESET this user's Face ID? They will need to RE-REGISTER their face."
+            : "Are you sure you want to UNBLOCK this user's Face ID? They can check in immediately.";
+
+        if (!confirm(confirmMsg)) return;
+
+        setUploadStatus('uploading');
+        setUploadMsg(action === 'reset' ? "Resetting Face ID..." : "Unblocking Face ID...");
+
+        try {
+            const res = await fetch('/api/admin/users/reset-face', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, action })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setUploadStatus('success');
+                setUploadMsg(data.message);
+                if (editingUser && editingUser.id === userId) {
+                    setEditingUser({
+                        ...editingUser,
+                        // Only clear descriptor if reset
+                        faceDescriptor: action === 'reset' ? null : editingUser.faceDescriptor
+                    });
+                }
+                setTimeout(() => setUploadStatus('idle'), 3000);
+            } else {
+                setUploadStatus('error');
+                setUploadMsg(data.error || 'Failed to update Face ID');
             }
         } catch (error) {
             console.error(error);
@@ -575,10 +616,28 @@ export default function UsersPage() {
                                             </div>
                                             <div className="absolute inset-0 rounded-full bg-gold-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                         </div>
+
                                         <h3 className="text-xl font-bold text-white mt-4">{editingUser.name}</h3>
                                         <span className="px-4 py-1.5 rounded-full bg-gold-500 text-black text-xs font-bold tracking-wider uppercase mt-3 shadow-lg shadow-gold-500/20">
                                             {editingUser.role}
                                         </span>
+
+                                        <div className="flex gap-2 mt-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleFaceAction(editingUser.id, 'unblock')}
+                                                className="text-[10px] uppercase font-bold tracking-wider bg-gold-500/10 text-gold-400 border border-gold-500/20 px-3 py-2 rounded hover:bg-gold-500/20 transition-colors"
+                                            >
+                                                Unblock Face ID
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleFaceAction(editingUser.id, 'reset')}
+                                                className="text-[10px] uppercase font-bold tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-2 rounded hover:bg-red-500/20 transition-colors"
+                                            >
+                                                Reset Face ID
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* Core Details */}
@@ -856,7 +915,7 @@ export default function UsersPage() {
                         </motion.div>
                     </motion.div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
 
             {/* Recent Users Widget Box */}
             {/* Recent Users Widget Box */}
@@ -1025,47 +1084,49 @@ export default function UsersPage() {
                 })}
             </div>
 
-            {loading ? (
-                <div className="text-center py-20 text-gold-theme animate-pulse">Loading users...</div>
-            ) : (
-                <div className="space-y-12">
-                    {/* Render Selected Role Content */}
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeRole}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            {filteredUsers
-                                .filter(u => activeRole === "ALL" || (activeRole === "RECENT" ? new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : activeRole === "PENDING_FEES" ? (u.pendingAmount || 0) > 0 : u.role === activeRole))
-                                .length === 0 ? (
-                                <div className="text-center py-20 text-muted-foreground border border-dashed border-theme rounded-xl">
-                                    <p className="text-xl">No {activeRole === "ALL" ? "users" : activeRole === "RECENT" ? "recent users" : activeRole === "PENDING_FEES" ? "pending payments" : activeRole.toLowerCase() + "s"} found.</p>
-                                    <p className="text-sm mt-2">Try adjusting your search{activeRole !== "PENDING_FEES" && ` or add a new ${activeRole === "ALL" ? "user" : activeRole.toLowerCase()}`}.</p>
-                                </div>
-                            ) : (
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-                                    {filteredUsers
-                                        .filter(u => activeRole === "ALL" || (activeRole === "RECENT" ? new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : activeRole === "PENDING_FEES" ? (u.pendingAmount || 0) > 0 : u.role === activeRole))
-                                        .map((user) => (
-                                            <UserCard
-                                                key={user.id}
-                                                user={user}
-                                                onEdit={setEditingUser}
-                                                onStatusUpdate={handleUpdateStatus}
-                                                onDelete={handleDelete}
-                                                onSalarySlip={openSalarySlipModal}
-                                                onProfileApproval={setApprovalUser}
-                                            />
-                                        ))}
-                                </div>
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-            )}
+            {
+                loading ? (
+                    <div className="text-center py-20 text-gold-theme animate-pulse">Loading users...</div>
+                ) : (
+                    <div className="space-y-12">
+                        {/* Render Selected Role Content */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeRole}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {filteredUsers
+                                    .filter(u => activeRole === "ALL" || (activeRole === "RECENT" ? new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : activeRole === "PENDING_FEES" ? (u.pendingAmount || 0) > 0 : u.role === activeRole))
+                                    .length === 0 ? (
+                                    <div className="text-center py-20 text-muted-foreground border border-dashed border-theme rounded-xl">
+                                        <p className="text-xl">No {activeRole === "ALL" ? "users" : activeRole === "RECENT" ? "recent users" : activeRole === "PENDING_FEES" ? "pending payments" : activeRole.toLowerCase() + "s"} found.</p>
+                                        <p className="text-sm mt-2">Try adjusting your search{activeRole !== "PENDING_FEES" && ` or add a new ${activeRole === "ALL" ? "user" : activeRole.toLowerCase()}`}.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                                        {filteredUsers
+                                            .filter(u => activeRole === "ALL" || (activeRole === "RECENT" ? new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : activeRole === "PENDING_FEES" ? (u.pendingAmount || 0) > 0 : u.role === activeRole))
+                                            .map((user) => (
+                                                <UserCard
+                                                    key={user.id}
+                                                    user={user}
+                                                    onEdit={setEditingUser}
+                                                    onStatusUpdate={handleUpdateStatus}
+                                                    onDelete={handleDelete}
+                                                    onSalarySlip={openSalarySlipModal}
+                                                    onProfileApproval={setApprovalUser}
+                                                />
+                                            ))}
+                                    </div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                )
+            }
 
             {/* PROFILE APPROVAL MODAL */}
             <AnimatePresence>

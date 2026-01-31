@@ -10,6 +10,7 @@ import ReferralSection from "@/components/student/ReferralSection";
 import MeetingSection from "@/components/common/MeetingSection";
 import ThemeSelector from "@/components/common/ThemeSelector";
 import TejasKPLogo from "@/components/common/TejasKPLogo";
+import FaceCheckInModal from "@/components/student/FaceCheckInModal";
 
 // Helper for Auth Header
 const getAuthHeader = (): HeadersInit => {
@@ -343,6 +344,8 @@ function AttendanceSection({ userId }: { userId: string }) {
     const [history, setHistory] = useState<any[]>([]);
     const [todayRecord, setTodayRecord] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [showFaceModal, setShowFaceModal] = useState(false);
+    const [checkInMode, setCheckInMode] = useState<'check-in' | 'check-out'>('check-in');
 
     useEffect(() => {
         fetchHistory();
@@ -363,36 +366,43 @@ function AttendanceSection({ userId }: { userId: string }) {
         });
     };
 
-    const handleCheckIn = async () => {
+    const handleCheckInClick = () => {
+        setCheckInMode('check-in');
+        setShowFaceModal(true);
+    };
+
+    const handleFaceSuccess = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/user/attendance', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-                body: JSON.stringify({ userId })
-            });
-            if (res.ok) {
-                fetchTodayStatus();
-                fetchHistory();
+            if (checkInMode === 'check-in') {
+                const res = await fetch('/api/user/attendance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                    body: JSON.stringify({ userId })
+                });
+                if (res.ok) {
+                    fetchTodayStatus();
+                    fetchHistory();
+                }
+            } else {
+                // Check Out Mode
+                const res = await fetch('/api/user/attendance', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                    body: JSON.stringify({ userId })
+                });
+                if (res.ok) {
+                    fetchTodayStatus();
+                    fetchHistory();
+                }
             }
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
 
     const handleCheckOut = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/user/attendance', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-                body: JSON.stringify({ userId })
-            });
-            if (res.ok) {
-                fetchTodayStatus();
-                fetchHistory();
-            }
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
+        setCheckInMode('check-out');
+        setShowFaceModal(true);
     };
 
     return (
@@ -405,12 +415,12 @@ function AttendanceSection({ userId }: { userId: string }) {
 
                 {!todayRecord ? (
                     <button
-                        onClick={handleCheckIn}
+                        onClick={handleCheckInClick}
                         disabled={loading}
                         className="w-64 h-64 rounded-full bg-green-500/10 border-4 border-green-500 text-green-500 text-2xl font-bold flex flex-col items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_50px_rgba(34,197,94,0.6)]"
                     >
-                        <span>👆</span>
-                        <span className="mt-2">CHECK IN</span>
+                        <span>📸</span>
+                        <span className="mt-2">FACE CHECK-IN</span>
                     </button>
                 ) : !todayRecord.logoutTime ? (
                     <div className="space-y-4">
@@ -543,6 +553,13 @@ function AttendanceSection({ userId }: { userId: string }) {
                     </tbody>
                 </table>
             </div>
+            <FaceCheckInModal
+                isOpen={showFaceModal}
+                onClose={() => setShowFaceModal(false)}
+                onSuccess={handleFaceSuccess}
+                userId={userId}
+                mode={checkInMode}
+            />
         </motion.div>
     );
 }

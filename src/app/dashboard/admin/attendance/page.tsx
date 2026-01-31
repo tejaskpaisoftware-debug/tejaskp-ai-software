@@ -43,6 +43,24 @@ export default function AttendancePage() {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this check-in? The user will have to check in again.")) return;
+
+        try {
+            const res = await fetch(`/api/admin/attendance?id=${id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                fetchAttendance();
+            } else {
+                alert("Failed to delete record");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         try {
             const res = await fetch('/api/admin/attendance', {
@@ -184,6 +202,14 @@ export default function AttendancePage() {
                                     {record.status === 'PENDING' && !record.logoutTime && (
                                         <span className="text-xs text-gray-500 italic">Wait to logout</span>
                                     )}
+
+                                    <button
+                                        onClick={() => handleDelete(record.id)}
+                                        className="p-2 hover:bg-red-500/10 rounded text-red-500 hover:text-red-400 transition-colors"
+                                        title="Delete Check-in"
+                                    >
+                                        🗑️
+                                    </button>
                                 </div>
                             </motion.div>
                         ))}

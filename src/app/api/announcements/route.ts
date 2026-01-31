@@ -15,7 +15,7 @@ export async function GET() {
         // We order by createdAt desc
         const announcements: any = await prisma.$queryRaw`
             SELECT * FROM announcements 
-            WHERE "isActive" = true OR "isActive" = 1 
+            WHERE "isActive" = true 
             ORDER BY "createdAt" DESC 
             LIMIT 5
         `;

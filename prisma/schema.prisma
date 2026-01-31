@@ -9,13 +9,13 @@ datasource db {
 }
 
 model User {
-  id               String          @id @default(uuid())
-  email            String?         @unique
-  mobile           String          @unique
+  id               String            @id @default(uuid())
+  email            String?           @unique
+  mobile           String            @unique
   password         String?
   name             String?
-  role             String          @default("USER")
-  status           String          @default("PENDING")
+  role             String            @default("USER")
+  status           String            @default("PENDING")
   details          String?
   course           String?
   college          String?
@@ -28,8 +28,8 @@ model User {
   duration         String?
   joiningDate      String?
   endDate          String?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   salaryDetails    String?
   bankName         String?
   bankState        String?
@@ -39,9 +39,9 @@ model User {
   accountNumber    String?
   ifscCode         String?
   panNumber        String?
-  isChatEnabled    Boolean         @default(false)
-  referralCode     String?         @unique
-  walletBalance    Float           @default(0.0)
+  isChatEnabled    Boolean           @default(false)
+  referralCode     String?           @unique
+  walletBalance    Float             @default(0.0)
   referredBy       String?
   aadharCard       String?
   bloodGroup       String?
@@ -50,12 +50,15 @@ model User {
   designation      String?
   dob              String?
   emergencyContact String?
-  employeeId       String?         @unique
+  employeeId       String?           @unique
   pendingUpdate    String?
   permanentAddress String?
   photoUrl         String?
   reportingManager String?
   skills           String?
+  faceDescriptor   String?
+  failedFaceAttempts Int           @default(0)
+  lockoutUntil     DateTime?
   attendance       Attendance[]
   certificates     Certificate[]
   invoices         Invoice[]
@@ -68,11 +71,11 @@ model User {
   myReferrals      Referral[]
   salarySlips      SalarySlip[]
   sessions         Session[]
+  documents        StudentDocument[]
   submissions      Submission[]
   logs             SystemLog[]
-  tasks            Task[]          @relation("AssignedTasks")
-  conversations    Conversation[]  @relation("UserConversations")
-  documents        StudentDocument[]
+  tasks            Task[]            @relation("AssignedTasks")
+  conversations    Conversation[]    @relation("UserConversations")
 
   @@map("users")
 }
@@ -83,7 +86,7 @@ model StudentDocument {
   type      String   @default("NOC")
   fileUrl   String
   fileName  String?
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id])

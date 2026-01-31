@@ -38,6 +38,16 @@ export async function POST(request: Request) {
             );
         }
 
+        // LOCKOUT CHECK
+        if (user.lockoutUntil && new Date(user.lockoutUntil) > new Date()) {
+            const diff = new Date(user.lockoutUntil).getTime() - new Date().getTime();
+            const hoursLeft = Math.ceil(diff / (1000 * 60 * 60));
+            return NextResponse.json(
+                { message: `Account Locked due to failed biometric attempts. Try again in ${hoursLeft} hours or contact Admin.` },
+                { status: 403 }
+            );
+        }
+
         // Role Check logic (Strict or Lenient based on requirement)
         if (user.role !== role && user.role !== 'ADMIN') {
             return NextResponse.json(
