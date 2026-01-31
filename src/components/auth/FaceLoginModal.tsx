@@ -83,8 +83,9 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }: FaceLogin
                 }, 1500);
             } else {
                 setStatus('ERROR');
-                setMessage(data.error || "Login failed.");
-                setTimeout(() => setStatus('SCANNING'), 3000);
+                const debugStr = data.debugDistance ? ` (Dist: ${data.debugDistance})` : "";
+                setMessage((data.error || "Login failed.") + debugStr);
+                setTimeout(() => setStatus('SCANNING'), 2000);
             }
 
         } catch (error) {

@@ -56,12 +56,16 @@ export default function StudentDashboard() {
     const checkTodayAttendance = async () => {
         try {
             const res = await fetch(`/api/user/attendance?userId=${user?.id}`, { headers: { ...getAuthHeader() } });
+            if (!res.ok) return;
+
             const data = await res.json();
             setTodayRecord(data);
 
-            // If no record and not skipped in this session
+            // 🛡️ CRITICAL FIX: If record exists (or has been skipped), HIDE prompt
             const skipped = sessionStorage.getItem("skipCheckInToday");
-            if (!data && !skipped) {
+            if (data || skipped) {
+                setShowCheckInPrompt(false);
+            } else {
                 setShowCheckInPrompt(true);
             }
         } catch (e) { console.error(e); }
@@ -218,7 +222,7 @@ export default function StudentDashboard() {
                     </motion.div>
                 )}
 
-                {activeTab === 'attendance' && user && <AttendanceSection userId={(user as any).id} />}
+                {activeTab === 'attendance' && user && <AttendanceSection userId={(user as any).id} onRefresh={checkTodayAttendance} />}
                 {activeTab === 'leaves' && user && <LeaveSection userId={(user as any).id} />}
                 {activeTab === 'documents' && user && <DocumentsSection userId={(user as any).id} createdAt={user.createdAt} />}
                 {activeTab === 'submissions' && (
@@ -278,7 +282,7 @@ export default function StudentDashboard() {
                                     setShowCheckInPrompt(false);
                                     setIsCheckingInFromPrompt(true);
                                 }}
-                                className="w-full bg-gold-500 text-black font-black py-4 rounded-xl hover:bg-gold-400 transition-all shadow-[0_10px_20px_rgba(234,179,8,0.2)] active:scale-95"
+                                className="w-full bg-[#EAB308] text-black font-black py-4 rounded-xl hover:bg-[#CA8A04] transition-all shadow-[0_10px_20px_rgba(234,179,8,0.2)] active:scale-95"
                             >
                                 YES, CHECK-IN NOW
                             </button>
@@ -304,9 +308,22 @@ export default function StudentDashboard() {
             <FaceCheckInModal
                 isOpen={isCheckingInFromPrompt}
                 onClose={() => setIsCheckingInFromPrompt(false)}
-                onSuccess={() => {
+                onSuccess={async () => {
                     setIsCheckingInFromPrompt(false);
-                    checkTodayAttendance(); // Refresh status
+                    // 🛡️ CREATE ACTUAL ATTENDANCE RECORD
+                    try {
+                        const res = await fetch('/api/user/attendance', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                            body: JSON.stringify({ userId: user?.id })
+                        });
+                        if (res.ok) {
+                            checkTodayAttendance(); // Refresh & Hide Prompt
+                        } else {
+                            const err = await res.json();
+                            alert(err.message || "Attendance failed");
+                        }
+                    } catch (e) { console.error(e); }
                 }}
                 userId={user?.id || ""}
                 mode="check-in"
@@ -419,7 +436,7 @@ function DocumentsSection({ userId, createdAt }: { userId: string, createdAt?: s
     );
 }
 
-function AttendanceSection({ userId }: { userId: string }) {
+function AttendanceSection({ userId, onRefresh }: { userId: string, onRefresh?: () => void }) {
     // ... existing AttendanceSection code ...
     const [history, setHistory] = useState<any[]>([]);
     const [todayRecord, setTodayRecord] = useState<any>(null);
@@ -463,6 +480,7 @@ function AttendanceSection({ userId }: { userId: string }) {
                 if (res.ok) {
                     fetchTodayStatus();
                     fetchHistory();
+                    if (onRefresh) onRefresh(); // 🛡️ Refresh global state
                 }
             } else {
                 // Check Out Mode
@@ -474,6 +492,7 @@ function AttendanceSection({ userId }: { userId: string }) {
                 if (res.ok) {
                     fetchTodayStatus();
                     fetchHistory();
+                    if (onRefresh) onRefresh(); // 🛡️ Refresh global state
                 }
             }
         } catch (e) { console.error(e); }

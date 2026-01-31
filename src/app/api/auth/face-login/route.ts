@@ -16,35 +16,48 @@ export async function POST(req: Request) {
 
         const descriptorArray = Object.values(faceDescriptor) as number[];
 
-        // 1. Fetch all users who HAVE a registered face
+        // 1. Fetch all users who HAVE a registered face and are NOT PENDING or BLOCKED
         const users = await prisma.user.findMany({
             where: {
                 faceDescriptor: { not: null },
-                status: "APPROVED" // Only approved users can login
+                NOT: {
+                    status: { in: ["PENDING", "BLOCKED"] }
+                }
             }
         });
 
         let bestMatch = null;
         let minDistance = Infinity;
-        const THRESHOLD = 0.6; // Relaxed threshold for better identification
+        const THRESHOLD = 0.65; // Even more relaxed for identification from login
+
+        console.log(`[Face Login] Comparing against ${users.length} users...`);
 
         for (const user of users) {
             // Check if user is locked out
             if (user.lockoutUntil && isAfter(new Date(user.lockoutUntil), new Date())) {
-                continue; // Skip locked users to prevent brute force/mistakes
+                continue; // Skip locked users
             }
 
             const storedDescriptor = JSON.parse(user.faceDescriptor as string) as number[];
             const distance = euclideanDistance(descriptorArray, storedDescriptor);
 
-            if (distance < minDistance && distance < THRESHOLD) {
+            if (distance < minDistance) {
                 minDistance = distance;
+            }
+
+            if (distance < THRESHOLD && (bestMatch === null || distance < euclideanDistance(descriptorArray, JSON.parse(bestMatch.faceDescriptor as string)))) {
                 bestMatch = user;
             }
         }
 
+        console.log(`[Face Login] Best match distance: ${minDistance.toFixed(4)} (Threshold: ${THRESHOLD})`);
+
         if (!bestMatch) {
-            return NextResponse.json({ success: false, error: "Face not recognized. Please sign in with mobile/password first." }, { status: 401 });
+            return NextResponse.json({
+                success: false,
+                error: "Face not recognized. Please sign in with mobile/password first.",
+                debugDistance: minDistance.toFixed(4)
+            }, { status: 401 });
         }
 
         const user = bestMatch;
