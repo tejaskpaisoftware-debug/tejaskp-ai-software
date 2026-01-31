@@ -43,7 +43,29 @@ export default function StudentDashboard() {
     }, [router]);
 
     const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'leaves' | 'documents' | 'submissions' | 'earn' | 'meetings' | 'theme'>('overview');
+    const [showCheckInPrompt, setShowCheckInPrompt] = useState(false);
+    const [todayRecord, setTodayRecord] = useState<any>(null);
+    const [isCheckingInFromPrompt, setIsCheckingInFromPrompt] = useState(false);
 
+    useEffect(() => {
+        if (user) {
+            checkTodayAttendance();
+        }
+    }, [user]);
+
+    const checkTodayAttendance = async () => {
+        try {
+            const res = await fetch(`/api/user/attendance?userId=${user?.id}`, { headers: { ...getAuthHeader() } });
+            const data = await res.json();
+            setTodayRecord(data);
+
+            // If no record and not skipped in this session
+            const skipped = sessionStorage.getItem("skipCheckInToday");
+            if (!data && !skipped) {
+                setShowCheckInPrompt(true);
+            }
+        } catch (e) { console.error(e); }
+    };
     const handleLogout = async () => {
         if (user) {
             try {
@@ -231,6 +253,64 @@ export default function StudentDashboard() {
 
             {/* Draggable AI Button (Overlay) */}
             <DraggableAIButton />
+
+            {/* Check-in Pending Prompt */}
+            {showCheckInPrompt && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 animate-in fade-in zoom-in duration-300">
+                    <div className="bg-gradient-to-b from-[#1a1a1a] to-black border border-gold-500/30 rounded-3xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(234,179,8,0.2)] text-center relative overflow-hidden">
+                        {/* Decorative Background */}
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent"></div>
+
+                        <div className="w-24 h-24 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-gold-500/20 shadow-[0_0_20px_rgba(234,179,8,0.1)]">
+                            <span className="text-4xl animate-bounce">📸</span>
+                        </div>
+
+                        <h2 className="text-3xl font-black font-cinzel text-glow mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-yellow-600">
+                            CHECK-IN PENDING
+                        </h2>
+                        <p className="text-gray-400 mb-8 leading-relaxed">
+                            Your check-in is pending. Do you want to check in now?
+                        </p>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowCheckInPrompt(false);
+                                    setIsCheckingInFromPrompt(true);
+                                }}
+                                className="w-full bg-gold-500 text-black font-black py-4 rounded-xl hover:bg-gold-400 transition-all shadow-[0_10px_20px_rgba(234,179,8,0.2)] active:scale-95"
+                            >
+                                YES, CHECK-IN NOW
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowCheckInPrompt(false);
+                                    sessionStorage.setItem("skipCheckInToday", "true");
+                                }}
+                                className="w-full bg-white/5 text-gray-400 font-bold py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all border border-white/10"
+                            >
+                                SKIP FOR NOW
+                            </button>
+                        </div>
+
+                        <p className="text-[10px] text-gray-500 mt-6 tracking-widest uppercase">
+                            TejasKP Portal Security • Biometric ID
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Face ID Modal Triggered from Prompt */}
+            <FaceCheckInModal
+                isOpen={isCheckingInFromPrompt}
+                onClose={() => setIsCheckingInFromPrompt(false)}
+                onSuccess={() => {
+                    setIsCheckingInFromPrompt(false);
+                    checkTodayAttendance(); // Refresh status
+                }}
+                userId={user?.id || ""}
+                mode="check-in"
+            />
         </div>
     );
 }

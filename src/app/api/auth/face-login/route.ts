@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
         let bestMatch = null;
         let minDistance = Infinity;
-        const THRESHOLD = 0.45; // Stricter threshold for identification than verification
+        const THRESHOLD = 0.6; // Relaxed threshold for better identification
 
         for (const user of users) {
             // Check if user is locked out
@@ -49,50 +49,7 @@ export async function POST(req: Request) {
 
         const user = bestMatch;
 
-        // 2. AUTO CHECK-IN LOGIC (Synchronized with api/user/attendance)
-        const now = new Date();
-        const today = now.toISOString().split('T')[0];
-
-        const existingAttendance = await prisma.attendance.findFirst({
-            where: { userId: user.id, date: today }
-        });
-
-        if (!existingAttendance) {
-            const deadline = new Date(now);
-            deadline.setHours(10, 45, 0, 0);
-
-            let status = "PRESENT";
-            let remarks = "Checked in via Face Login";
-
-            if (now > deadline) {
-                status = "LATE";
-                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-                const lateCount = await prisma.attendance.count({
-                    where: {
-                        userId: user.id,
-                        status: "LATE",
-                        date: { gte: firstDayOfMonth, lt: today }
-                    }
-                });
-
-                if (lateCount >= 2) {
-                    status = "ABSENT";
-                    remarks = "Multiple Late Arrivals (3rd Strike) - Face Login";
-                }
-            }
-
-            await prisma.attendance.create({
-                data: {
-                    userId: user.id,
-                    date: today,
-                    loginTime: now,
-                    status,
-                    adminRemarks: remarks
-                }
-            });
-        }
-
-        // 3. GENERATE SESSION (Synchronized with api/auth/login)
+        // 2. GENERATE SESSION (Synchronized with api/auth/login)
         const sessionToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
         await prisma.session.create({
             data: {

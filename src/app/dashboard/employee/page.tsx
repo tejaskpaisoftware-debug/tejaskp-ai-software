@@ -14,6 +14,7 @@ import ProfileSection from "@/components/employee/ProfileSection";
 import MailboxSection from "@/components/employee/MailboxSection";
 import SplashScreen from "@/components/common/SplashScreen";
 import TejasKPLogo from "@/components/common/TejasKPLogo";
+import FaceCheckInModal from "@/components/student/FaceCheckInModal";
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import { useRef } from "react";
@@ -72,6 +73,29 @@ export default function EmployeeDashboard() {
     }, [router]);
 
     const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'mailbox' | 'attendance' | 'leaves' | 'documents' | 'submissions' | 'earn' | 'meetings' | 'profile' | 'theme'>('overview');
+    const [showCheckInPrompt, setShowCheckInPrompt] = useState(false);
+    const [todayRecord, setTodayRecord] = useState<any>(null);
+    const [isCheckingInFromPrompt, setIsCheckingInFromPrompt] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            checkTodayAttendance();
+        }
+    }, [user]);
+
+    const checkTodayAttendance = async () => {
+        try {
+            const res = await fetch(`/api/user/attendance?userId=${user?.id}`, { headers: { ...getAuthHeader() } });
+            const data = await res.json();
+            setTodayRecord(data);
+
+            // If no record and not skipped in this session
+            const skipped = sessionStorage.getItem("skipCheckInToday");
+            if (!data && !skipped) {
+                setShowCheckInPrompt(true);
+            }
+        } catch (e) { console.error(e); }
+    };
 
     const handleLogout = async () => {
         if (user) {
@@ -331,6 +355,58 @@ export default function EmployeeDashboard() {
                     <NavButton active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} icon={<span className="text-xl">👤</span>} label="Profile" />
                     <NavButton active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} icon={<Palette size={20} />} label="Theme" />
                 </div>
+
+                {/* Check-in Pending Prompt */}
+                {showCheckInPrompt && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 animate-in fade-in zoom-in duration-300">
+                        <div className="bg-gradient-to-b from-[#1a1a1a] to-black border border-gold-500/30 rounded-3xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(234,179,8,0.2)] text-center relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent"></div>
+
+                            <div className="w-24 h-24 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-gold-500/20">
+                                <span className="text-4xl animate-bounce">📸</span>
+                            </div>
+
+                            <h2 className="text-3xl font-black font-cinzel text-glow mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-yellow-600">
+                                CHECK-IN PENDING
+                            </h2>
+                            <p className="text-gray-400 mb-8 leading-relaxed">
+                                Your check-in is pending. Do you want to check in now?
+                            </p>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowCheckInPrompt(false);
+                                        setIsCheckingInFromPrompt(true);
+                                    }}
+                                    className="w-full bg-gold-500 text-black font-black py-4 rounded-xl hover:bg-gold-400 transition-all shadow-[0_10px_20px_rgba(234,179,8,0.2)]"
+                                >
+                                    INITIALIZE FACE ID
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowCheckInPrompt(false);
+                                        sessionStorage.setItem("skipCheckInToday", "true");
+                                    }}
+                                    className="w-full bg-white/5 text-gray-400 font-bold py-3 rounded-xl hover:bg-white/10"
+                                >
+                                    PROCEED TO DASHBOARD
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <FaceCheckInModal
+                    isOpen={isCheckingInFromPrompt}
+                    onClose={() => setIsCheckingInFromPrompt(false)}
+                    onSuccess={() => {
+                        setIsCheckingInFromPrompt(false);
+                        checkTodayAttendance();
+                    }}
+                    userId={user?.id || ""}
+                    mode="check-in"
+                />
             </div>
         </>
     );
@@ -549,6 +625,8 @@ function AttendanceSection({ userId }: { userId: string }) {
     const [history, setHistory] = useState<any[]>([]);
     const [todayRecord, setTodayRecord] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [showFaceModal, setShowFaceModal] = useState(false);
+    const [checkInMode, setCheckInMode] = useState<'check-in' | 'check-out'>('check-in');
 
     const [stats, setStats] = useState<any>(null);
 
@@ -579,38 +657,44 @@ function AttendanceSection({ userId }: { userId: string }) {
         });
     };
 
-    const handleCheckIn = async () => {
+    const handleCheckIn = () => {
+        setCheckInMode('check-in');
+        setShowFaceModal(true);
+    };
+
+    const handleFaceSuccess = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/user/attendance', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-                body: JSON.stringify({ userId })
-            });
-            if (res.ok) {
-                fetchTodayStatus();
-                fetchStats(); // Update stats
-                fetchHistory();
+            if (checkInMode === 'check-in') {
+                const res = await fetch('/api/user/attendance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                    body: JSON.stringify({ userId })
+                });
+                if (res.ok) {
+                    fetchTodayStatus();
+                    fetchStats(); // Update stats
+                    fetchHistory();
+                }
+            } else {
+                const res = await fetch('/api/user/attendance', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                    body: JSON.stringify({ userId })
+                });
+                if (res.ok) {
+                    fetchTodayStatus();
+                    fetchStats(); // Update stats
+                    fetchHistory();
+                }
             }
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
 
     const handleCheckOut = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/user/attendance', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-                body: JSON.stringify({ userId })
-            });
-            if (res.ok) {
-                fetchTodayStatus();
-                fetchStats(); // Update stats
-                fetchHistory();
-            }
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
+        setCheckInMode('check-out');
+        setShowFaceModal(true);
     };
 
     return (
@@ -784,6 +868,13 @@ function AttendanceSection({ userId }: { userId: string }) {
                     </tbody>
                 </table>
             </div>
+            <FaceCheckInModal
+                isOpen={showFaceModal}
+                onClose={() => setShowFaceModal(false)}
+                onSuccess={handleFaceSuccess}
+                userId={userId}
+                mode={checkInMode}
+            />
         </motion.div>
     );
 }
