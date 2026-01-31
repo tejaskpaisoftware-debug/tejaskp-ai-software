@@ -25,6 +25,8 @@ export default function App() {
           scalesPageToFit={true}
           javaScriptEnabled={true}
           domStorageEnabled={true}
+          allowsInlineMediaPlayback={true}
+          mediaPlaybackRequiresUserAction={false}
         />
       </SafeAreaView>
     </View>

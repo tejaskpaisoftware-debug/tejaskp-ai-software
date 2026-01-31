@@ -39,7 +39,7 @@ class _MainWebViewState extends State<MainWebView> {
   String? _errorMessage;
 
   // 🔹 CONFIGURATION: Vercel is cleaner/faster for mobile than localhost
-  static const String _appUrl = 'https://tejaskp-ai-software-qjnli60ux-tejas-projects-62ee4952.vercel.app/login';
+  static const String _appUrl = 'https://www.tejaskp.in/login';
 
   @override
   void initState() {

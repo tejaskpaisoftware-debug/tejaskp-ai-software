@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import "../stars.css"; // Import the CSS stars
+import { ScanFace } from "lucide-react";
+import FaceLoginModal from "@/components/auth/FaceLoginModal";
 // import { Canvas } from "@react-three/fiber"; // Removed for mobile stability
 // import { Stars } from "@react-three/drei";
 
@@ -20,6 +22,7 @@ export default function LoginPage() {
     const [authStep, setAuthStep] = useState<"LOGIN" | "SET_PASSWORD" | "FORGOT_PASSWORD">("LOGIN");
 
     const [error, setError] = useState("");
+    const [showFaceModal, setShowFaceModal] = useState(false);
     const router = useRouter();
 
     // 🛡️ SECURITY: Clear any stale session data on mount
@@ -35,10 +38,7 @@ export default function LoginPage() {
         e.preventDefault();
         setError("");
 
-        // ADMIN LOGIN (Handled via API now)
-
         try {
-            // SET PASSWORD FLOW
             if (authStep === "SET_PASSWORD") {
                 if (newPassword !== confirmPassword) {
                     setError("Passwords do not match.");
@@ -58,8 +58,7 @@ export default function LoginPage() {
                 if (res.ok) {
                     alert("Password Set Successfully! Logging in...");
                     setAuthStep("LOGIN");
-                    setPassword(""); // Clear for user to re-enter or we could auto-login
-                    // For better UX, let's ask them to re-login to confirm they remembered it
+                    setPassword("");
                 } else {
                     const data = await res.json();
                     setError(data.message || "Failed to set password");
@@ -67,7 +66,6 @@ export default function LoginPage() {
                 return;
             }
 
-            // STANDARD LOGIN / CHECK FLOW
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -84,12 +82,7 @@ export default function LoginPage() {
                 if (data.status === "PENDING_SETUP") {
                     setAuthStep("SET_PASSWORD");
                 } else if (data.status === "SUCCESS") {
-                    // Save User Session Client-Side (SessionStorage for Tab Isolation)
-                    // data.user now contains { ..., token: "Request-Token" }
                     sessionStorage.setItem("currentUser", JSON.stringify(data.user));
-
-                    // Redirect based on role
-                    // Redirect based on returned user role
                     const role = data.user.role;
                     if (role === "ADMIN") router.push("/dashboard/admin");
                     else if (role === "STUDENT") router.push("/dashboard/student");
@@ -100,11 +93,20 @@ export default function LoginPage() {
             } else {
                 setError(data.message || "Login failed");
             }
-
         } catch (err) {
             console.error(err);
             setError("Connection Error");
         }
+    };
+
+    const handleFaceLoginSuccess = (userData: any) => {
+        sessionStorage.setItem("currentUser", JSON.stringify(userData));
+        const role = userData.role;
+        if (role === "ADMIN") router.push("/dashboard/admin");
+        else if (role === "STUDENT") router.push("/dashboard/student");
+        else if (role === "EMPLOYEE") router.push("/dashboard/employee");
+        else if (role === "CLIENT") router.push("/dashboard/client");
+        else router.push("/dashboard");
     };
 
     const handleForgotPassword = (e: React.FormEvent) => {
@@ -113,15 +115,12 @@ export default function LoginPage() {
             setError("Please enter a valid mobile number.");
             return;
         }
-        // In a real app, we would verify the mobile number here or send an OTP.
-        // For this environment, we assume valid and proceed to reset.
         setError("");
         setAuthStep("SET_PASSWORD");
     };
 
     return (
         <div className="min-h-screen bg-[#050505] text-gold-100 font-sans flex items-center justify-center relative overflow-hidden">
-            {/* CSS-Only Stars Background (Mobile Optimized, Visually Identical) */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a1a1a_0%,_#000000_100%)] opacity-80" />
                 <div className="stars-small" />
@@ -130,7 +129,6 @@ export default function LoginPage() {
             </div>
 
             <div className="relative z-10 w-full max-w-5xl px-4 grid md:grid-cols-2 gap-8 items-center">
-                {/* Left Side: Branding & Info */}
                 <motion.div
                     initial={{ x: -50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -159,14 +157,12 @@ export default function LoginPage() {
                     </div>
                 </motion.div>
 
-                {/* Right Side: Login Panel */}
                 <motion.div
                     initial={{ x: 50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                 >
                     <div className="bg-[#121212]/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
-                        {/* Role Tabs */}
                         <div className="flex border-b border-yellow-500/20">
                             {["STUDENT", "EMPLOYEE", "CLIENT"].map((role) => (
                                 <button
@@ -188,10 +184,9 @@ export default function LoginPage() {
                             ))}
                         </div>
 
-                        {/* Login Form */}
                         <div className="p-8">
                             <motion.div
-                                key={activeRole + authStep} // Re-animate on role or step change
+                                key={activeRole + authStep}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3 }}
@@ -214,7 +209,6 @@ export default function LoginPage() {
                                 </div>
 
                                 <form className="space-y-4" onSubmit={authStep === "FORGOT_PASSWORD" ? handleForgotPassword : handleLogin}>
-                                    {/* Mobile/User Input - Visible for LOGIN and FORGOT_PASSWORD */}
                                     {(authStep === "LOGIN" || authStep === "FORGOT_PASSWORD") && (
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">
@@ -230,7 +224,6 @@ export default function LoginPage() {
                                         </div>
                                     )}
 
-                                    {/* Password Input (Active for Admin or Normal Login) */}
                                     {authStep === "LOGIN" && (
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">Password</label>
@@ -245,7 +238,6 @@ export default function LoginPage() {
                                         </div>
                                     )}
 
-                                    {/* Set Password Inputs */}
                                     {authStep === "SET_PASSWORD" && (
                                         <>
                                             <div className="space-y-2">
@@ -293,6 +285,24 @@ export default function LoginPage() {
                                                 : "ACCESS DASHBOARD"}
                                     </button>
 
+                                    {authStep === "LOGIN" && (
+                                        <div className="relative py-4">
+                                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-yellow-500/20"></div></div>
+                                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#121212] px-4 text-yellow-500/40 font-bold tracking-widest">OR</span></div>
+                                        </div>
+                                    )}
+
+                                    {authStep === "LOGIN" && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowFaceModal(true)}
+                                            className="w-full bg-transparent border border-yellow-500/50 text-yellow-500 font-bold py-4 rounded-lg hover:bg-yellow-500/10 transition-all flex items-center justify-center gap-3 active:scale-95"
+                                        >
+                                            <ScanFace size={24} />
+                                            SMART FACE LOGIN
+                                        </button>
+                                    )}
+
                                     {(authStep === "SET_PASSWORD" || authStep === "FORGOT_PASSWORD") && (
                                         <button
                                             type="button"
@@ -314,6 +324,12 @@ export default function LoginPage() {
                     </div>
                 </motion.div>
             </div>
+
+            <FaceLoginModal
+                isOpen={showFaceModal}
+                onClose={() => setShowFaceModal(false)}
+                onSuccess={handleFaceLoginSuccess}
+            />
         </div>
     );
 }
