@@ -98,7 +98,7 @@ export function AvengersTheme({ character }: AvengersThemeProps) {
                         // Trigger logout via existing system if possible, or simple redirect
                         // finding the logout button might be hard, so just redirect to login for now or let sidebar handle it
                         // Ideally we'd call the logout API, but let's stick to navigation
-                        window.location.href = "/login";
+                        window.location.href = "/login?logout=true";
                         return;
                     }
 
@@ -136,16 +136,22 @@ export function AvengersTheme({ character }: AvengersThemeProps) {
 
                     if (targetPath) {
                         console.log(`🚀 Jarvis Navigating to: ${targetPath}`);
-                        // Play confirmation sound?
+                        // Play confirmation sound
                         const confirmAudio = new Audio("https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3");
                         confirmAudio.volume = 0.3;
                         confirmAudio.play().catch(() => { });
 
-                        setTimeout(() => {
-                            window.location.href = targetPath;
-                        }, 800);
+                        // Check if we are already here? If so, just unlock
+                        if (window.location.pathname === targetPath) {
+                            setIsBooted(true);
+                        } else {
+                            setTimeout(() => {
+                                window.location.href = targetPath;
+                            }, 800);
+                        }
                     } else {
                         setVoiceError("COMMAND NOT RECOGNIZED");
+                        // DO NOT UNLOCK - Stay in Reactor Mode
                     }
 
                 } catch (e) {
@@ -153,25 +159,21 @@ export function AvengersTheme({ character }: AvengersThemeProps) {
                     setVoiceError("SYSTEM ERROR");
                 }
 
-                // Unlock after command
-                setTimeout(() => {
-                    setIsListening(false);
-                    setIsBooted(true);
-                }, 1500);
+                setIsListening(false);
             };
 
             recognition.onerror = (event: any) => {
                 console.warn("Speech recognition error:", event.error);
-                setVoiceError("VOICE PASSIVE"); // Less aggressive error
+                setVoiceError("TRY AGAIN");
                 setIsListening(false);
-                setTimeout(() => setIsBooted(true), 1500);
+                // DO NOT UNLOCK
             };
 
             recognition.start();
         } else {
             // Fallback for non-supported browsers
             setVoiceError("VOICE UNAVAILABLE");
-            setTimeout(() => setIsBooted(true), 1000);
+            setTimeout(() => setIsBooted(true), 1000); // Only auto-boot if voice not supported
         }
     };
 
