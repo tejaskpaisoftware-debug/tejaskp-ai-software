@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AvengersThemeProps {
@@ -8,6 +9,12 @@ interface AvengersThemeProps {
 }
 
 export function AvengersTheme({ character }: AvengersThemeProps) {
+    const pathname = usePathname();
+    const isPublicRoute = pathname === "/login" || pathname === "/";
+
+    // If on public route, do not render the overlay at all
+    if (isPublicRoute) return null;
+
     const [isBooted, setIsBooted] = useState(character !== "iron-man");
     const [playBootSound, setPlayBootSound] = useState(false);
 
