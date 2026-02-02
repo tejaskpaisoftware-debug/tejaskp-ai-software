@@ -341,8 +341,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Apply theme to document
     useEffect(() => {
-        console.log("🎨 [ThemeProvider] Applying Theme:", theme);
-        console.log("🦸 [ThemeProvider] Character:", avengersCharacter);
         const root = window.document.documentElement;
 
         root.setAttribute("data-theme", theme);
