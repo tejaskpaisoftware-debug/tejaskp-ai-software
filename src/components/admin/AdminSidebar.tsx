@@ -17,6 +17,7 @@ const menuItems = [
             { name: "Attendance", href: "/dashboard/admin/attendance", icon: "🕒" },
             { name: "Leaves", href: "/dashboard/admin/leaves", icon: "🌴" },
             { name: "Tasks", href: "/dashboard/admin/tasks", icon: "📋" },
+            { name: "Admin Validation", href: "/dashboard/admin/validation", icon: "🛡️" },
         ]
     },
     {

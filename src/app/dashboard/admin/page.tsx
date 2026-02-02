@@ -52,28 +52,41 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         let isMounted = true;
+        const controller = new AbortController();
+        let timeoutId: NodeJS.Timeout;
 
         const fetchStats = async () => {
             try {
-                const res = await fetch(`/api/admin/dashboard/stats?year=${year}`);
+                const res = await fetch(`/api/admin/dashboard/stats?year=${year}`, {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
+
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
                 const data = await res.json();
                 if (data.success && isMounted) {
                     setStats(data.stats);
                 }
-            } catch (error) {
-                console.error("Failed to load dashboard stats", error);
+            } catch (error: any) {
+                if (error.name !== 'AbortError') {
+                    console.error("Failed to load dashboard stats", error);
+                }
+            } finally {
+                // Schedule next fetch only if still mounted and not aborted
+                if (isMounted) {
+                    timeoutId = setTimeout(fetchStats, 5000);
+                }
             }
         };
 
         // Initial Fetch
         fetchStats();
 
-        // Polling Interval
-        const intervalId = setInterval(fetchStats, 5000);
-
         return () => {
             isMounted = false;
-            clearInterval(intervalId);
+            controller.abort();
+            clearTimeout(timeoutId);
         };
     }, [year]);
 

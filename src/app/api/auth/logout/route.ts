@@ -11,6 +11,17 @@ export async function POST(request: Request) {
         const today = new Date().toISOString().split('T')[0];
 
         // Find today's attendance record only if userId exists
+        // Find today's attendance record only if userId exists
+        /* 
+           DISABLE AUTO-CHECKOUT ON LOGOUT
+           User reported issue: "checkout is happening automatically". 
+           This was caused by system/token expiry or device switching triggering this logout logic, 
+           which unintentionally closed the attendance day.
+           
+           Fix: Logout should ONLY sign the user out. Attendance Check-Out must be EXPLICIT via the Dashboard button.
+        */
+
+        /*
         if (userId) {
             const attendance = await prisma.attendance.findFirst({
                 where: {
@@ -31,6 +42,7 @@ export async function POST(request: Request) {
                 console.log("No attendance record found for today to update logout time.");
             }
         }
+        */
 
 
         const response = NextResponse.json({ message: "Logged out successfully" });
