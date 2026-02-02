@@ -301,7 +301,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [globalTheme, setGlobalTheme] = useState<Theme>("light");
+    const [globalTheme, setGlobalTheme] = useState<Theme>("avengers");
     const [localTheme, setLocalThemeState] = useState<Theme | null>(null); // Local override
     const [isLoading, setIsLoading] = useState(true);
     const [avengersCharacter, setAvengersCharacter] = useState("iron-man");
@@ -342,6 +342,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Apply theme to document
     useEffect(() => {
         console.log("🎨 [ThemeProvider] Applying Theme:", theme);
+        console.log("🦸 [ThemeProvider] Character:", avengersCharacter);
         const root = window.document.documentElement;
 
         root.setAttribute("data-theme", theme);
