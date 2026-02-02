@@ -74,112 +74,38 @@ export function AvengersTheme({ character }: AvengersThemeProps) {
             recognition.interimResults = false;
 
             recognition.onresult = (event: any) => {
-                const rawCommand = event.results[0][0].transcript.toLowerCase();
-                const command = rawCommand.replace("go to", "").replace("page", "").trim(); // Normalize: "go to attendance page" -> "attendance"
-                setTranscript(rawCommand);
+                const command = event.results[0][0].transcript.toLowerCase();
+                setTranscript(command);
                 console.log("🎤 Voice Command:", command);
 
-                // --- VOICE NAVIGATION LOGIC ---
-                try {
-                    const userStr = sessionStorage.getItem("currentUser");
-                    const user = userStr ? JSON.parse(userStr) : null;
-                    const role = user?.role?.toLowerCase() || 'student'; // default to student
-
-                    let targetPath = "";
-
-                    // common mappings
-                    if (command.includes("dashboard") || command.includes("home")) {
-                        targetPath = `/dashboard/${role}`;
-                    }
-                    else if (command.includes("chat")) {
-                        targetPath = "/dashboard/user/chat";
-                    }
-                    else if (command.includes("logout") || command.includes("log out")) {
-                        // Trigger logout via existing system if possible, or simple redirect
-                        // finding the logout button might be hard, so just redirect to login for now or let sidebar handle it
-                        // Ideally we'd call the logout API, but let's stick to navigation
-                        window.location.href = "/login?logout=true";
-                        return;
-                    }
-
-                    // Role Specific Mappings
-                    if (role === 'admin') {
-                        if (command.includes("attendance")) targetPath = "/dashboard/admin/attendance";
-                        else if (command.includes("leave")) targetPath = "/dashboard/admin/leaves";
-                        else if (command.includes("task")) targetPath = "/dashboard/admin/tasks";
-                        else if (command.includes("user")) targetPath = "/dashboard/admin/users";
-                        else if (command.includes("validation") || command.includes("admin")) targetPath = "/dashboard/admin/validation";
-                        else if (command.includes("submission")) targetPath = "/dashboard/admin/submissions";
-                        else if (command.includes("mail") || command.includes("inbox")) targetPath = "/dashboard/admin/mailbox";
-                        else if (command.includes("setting") || command.includes("config")) targetPath = "/dashboard/admin/settings";
-                        else if (command.includes("report")) targetPath = "/dashboard/admin/reports";
-                        else if (command.includes("revenue")) targetPath = "/dashboard/admin/revenue";
-                        else if (command.includes("meeting")) targetPath = "/dashboard/admin/meetings";
-                        else if (command.includes("document")) targetPath = "/dashboard/admin/documents";
-                    }
-                    else if (role === 'student') {
-                        if (command.includes("submission")) targetPath = "/dashboard/student/submissions";
-                        else if (command.includes("game")) targetPath = "/dashboard/student/games";
-                        else if (command.includes("noc")) targetPath = "/dashboard/student/noc";
-                        else if (command.includes("certificate")) targetPath = "/dashboard/student/certificate";
-                        else if (command.includes("assessment")) targetPath = "/dashboard/student/assessment";
-                        // Attendance/Leaves for students are on the main dashboard
-                        else if (command.includes("attendance") || command.includes("leave")) {
-                            targetPath = "/dashboard/student";
-                            // Optional: Could append a query param like ?focus=attendance to scroll/highlight
-                        }
-                    }
-                    else if (role === 'employee') {
-                        if (command.includes("salary") || command.includes("slip")) targetPath = "/dashboard/employee/documents/salary-slips";
-                        else if (command.includes("leave")) targetPath = "/dashboard/leaves"; // Employee might have generic leaves
-                    }
-
-                    if (targetPath) {
-                        console.log(`🚀 Jarvis Navigating to: ${targetPath}`);
-                        // Play confirmation sound
-                        const confirmAudio = new Audio("https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3");
-                        confirmAudio.volume = 0.3;
-                        confirmAudio.play().catch(() => { });
-
-                        // Check if we are already here? If so, just unlock
-                        if (window.location.pathname === targetPath) {
-                            setIsBooted(true);
-                        } else {
-                            setTimeout(() => {
-                                window.location.href = targetPath;
-                            }, 800);
-                        }
-                    } else {
-                        setVoiceError("COMMAND NOT RECOGNIZED");
-                        // Fallback unlock so user isn't stuck
-                        setTimeout(() => {
-                            setIsBooted(true);
-                        }, 1000);
-                    }
-
-                } catch (e) {
-                    console.error("Navigation logic error:", e);
-                    setVoiceError("SYSTEM ERROR");
+                if (command.includes("dashboard") || command.includes("home")) {
+                    window.location.href = "/";
+                } else if (command.includes("settings") || command.includes("config")) {
+                    window.location.href = "/dashboard/admin/settings";
+                }
+                else if (command.includes("profile")) {
+                    // specific route if needed, else stay
                 }
 
-                // Unlock after command
+                // Unlock after command or default
                 setTimeout(() => {
                     setIsListening(false);
-                }, 1500);
+                    setIsBooted(true);
+                }, 1000);
             };
 
             recognition.onerror = (event: any) => {
-                console.warn("Speech recognition error:", event.error);
-                setVoiceError("VOICE PASSIVE");
+                console.warn("Speech recognition (expected if offline/unsupported):", event.error);
+                setVoiceError("VOICE OFFLINE - MANUAL BYPASS");
                 setIsListening(false);
-                setTimeout(() => setIsBooted(true), 1500); // Auto-Unlock Fallback
+                setTimeout(() => setIsBooted(true), 1500);
             };
 
             recognition.start();
         } else {
             // Fallback for non-supported browsers
             setVoiceError("VOICE UNAVAILABLE");
-            setTimeout(() => setIsBooted(true), 1000); // Only auto-boot if voice not supported
+            setTimeout(() => setIsBooted(true), 1000);
         }
     };
 
