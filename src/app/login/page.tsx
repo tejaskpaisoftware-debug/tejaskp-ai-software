@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import "../stars.css"; // Import the CSS stars
-import { ScanFace } from "lucide-react";
+import { ScanFace, Mic } from "lucide-react";
 import FaceLoginModal from "@/components/auth/FaceLoginModal";
-// import { Canvas } from "@react-three/fiber"; // Removed for mobile stability
-// import { Stars } from "@react-three/drei";
+import VoiceLoginModal from "@/components/auth/VoiceLoginModal";
+
 
 type Role = "ADMIN" | "STUDENT" | "EMPLOYEE" | "CLIENT";
 
@@ -23,7 +23,24 @@ export default function LoginPage() {
 
     const [error, setError] = useState("");
     const [showFaceModal, setShowFaceModal] = useState(false);
+    const [showVoiceModal, setShowVoiceModal] = useState(false); // NEW
     const router = useRouter();
+
+    // NEW Success Handler
+    const handleVoiceLoginSuccess = (userData: any) => {
+        sessionStorage.setItem("currentUser", JSON.stringify(userData));
+        if (userData.token) {
+            // Store token if your app uses it for API calls
+            // localStorage.setItem("token", userData.token); 
+        }
+
+        const role = userData.role;
+        if (role === "ADMIN") router.push("/dashboard/admin");
+        else if (role === "STUDENT") router.push("/dashboard/student");
+        else if (role === "EMPLOYEE") router.push("/dashboard/employee");
+        else if (role === "CLIENT") router.push("/dashboard/client");
+        else router.push("/dashboard");
+    };
 
     // 🛡️ SECURITY: Clear any stale session data on mount
     useEffect(() => {
@@ -226,100 +243,116 @@ export default function LoginPage() {
 
                                     {authStep === "LOGIN" && (
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">Password</label>
+                                            <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">
+                                                Password
+                                            </label>
                                             <input
                                                 type="password"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium border-opacity-50"
-                                                placeholder={activeRole === "ADMIN" ? "admin123" : "pass123 (or leave blank to test setup)"}
+                                                placeholder="Enter your password"
                                             />
-                                            {activeRole !== "ADMIN" && <p className="text-[11px] !text-white font-medium">*First time? Enter mobile & leave password blank</p>}
                                         </div>
                                     )}
 
                                     {authStep === "SET_PASSWORD" && (
                                         <>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">New Password</label>
+                                                <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">
+                                                    New Password
+                                                </label>
                                                 <input
                                                     type="password"
                                                     value={newPassword}
                                                     onChange={(e) => setNewPassword(e.target.value)}
-                                                    className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-all"
-                                                    placeholder="Minimum 6 characters"
+                                                    className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium border-opacity-50"
+                                                    placeholder="Enter new password"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">Confirm Password</label>
+                                                <label className="text-xs font-bold !text-yellow-500 uppercase tracking-wider">
+                                                    Confirm New Password
+                                                </label>
                                                 <input
                                                     type="password"
                                                     value={confirmPassword}
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                                    className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-all"
-                                                    placeholder="Re-enter password"
+                                                    className="w-full bg-[#1a1a1a] border border-yellow-600/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium border-opacity-50"
+                                                    placeholder="Confirm new password"
                                                 />
                                             </div>
                                         </>
                                     )}
 
-                                    {error && <p className="text-red-500 text-xs text-center font-bold tracking-wide">{error}</p>}
-
-                                    <div className="flex items-center justify-between text-xs !text-white">
-                                        <label className="flex items-center gap-2 cursor-pointer hover:text-white">
-                                            <input type="checkbox" className="rounded border-gray-600 bg-transparent text-yellow-500 focus:ring-offset-0 focus:ring-yellow-500" />
-                                            Remember me
-                                        </label>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setAuthStep("FORGOT_PASSWORD"); setError(""); }}
-                                            className="hover:text-yellow-400 transition-colors"
+                                    {error && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="text-red-500 text-sm text-center font-medium"
                                         >
-                                            Forgot Password?
-                                        </button>
-                                    </div>
+                                            {error}
+                                        </motion.div>
+                                    )}
 
-                                    <button className="w-full bg-[#EAB308] hover:bg-[#CA8A04] text-black font-extrabold py-4 rounded-lg shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] transition-all transform active:scale-95 text-base tracking-wide">
-                                        {authStep === "SET_PASSWORD" ? "SET PASSWORD & LOGIN"
-                                            : authStep === "FORGOT_PASSWORD" ? "PROCEED TO RESET"
-                                                : "ACCESS DASHBOARD"}
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-[#FFD700] text-black font-bold py-3 rounded-lg hover:bg-[#e6c200] transition-all active:scale-95 shadow-lg shadow-yellow-500/30"
+                                    >
+                                        {authStep === "SET_PASSWORD" ? "Set Password" : "Login"}
                                     </button>
 
                                     {authStep === "LOGIN" && (
-                                        <div className="relative py-4">
-                                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-yellow-500/20"></div></div>
-                                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#121212] px-4 text-yellow-500/40 font-bold tracking-widest">OR</span></div>
+                                        <div className="flex justify-between text-sm">
+                                            <button
+                                                type="button"
+                                                onClick={() => setAuthStep("FORGOT_PASSWORD")}
+                                                className="text-yellow-400 hover:underline"
+                                            >
+                                                Forgot Password?
+                                            </button>
+                                            {/* <button
+                                                type="button"
+                                                onClick={() => setAuthStep("REGISTER")}
+                                                className="text-yellow-400 hover:underline"
+                                            >
+                                                Register
+                                            </button> */}
                                         </div>
                                     )}
 
-                                    {authStep === "LOGIN" && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowFaceModal(true)}
-                                            className="w-full bg-transparent border border-yellow-500/50 text-yellow-500 font-bold py-4 rounded-lg hover:bg-yellow-500/10 transition-all flex items-center justify-center gap-3 active:scale-95"
-                                        >
-                                            <ScanFace size={24} />
-                                            SMART FACE LOGIN
-                                        </button>
-                                    )}
-
-                                    {(authStep === "SET_PASSWORD" || authStep === "FORGOT_PASSWORD") && (
+                                    {authStep === "FORGOT_PASSWORD" && (
                                         <button
                                             type="button"
                                             onClick={() => setAuthStep("LOGIN")}
-                                            className="w-full text-xs text-gold-500 hover:text-white underline"
+                                            className="text-yellow-400 hover:underline text-sm w-full text-center"
                                         >
-                                            Cancel
+                                            Back to Login
                                         </button>
                                     )}
                                 </form>
-                            </motion.div>
-                        </div>
 
-                        <div className="bg-obsidian/50 p-4 text-center border-t border-gold-500/10">
-                            <p className="text-xs !text-white">
-                                Protected by TEJASKP Security Systems v1.0
-                            </p>
+                                {authStep === "LOGIN" && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowFaceModal(true)}
+                                            className="bg-transparent border border-yellow-500/50 text-yellow-500 font-bold py-4 rounded-lg hover:bg-yellow-500/10 transition-all flex items-center justify-center gap-2 active:scale-95 text-xs"
+                                        >
+                                            <ScanFace size={20} />
+                                            FACE LOGIN
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowVoiceModal(true)}
+                                            className="bg-transparent border border-blue-500/50 text-blue-400 font-bold py-4 rounded-lg hover:bg-blue-500/10 transition-all flex items-center justify-center gap-2 active:scale-95 text-xs"
+                                        >
+                                            <Mic size={20} />
+                                            VOICE LOGIN
+                                        </button>
+                                    </div>
+                                )}
+                            </motion.div>
                         </div>
                     </div>
                 </motion.div>
@@ -329,6 +362,12 @@ export default function LoginPage() {
                 isOpen={showFaceModal}
                 onClose={() => setShowFaceModal(false)}
                 onSuccess={handleFaceLoginSuccess}
+            />
+
+            <VoiceLoginModal
+                isOpen={showVoiceModal}
+                onClose={() => setShowVoiceModal(false)}
+                onSuccess={handleVoiceLoginSuccess}
             />
         </div>
     );

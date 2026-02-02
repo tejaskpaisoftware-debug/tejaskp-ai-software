@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash, ScanFace, Shield, Search, UserCheck, AlertOctagon } from "lucide-react";
+import { Plus, Trash, ScanFace, Shield, Search, UserCheck, AlertOctagon, Mic } from "lucide-react";
 import AdminFaceEnrollment from "@/components/admin/AdminFaceEnrollment";
+import AdminVoiceEnrollment from "@/components/admin/AdminVoiceEnrollment";
 
 interface AdminUser {
     id: string;
@@ -10,6 +11,7 @@ interface AdminUser {
     mobile: string;
     employeeId: string;
     isFaceEnrolled: boolean;
+    voicePassphrase?: string; // Add check for voice
     createdAt: string;
 }
 
@@ -18,6 +20,7 @@ export default function AdminValidationPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEnrollModal, setShowEnrollModal] = useState(false);
+    const [showVoiceModal, setShowVoiceModal] = useState(false);
     const [selectedAdmin, setSelectedAdmin] = useState<{ id: string, name: string } | null>(null);
 
     // Form Stats
@@ -161,6 +164,16 @@ export default function AdminValidationPage() {
                                                 <ScanFace size={16} />
                                                 {admin.isFaceEnrolled ? "Re-Scan Face" : "Enroll Face"}
                                             </button>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAdmin({ id: admin.id, name: admin.name });
+                                                    setShowVoiceModal(true);
+                                                }}
+                                                className="flex items-center gap-2 bg-[#222] hover:bg-green-600 hover:text-white text-gray-300 px-4 py-2 rounded-lg text-xs font-bold transition-all border border-gray-700 hover:border-green-500 ml-2"
+                                            >
+                                                <Mic size={16} />
+                                                {admin.voicePassphrase ? "Update Voice" : "Enroll Voice"}
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
@@ -240,11 +253,22 @@ export default function AdminValidationPage() {
                 userName={selectedAdmin?.name || "Admin"}
             />
 
+            {/* Voice Enrollment Modal - Reuse selectedAdmin state or create new if needed. Reusing for simplicity. */}
+            <AdminVoiceEnrollment
+                isOpen={showVoiceModal}
+                onClose={() => setShowVoiceModal(false)}
+                onSuccess={() => {
+                    fetchAdmins();
+                }}
+                userId={selectedAdmin?.id || ""}
+                userName={selectedAdmin?.name || "Admin"}
+            />
+
         </div>
     );
 }
 // Helper icon
-function CheckCircle({ size, className }: { size: number, className: string }) {
+function CheckCircle({ size, className = "" }: { size: number, className?: string }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
     )

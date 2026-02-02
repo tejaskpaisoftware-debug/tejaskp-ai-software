@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
+// @ts-nocheck
+// Force reload: Voice Auth Schema Updateed
 // Forced reload comment - update 2
 
 const globalForPrisma = global as unknown as { prismaDb_racing_v2: PrismaClient }

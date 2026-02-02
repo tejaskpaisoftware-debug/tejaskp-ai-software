@@ -58,6 +58,8 @@ model User {
   skills           String?
   faceDescriptor   String?
   failedFaceAttempts Int           @default(0)
+  voicePassphrase    String?       // The text phrase they must say
+  voiceAudioPath     String?       // The path to their enrolled WAV file
   lockoutUntil     DateTime?
   attendance       Attendance[]
   certificates     Certificate[]
