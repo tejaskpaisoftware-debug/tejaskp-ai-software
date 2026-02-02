@@ -151,7 +151,10 @@ export function AvengersTheme({ character }: AvengersThemeProps) {
                         }
                     } else {
                         setVoiceError("COMMAND NOT RECOGNIZED");
-                        // DO NOT UNLOCK - Stay in Reactor Mode
+                        // Fallback unlock so user isn't stuck
+                        setTimeout(() => {
+                            setIsBooted(true);
+                        }, 1000);
                     }
 
                 } catch (e) {
@@ -159,14 +162,17 @@ export function AvengersTheme({ character }: AvengersThemeProps) {
                     setVoiceError("SYSTEM ERROR");
                 }
 
-                setIsListening(false);
+                // Unlock after command
+                setTimeout(() => {
+                    setIsListening(false);
+                }, 1500);
             };
 
             recognition.onerror = (event: any) => {
                 console.warn("Speech recognition error:", event.error);
-                setVoiceError("TRY AGAIN");
+                setVoiceError("VOICE PASSIVE");
                 setIsListening(false);
-                // DO NOT UNLOCK
+                setTimeout(() => setIsBooted(true), 1500); // Auto-Unlock Fallback
             };
 
             recognition.start();

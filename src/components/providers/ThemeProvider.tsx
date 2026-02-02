@@ -301,7 +301,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [globalTheme, setGlobalTheme] = useState<Theme>("avengers");
+    const [globalTheme, setGlobalTheme] = useState<Theme>("light");
     const [localTheme, setLocalThemeState] = useState<Theme | null>(null); // Local override
     const [isLoading, setIsLoading] = useState(true);
     const [avengersCharacter, setAvengersCharacter] = useState("iron-man");
