@@ -42,10 +42,13 @@ class WhatsAppManager {
         state.isInitializing = true;
         console.log(`[WhatsApp - ${userId}] Starting background Puppeteer instance with Stealth Config...`);
 
+        const isVercel = process.env.VERCEL === '1' || !!process.env.NOW_REGION;
+        const authPath = isVercel ? '/tmp/.wwebjs_auth' : '.wwebjs_auth';
+
         const client = new Client({
             authStrategy: new LocalAuth({
                 clientId: userId,
-                dataPath: '.wwebjs_auth'
+                dataPath: authPath
             }),
             webVersionCache: {
                 type: 'remote',
@@ -66,6 +69,9 @@ class WhatsAppManager {
                     '--window-position=0,0',
                     '--ignore-certificate-errors',
                     '--ignore-certificate-errors-spki-list',
+                    '--single-process',
+                    '--disable-web-security',
+                    '--disable-features=IsolateOrigins,site-per-process',
                     '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
                 ]
             }
