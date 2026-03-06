@@ -40,10 +40,10 @@ class WhatsAppManager {
         if (state.instance || state.isInitializing) return;
 
         state.isInitializing = true;
-        console.log(`[WhatsApp - ${userId}] Starting background Puppeteer instance with Stealth Config...`);
+        console.log(`[WhatsApp - ${userId}] Starting background Puppeteer instance...`);
 
-        const isVercel = process.env.VERCEL === '1' || !!process.env.NOW_REGION;
-        const authPath = isVercel ? '/tmp/.wwebjs_auth' : '.wwebjs_auth';
+        // Use a consistent data path for persistent storage
+        const authPath = '.wwebjs_auth';
 
         const client = new Client({
             authStrategy: new LocalAuth({
@@ -103,6 +103,11 @@ class WhatsAppManager {
             await client.initialize();
         } catch (error) {
             console.error(`[WhatsApp - ${userId}] Initialization failed:`, error);
+            if (state.instance) {
+                try {
+                    await state.instance.destroy();
+                } catch (e) { }
+            }
             state.instance = null;
         } finally {
             state.isInitializing = false;
