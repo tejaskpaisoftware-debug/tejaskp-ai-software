@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 // AdminSidebar removed (handled by layout)
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 type UserStatus = "PENDING" | "ACTIVE" | "BLOCKED";
 type User = {
@@ -19,6 +20,22 @@ type User = {
 export default function SystemLogsPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
+    // Role Protection
+    useEffect(() => {
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user") || localStorage.getItem("currentUser") || localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.role === "TEAM_LEAD") {
+                    router.replace('/dashboard/admin');
+                }
+            }
+        } catch (e) {
+            console.error("Role Check Error", e);
+        }
+    }, [router]);
 
     const fetchUsers = async () => {
         try {

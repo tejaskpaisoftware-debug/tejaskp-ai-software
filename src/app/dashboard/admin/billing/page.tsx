@@ -36,6 +36,21 @@ export default function BillingPage() {
         dueDate: "",
     });
 
+    // Role Protection
+    useEffect(() => {
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user") || localStorage.getItem("currentUser") || localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.role === "TEAM_LEAD") {
+                    router.replace('/dashboard/admin');
+                }
+            }
+        } catch (e) {
+            console.error("Role Check Error", e);
+        }
+    }, [router]);
+
     useEffect(() => {
         // Fetch Students only
         fetch("/api/admin/users").then(res => res.json()).then(data => {

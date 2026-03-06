@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { adminTransporter, ADMIN_SENDER_IDENTITY } from "@/lib/admin-mailer";
+import { restrictToAdmin } from "@/lib/auth-server";
 
 export async function POST(request: Request) {
+    const auth = await restrictToAdmin();
+    if (!auth.authorized) return auth.response;
+
     try {
         const { email, name, month, pdfBase64 } = await request.json();
 

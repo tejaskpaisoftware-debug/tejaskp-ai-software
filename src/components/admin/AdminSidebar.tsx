@@ -38,7 +38,7 @@ const menuItems = [
     { name: "Billing", href: "/dashboard/admin/billing", icon: "🧾" },
     { name: "Invoices", href: "/dashboard/admin/invoices", icon: "📄" },
     { name: "Daily Updates", href: "/dashboard/admin/updates", icon: "📢" },
-    { name: 'Reports', href: '/dashboard/admin/reports', icon: '📊' },
+    { name: 'Reports', href: '/dashboard/admin/reports/attendance', icon: '📊' },
     { name: "Revenue", href: "/dashboard/admin/revenue", icon: "💰" },
     { name: "Chat Server", href: "/dashboard/admin/chat-server", icon: "💬" },
     { name: "Online Meetings", href: "/dashboard/admin/meetings", icon: "📹" },
@@ -61,6 +61,40 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop, widt
     const [openSubmenu, setOpenSubmenu] = useState<string | null>("Users");
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
+    const [userRole, setUserRole] = useState<string>("ADMIN");
+    const [userName, setUserName] = useState<string>("Admin User");
+
+    // Retrieve the user from session to determine their role
+    useEffect(() => {
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user") || localStorage.getItem("currentUser") || localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                setUserRole(user.role || "ADMIN");
+                setUserName(user.name || "Admin User");
+            }
+        } catch (e) {
+            console.error("Error reading role", e);
+        }
+    }, []);
+
+    // Filter menu items based on ROLE
+    const filteredMenuItems = menuItems.map(item => {
+        if (userRole === "TEAM_LEAD") {
+            // Remove full groups
+            const forbiddenTopLevel = ["Payroll Automation", "Billing", "Invoices", "Revenue", "System Logs", "Settings"];
+            if (forbiddenTopLevel.includes(item.name)) return null;
+
+            // Remove specific sub-items (e.g. Admin Validation from Users)
+            if (item.subItems) {
+                const filteredSubs = item.subItems.filter(sub => sub.name !== "Admin Validation");
+                return { ...item, subItems: filteredSubs };
+            }
+        }
+        // DEVELOPMENT_MANAGER and ADMIN see everything
+
+        return item;
+    }).filter(Boolean) as typeof menuItems;
 
     // Sidebar resize handler
     useEffect(() => {
@@ -209,7 +243,7 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop, widt
                 </div>
 
                 <nav className="space-y-1.5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-yellow-900/20 scrollbar-track-transparent">
-                    {menuItems.map((item) => {
+                    {filteredMenuItems.map((item) => {
                         const isActive = pathname === item.href;
                         const hasSubItems = item.subItems && item.subItems.length > 0;
                         const isOpen = openSubmenu === item.name;
@@ -292,8 +326,8 @@ export default function AdminSidebar({ isDesktopOpen = true, toggleDesktop, widt
                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black shadow-[0_0_5px_rgba(34,197,94,0.8)]"></div>
                         </div>
                         <div>
-                            <div className="text-sm font-bold text-gray-200 group-hover:text-white transition-colors">Admin User</div>
-                            <div className="text-xs text-green-400 font-medium">● Online</div>
+                            <div className="text-sm font-bold text-gray-200 group-hover:text-white transition-colors truncate max-w-[120px]">{userName}</div>
+                            <div className="text-[10px] text-yellow-500/80 font-black tracking-tighter uppercase">{userRole.replace('_', ' ')}</div>
                         </div>
                     </div>
 

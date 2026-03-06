@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { differenceInDays, parseISO, startOfDay } from "date-fns";
 
 export async function POST(request: Request) {
     try {
@@ -19,6 +20,21 @@ export async function POST(request: Request) {
         // Ensure isHalfDay is boolean
         const halfDayBool = isHalfDay === true || isHalfDay === "true";
 
+        // --- CASUAL LEAVE 2-DAY RULE ---
+        let finalStatus = "PENDING";
+        let autoRemark = "";
+
+        if ((type === "CL" || type === "Casual") && startDate) {
+            const today = startOfDay(new Date());
+            const leaveStart = startOfDay(parseISO(startDate));
+            const daysDiff = differenceInDays(leaveStart, today);
+
+            if (daysDiff < 2) {
+                finalStatus = "REJECTED";
+                autoRemark = "Auto-rejected: Must apply at least 2 days in advance.";
+            }
+        }
+
         const leave = await prisma.leave.create({
             data: {
                 userId,
@@ -26,10 +42,24 @@ export async function POST(request: Request) {
                 endDate,
                 reason,
                 type: type || "CL",
-                status: "PENDING",
-                isHalfDay: halfDayBool
+                status: finalStatus,
+                isHalfDay: halfDayBool,
+                managerRemarks: autoRemark || null
             }
         });
+
+        const { NotificationService } = require("@/lib/notifications");
+
+        // --- AUTOMATIC CASUAL LEAVE REJECTION NOTIFICATION ---
+        if (finalStatus === "REJECTED" && (type === "CL" || type === "Casual")) {
+            await NotificationService.sendCasualLeaveRejected(userId);
+        }
+
+        // --- SICK LEAVE CARE TRIGGER ---
+        if (type === "Medical" || type === "Sick" || reason.toLowerCase().includes("sick") || reason.toLowerCase().includes("fever")) {
+            const { NotificationService } = require("@/lib/notifications");
+            await NotificationService.sendSickLeaveCare(userId);
+        }
 
         return NextResponse.json(leave);
     } catch (error) {

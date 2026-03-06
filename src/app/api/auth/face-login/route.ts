@@ -83,7 +83,7 @@ export async function POST(req: Request) {
             .setExpirationTime('24h')
             .sign(secret);
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             status: "SUCCESS",
             message: "Face Login Successful!",
@@ -96,6 +96,18 @@ export async function POST(req: Request) {
                 token: jwt
             }
         });
+
+        response.cookies.set({
+            name: "auth_token",
+            value: jwt,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 // 24 hours
+        });
+
+        return response;
 
     } catch (error) {
         console.error("Face Login Error:", error);

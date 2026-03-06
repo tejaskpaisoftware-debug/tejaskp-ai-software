@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 // AdminSidebar removed (handled by layout)
 
 export default function RevenuePage() {
+    const router = useRouter();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'yearly' | 'monthly' | 'weekly' | 'daily' | 'custom'>('monthly');
@@ -27,6 +29,21 @@ export default function RevenuePage() {
     // Transaction Filters
     const [filterType, setFilterType] = useState<'all' | 'day' | 'week' | 'month' | 'year'>('all');
     const [filterValue, setFilterValue] = useState('');
+
+    // Role Protection
+    useEffect(() => {
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user") || localStorage.getItem("currentUser") || localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.role === "TEAM_LEAD") {
+                    router.replace('/dashboard/admin');
+                }
+            }
+        } catch (e) {
+            console.error("Role Check Error", e);
+        }
+    }, [router]);
 
     useEffect(() => {
         // Initial fetch only if not custom

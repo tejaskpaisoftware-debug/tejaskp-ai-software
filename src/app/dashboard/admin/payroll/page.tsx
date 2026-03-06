@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 // AdminSidebar removed (handled by layout)
 import { motion } from "framer-motion";
 import SalarySlipTemplate from "@/components/documents/SalarySlipTemplate";
@@ -8,6 +9,7 @@ import { toPng, toJpeg } from "html-to-image";
 import jsPDF from "jspdf";
 
 export default function PayrollPage() {
+    const router = useRouter();
     const [employees, setEmployees] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -24,6 +26,21 @@ export default function PayrollPage() {
     // Leave Management Modal State
     const [selectedEmployeeLeaves, setSelectedEmployeeLeaves] = useState<any>(null);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+
+    // Role Protection
+    useEffect(() => {
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user") || localStorage.getItem("currentUser") || localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.role === "TEAM_LEAD") {
+                    router.replace('/dashboard/admin');
+                }
+            }
+        } catch (e) {
+            console.error("Role Check Error", e);
+        }
+    }, [router]);
 
     useEffect(() => {
         fetchEmployees();

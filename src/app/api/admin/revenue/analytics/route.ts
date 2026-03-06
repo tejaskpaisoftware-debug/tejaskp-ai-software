@@ -1,6 +1,6 @@
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { restrictToAdmin } from "@/lib/auth-server";
 
 function formatPeriod(period: string, type: 'yearly' | 'monthly' | 'weekly' | 'daily'): string {
     if (!period) return "";
@@ -28,6 +28,9 @@ function getYearRange(year: number) {
 }
 
 export async function GET(request: Request) {
+    const auth = await restrictToAdmin();
+    if (!auth.authorized) return auth.response;
+
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');

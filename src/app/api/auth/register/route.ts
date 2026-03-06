@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { role, fullName, mobile, email, details, address, joiningDate } = body;
+        const { role, fullName, mobile, email, details, address, joiningDate, department } = body;
 
         // Check if user exists (Mobile)
         const existingUserMobile = await prisma.user.findUnique({
@@ -53,7 +53,8 @@ export async function POST(request: Request) {
                 password: "", // Empty means pending setup
                 status: "PENDING",
                 joiningDate: joiningDate || null, // Store explicit joining date
-                createdAt: creationTime // Backdate creation if needed
+                createdAt: creationTime, // Backdate creation if needed
+                department: department || null
             }
         });
 

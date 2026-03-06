@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Home, Calendar, FileText, ClipboardList, MessageCircle, TrendingUp, Gamepad2, Video, Palette } from "lucide-react";
+import { X, Home, Calendar, FileText, ClipboardList, MessageCircle, TrendingUp, Gamepad2, Video, Palette, User } from "lucide-react";
 import StudentSubmissionsPage from "./submissions/page";
 import DraggableAIButton from "@/components/common/DraggableAIButton";
 import ReferralSection from "@/components/student/ReferralSection";
@@ -11,6 +11,7 @@ import MeetingSection from "@/components/common/MeetingSection";
 import ThemeSelector from "@/components/common/ThemeSelector";
 import TejasKPLogo from "@/components/common/TejasKPLogo";
 import FaceCheckInModal from "@/components/student/FaceCheckInModal";
+import ProfileSection from "@/components/student/ProfileSection";
 
 // Helper for Auth Header
 const getAuthHeader = (): HeadersInit => {
@@ -42,7 +43,7 @@ export default function StudentDashboard() {
         }
     }, [router]);
 
-    const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'leaves' | 'documents' | 'submissions' | 'earn' | 'meetings' | 'theme'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'leaves' | 'documents' | 'submissions' | 'earn' | 'meetings' | 'theme' | 'profile'>('overview');
     const [showCheckInPrompt, setShowCheckInPrompt] = useState(false);
     const [todayRecord, setTodayRecord] = useState<any>(null);
     const [isCheckingInFromPrompt, setIsCheckingInFromPrompt] = useState(false);
@@ -175,7 +176,7 @@ export default function StudentDashboard() {
 
             {/* Desktop Tabs (Hidden on Mobile) */}
             <div className="hidden md:flex gap-4 mb-8">
-                {['overview', 'attendance', 'leaves', 'documents', 'submissions', 'earn', 'meetings'].map((tab) => (
+                {['overview', 'attendance', 'leaves', 'documents', 'submissions', 'earn', 'meetings', 'profile'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
@@ -232,6 +233,11 @@ export default function StudentDashboard() {
                 )}
                 {activeTab === 'earn' && user && <ReferralSection userId={(user as any).id} />}
                 {activeTab === 'meetings' && user && <MeetingSection userId={(user as any).id} userName={(user as any).name} />}
+                {activeTab === 'profile' && user && (
+                    <div className="mt-8">
+                        <ProfileSection userId={user.id} />
+                    </div>
+                )}
                 {activeTab === 'theme' && <ThemeSelector />}
             </div>
 
@@ -240,6 +246,7 @@ export default function StudentDashboard() {
                 <NavButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<Home size={20} />} label="Home" />
                 <NavButton active={activeTab === 'attendance'} onClick={() => setActiveTab('attendance')} icon={<Calendar size={20} />} label="Attend" />
                 <NavButton active={activeTab === 'submissions'} onClick={() => setActiveTab('submissions')} icon={<ClipboardList size={20} />} label="Tasks" />
+                <NavButton active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} icon={<User size={20} />} label="Profile" />
                 <NavButton active={activeTab === 'meetings'} onClick={() => setActiveTab('meetings')} icon={<Video size={20} />} label="Meet" />
                 <NavButton active={activeTab === 'earn'} onClick={() => setActiveTab('earn')} icon={<TrendingUp size={20} />} label="Earn" />
                 <NavButton active={activeTab === 'documents'} onClick={() => setActiveTab('documents')} icon={<FileText size={20} />} label="Docs" />
@@ -318,12 +325,17 @@ export default function StudentDashboard() {
                             body: JSON.stringify({ userId: user?.id })
                         });
                         if (res.ok) {
+                            alert("Check-in Successful!");
                             checkTodayAttendance(); // Refresh & Hide Prompt
                         } else {
                             const err = await res.json();
-                            alert(err.message || "Attendance failed");
+                            const detailedErr = err.error ? ` - ${err.error}` : "";
+                            alert(`Check-in Failed: ${err.message || "Unknown error"}${detailedErr}`);
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) {
+                        console.error(e);
+                        alert("Network error during check-in. Please check your connection.");
+                    }
                 }}
                 userId={user?.id || ""}
                 mode="check-in"
@@ -478,9 +490,14 @@ function AttendanceSection({ userId, onRefresh }: { userId: string, onRefresh?: 
                     body: JSON.stringify({ userId })
                 });
                 if (res.ok) {
+                    alert("Check-in Successful!");
                     fetchTodayStatus();
                     fetchHistory();
                     if (onRefresh) onRefresh(); // 🛡️ Refresh global state
+                } else {
+                    const err = await res.json();
+                    const detailedErr = err.error ? ` - ${err.error}` : "";
+                    alert(`Check-in Failed: ${err.message || "Unknown error"}${detailedErr}`);
                 }
             } else {
                 // Check Out Mode
@@ -490,12 +507,20 @@ function AttendanceSection({ userId, onRefresh }: { userId: string, onRefresh?: 
                     body: JSON.stringify({ userId })
                 });
                 if (res.ok) {
+                    alert("Check-out Successful!");
                     fetchTodayStatus();
                     fetchHistory();
                     if (onRefresh) onRefresh(); // 🛡️ Refresh global state
+                } else {
+                    const err = await res.json();
+                    const detailedErr = err.error ? ` - ${err.error}` : "";
+                    alert(`Check-out Failed: ${err.message || "Unknown error"}${detailedErr}`);
                 }
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            alert("Network error during attendance update.");
+        }
         finally { setLoading(false); }
     };
 
@@ -504,9 +529,31 @@ function AttendanceSection({ userId, onRefresh }: { userId: string, onRefresh?: 
         setShowFaceModal(true);
     };
 
+    const stats = {
+        present: history.filter(h => h.status === 'PRESENT' || h.status === 'LATE').length,
+        late: history.filter(h => h.isLate || h.status === 'LATE').length,
+        absent: history.filter(h => h.status === 'ABSENT' || h.isAbsent).length
+    };
+
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             <h2 className="text-2xl font-bold text-foreground">Attendance Management</h2>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-4">
+                <div className="bg-green-500/10 border border-green-500/30 p-4 rounded-xl flex flex-col items-center shadow-lg">
+                    <span className="text-2xl font-black text-green-500">{stats.present}</span>
+                    <span className="text-[10px] uppercase text-green-400/80 font-black tracking-widest">Present</span>
+                </div>
+                <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-xl flex flex-col items-center shadow-lg">
+                    <span className="text-2xl font-black text-yellow-500">{stats.late}</span>
+                    <span className="text-[10px] uppercase text-yellow-500/80 font-black tracking-widest">Late</span>
+                </div>
+                <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex flex-col items-center shadow-lg">
+                    <span className="text-2xl font-black text-red-500">{stats.absent}</span>
+                    <span className="text-[10px] uppercase text-red-400/80 font-black tracking-widest">Absent</span>
+                </div>
+            </div>
 
             {/* Action Card */}
             <div className="bg-card border border-theme rounded-xl p-8 flex flex-col items-center justify-center text-center">

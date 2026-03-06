@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Trash, ScanFace, Shield, Search, UserCheck, AlertOctagon, Mic } from "lucide-react";
 import AdminFaceEnrollment from "@/components/admin/AdminFaceEnrollment";
 import AdminVoiceEnrollment from "@/components/admin/AdminVoiceEnrollment";
@@ -10,6 +11,7 @@ interface AdminUser {
     name: string;
     mobile: string;
     employeeId: string;
+    role: string;
     isFaceEnrolled: boolean;
     voicePassphrase?: string; // Add check for voice
     createdAt: string;
@@ -22,6 +24,24 @@ export default function AdminValidationPage() {
     const [showEnrollModal, setShowEnrollModal] = useState(false);
     const [showVoiceModal, setShowVoiceModal] = useState(false);
     const [selectedAdmin, setSelectedAdmin] = useState<{ id: string, name: string } | null>(null);
+    const router = useRouter();
+
+    // Role Protection
+    useEffect(() => {
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user") || localStorage.getItem("currentUser") || localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.role === "TEAM_LEAD") {
+                    router.replace('/dashboard/admin');
+                }
+                // Admin and Development Manager allowed
+
+            }
+        } catch (e) {
+            console.error("Role Check Error", e);
+        }
+    }, [router]);
 
     // Form Stats
     const [newName, setNewName] = useState("");
@@ -43,6 +63,22 @@ export default function AdminValidationPage() {
             console.error("Failed to fetch admins", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleRemoveAdmin = async (id: string) => {
+        if (!confirm("Are you sure you want to remove this administrative user? Their biometric access will be revoked.")) return;
+        try {
+            const res = await fetch(`/api/admin/admins?id=${id}`, { method: "DELETE" });
+            if (res.ok) {
+                alert("User removed successfully");
+                fetchAdmins();
+            } else {
+                const err = await res.json();
+                alert(err.message || "Failed to remove user");
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -90,7 +126,7 @@ export default function AdminValidationPage() {
                     onClick={() => setShowAddModal(true)}
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-blue-500/20"
                 >
-                    <Plus size={20} /> Add Sub Admin
+                    <Plus size={20} /> Add Team Lead
                 </button>
             </div>
 
@@ -98,7 +134,7 @@ export default function AdminValidationPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-[#111] p-6 rounded-2xl border border-gray-800">
                     <div className="text-2xl font-bold text-white mb-1">{admins.length}</div>
-                    <div className="text-xs text-gray-400 uppercase tracking-widest">Total Admins</div>
+                    <div className="text-xs text-gray-400 uppercase tracking-widest">Administrative Users</div>
                 </div>
                 <div className="bg-[#111] p-6 rounded-2xl border border-gray-800">
                     <div className="text-2xl font-bold text-green-500 mb-1">{admins.filter(a => a.isFaceEnrolled).length}</div>
@@ -116,7 +152,7 @@ export default function AdminValidationPage() {
                     <table className="w-full text-left">
                         <thead className="bg-[#1a1a1a] text-xs uppercase tracking-wider text-gray-400 font-semibold">
                             <tr>
-                                <th className="p-4">Admin Details</th>
+                                <th className="p-4">Staff Details</th>
                                 <th className="p-4">Role / ID</th>
                                 <th className="p-4">Biometric Status</th>
                                 <th className="p-4">Actions</th>
@@ -126,7 +162,7 @@ export default function AdminValidationPage() {
                             {isLoading ? (
                                 <tr><td colSpan={4} className="p-8 text-center text-gray-500">Loading Access Data...</td></tr>
                             ) : admins.length === 0 ? (
-                                <tr><td colSpan={4} className="p-8 text-center text-gray-500">No Sub-Admins Found</td></tr>
+                                <tr><td colSpan={4} className="p-8 text-center text-gray-500">No Administrative Staff Found</td></tr>
                             ) : (
                                 admins.map((admin) => (
                                     <tr key={admin.id} className="hover:bg-white/5 transition-colors">
@@ -143,7 +179,12 @@ export default function AdminValidationPage() {
                                         </td>
                                         <td className="p-4">
                                             <div className="text-sm font-mono text-gray-300">{admin.employeeId || 'N/A'}</div>
-                                            <div className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded w-fit mt-1">SUPER ADMIN</div>
+                                            <div className={`text-[10px] px-2 py-0.5 rounded w-fit mt-1 uppercase font-bold ${admin.role === 'ADMIN' ? 'bg-red-500/10 text-red-400' :
+                                                    admin.role === 'DEVELOPMENT_MANAGER' ? 'bg-yellow-500/10 text-yellow-400' :
+                                                        'bg-blue-500/10 text-blue-400'}`}>
+                                                {admin.role.replace('_', ' ')}
+                                            </div>
+
                                         </td>
                                         <td className="p-4">
                                             {admin.isFaceEnrolled ? (
@@ -174,6 +215,13 @@ export default function AdminValidationPage() {
                                                 <Mic size={16} />
                                                 {admin.voicePassphrase ? "Update Voice" : "Enroll Voice"}
                                             </button>
+                                            <button
+                                                onClick={() => handleRemoveAdmin(admin.id)}
+                                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all ml-2"
+                                                title="Remove Staff"
+                                            >
+                                                <Trash size={14} />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
@@ -188,15 +236,47 @@ export default function AdminValidationPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-[#1a1a1a] w-full max-w-md rounded-2xl border border-gray-700 p-6 shadow-2xl">
                         <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                            <Plus size={20} className="text-blue-500" /> New Sub Admin
+                            <Plus size={20} className="text-blue-500" /> New Staff Access
                         </h2>
-                        <form onSubmit={handleCreateAdmin} className="space-y-4">
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const target = e.target as typeof e.target & {
+                                name: { value: string };
+                                mobile: { value: string };
+                                password: { value: string };
+                                role: { value: string };
+                            };
+
+                            try {
+                                const res = await fetch("/api/admin/admins", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        name: target.name.value,
+                                        mobile: target.mobile.value,
+                                        password: target.password.value,
+                                        role: target.role.value
+                                    }),
+                                });
+
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    alert(data.info || "Staff Account Created Successfully");
+                                    setShowAddModal(false);
+                                    fetchAdmins();
+                                } else {
+                                    const err = await res.json();
+                                    alert(err.message || "Failed to create staff");
+                                }
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        }} className="space-y-4">
                             <div>
                                 <label className="text-xs text-gray-500 uppercase font-bold">Full Name</label>
                                 <input
+                                    name="name"
                                     required
-                                    value={newName}
-                                    onChange={e => setNewName(e.target.value)}
                                     className="w-full bg-[#111] border border-gray-700 rounded-lg p-3 text-white mt-1 focus:border-blue-500 focus:outline-none"
                                     placeholder="Enter name"
                                 />
@@ -204,20 +284,31 @@ export default function AdminValidationPage() {
                             <div>
                                 <label className="text-xs text-gray-500 uppercase font-bold">Mobile</label>
                                 <input
+                                    name="mobile"
                                     required
-                                    value={newMobile}
-                                    onChange={e => setNewMobile(e.target.value)}
                                     className="w-full bg-[#111] border border-gray-700 rounded-lg p-3 text-white mt-1 focus:border-blue-500 focus:outline-none"
                                     placeholder="10-digit mobile"
                                 />
                             </div>
                             <div>
+                                <label className="text-xs text-gray-500 uppercase font-bold">Role Type</label>
+                                <select
+                                    name="role"
+                                    defaultValue="TEAM_LEAD"
+                                    className="w-full bg-[#111] border border-gray-700 rounded-lg p-3 text-white mt-1 focus:border-blue-500 focus:outline-none"
+                                >
+                                    <option value="TEAM_LEAD">Team Lead (Restricted Access)</option>
+                                    <option value="DEVELOPMENT_MANAGER">Development Manager (Full Student Access)</option>
+                                    <option value="ADMIN">Super Admin (Full Access)</option>
+                                </select>
+
+                            </div>
+                            <div>
                                 <label className="text-xs text-gray-500 uppercase font-bold">Password</label>
                                 <input
+                                    name="password"
                                     required
                                     type="password"
-                                    value={newPassword}
-                                    onChange={e => setNewPassword(e.target.value)}
                                     className="w-full bg-[#111] border border-gray-700 rounded-lg p-3 text-white mt-1 focus:border-blue-500 focus:outline-none"
                                     placeholder="Secure password"
                                 />

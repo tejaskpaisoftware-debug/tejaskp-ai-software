@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth-server";
 
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await context.params; // 'id' here is the mobile number
+        const auth = await getAuthUser();
 
         if (!id) {
             return NextResponse.json({ message: "User ID Required" }, { status: 400 });
         }
 
+        // 1. Fetch User First
         const user = await prisma.user.findFirst({
             where: {
                 OR: [
@@ -31,6 +34,18 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
 
+        // 2. Role Check: Team Lead restriction
+        if (auth && auth.role === "TEAM_LEAD") {
+            const lead = await prisma.user.findUnique({
+                where: { id: auth.userId },
+                select: { department: true }
+            });
+
+            if (user.role !== "STUDENT" || user.department !== lead?.department) {
+                return NextResponse.json({ message: "Unauthorized: Domain Restriction" }, { status: 403 });
+            }
+        }
+
         return NextResponse.json({ user });
     } catch (error) {
         console.error("Error fetching user:", error);
@@ -42,17 +57,49 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await context.params;
+        const auth = await getAuthUser();
         if (!id) return NextResponse.json({ message: "ID Required" }, { status: 400 });
 
-        // Delete dependencies first (optional, but cascaded usually handled by DB or explicit logic)
-        // Since I have separate tables (Invoice, etc.), I should ideally delete them or rely on cascade.
-        // For now, I'll rely on my 'clear_data.js' logic being robust or assume Prisma handles it if configured.
-        // Actually, for individual delete, I should be safe.
-        // Note: The user explicitly wants to "remove students".
+        // Role Check: Team Lead cannot delete or can only delete their own students?
+        // User said "they should only see students from the Web Development domain... They must not see students from other domains."
+        // Usually, deletion is Admin-only, but let's check current user role.
+        if (auth && auth.role === "TEAM_LEAD") {
+            const lead = await prisma.user.findUnique({ where: { id: auth.userId }, select: { department: true } });
+            const target = await prisma.user.findUnique({ where: { id }, select: { department: true, role: true } });
+            if (!target || target.role !== "STUDENT" || target.department !== lead?.department) {
+                return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+            }
+        }
 
-        await prisma.user.delete({
-            where: { id }
-        });
+
+        // Delete dependencies first sequentially to avoid transaction timeouts
+        await prisma.attendance.deleteMany({ where: { userId: id } });
+        await prisma.studentDocument.deleteMany({ where: { userId: id } });
+        await prisma.leave.deleteMany({ where: { userId: id } });
+        await prisma.leaveBalance.deleteMany({ where: { userId: id } });
+        await prisma.certificate.deleteMany({ where: { userId: id } });
+        await prisma.invoice.deleteMany({ where: { userId: id } });
+        await prisma.joiningLetter.deleteMany({ where: { userId: id } });
+        await prisma.salarySlip.deleteMany({ where: { userId: id } });
+        await prisma.session.deleteMany({ where: { userId: id } });
+        await prisma.systemLog.deleteMany({ where: { userId: id } });
+        await prisma.submission.deleteMany({ where: { userId: id } });
+        await prisma.notification.deleteMany({ where: { userId: id } });
+        await prisma.referral.deleteMany({ where: { referrerId: id } });
+        await prisma.message.deleteMany({ where: { senderId: id } });
+        await prisma.task.deleteMany({ where: { assignedToId: id } });
+
+        // Ensure Mailbox deletion if it exists
+        const mailbox = await prisma.mailbox.findUnique({ where: { userId: id } });
+        if (mailbox) {
+            // Delete associated email recipients & emails tied to the mailbox
+            await prisma.emailRecipient.deleteMany({ where: { mailboxId: mailbox.id } });
+            await prisma.email.deleteMany({ where: { senderId: mailbox.id } });
+            await prisma.mailbox.delete({ where: { userId: id } });
+        }
+
+        // Finally, delete the User
+        await prisma.user.delete({ where: { id } });
 
         return NextResponse.json({ success: true, message: "User Deleted" });
     } catch (error) {
@@ -64,11 +111,22 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await context.params;
+        const auth = await getAuthUser();
         if (!id) return NextResponse.json({ message: "ID Required" }, { status: 400 });
+
+        // Role Check
+        if (auth && auth.role === "TEAM_LEAD") {
+            const lead = await prisma.user.findUnique({ where: { id: auth.userId }, select: { department: true } });
+            const target = await prisma.user.findUnique({ where: { id }, select: { department: true, role: true } });
+            if (!target || target.role !== "STUDENT" || target.department !== lead?.department) {
+                return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+            }
+        }
+
 
         const body = await request.json();
         const {
-            name, email, mobile, course, role, status, totalFees, paidAmount,
+            name, email, mobile, parentMobile, course, role, status, totalFees, paidAmount,
             department, designation, employeeId, photoUrl, reportingManager,
             skills, dob, bloodGroup, currentAddress, permanentAddress, emergencyContact,
             bankName, accountNumber, ifscCode, panNumber, aadharCard,
@@ -89,6 +147,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                     name: name ? name.toUpperCase() : undefined,
                     email,
                     mobile,
+                    parentMobile,
                     course,
                     role,
                     status,

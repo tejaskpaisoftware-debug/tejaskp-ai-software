@@ -9,7 +9,7 @@ import FaceLoginModal from "@/components/auth/FaceLoginModal";
 import VoiceLoginModal from "@/components/auth/VoiceLoginModal";
 
 
-type Role = "ADMIN" | "STUDENT" | "EMPLOYEE" | "CLIENT";
+type Role = "ADMIN" | "STUDENT" | "EMPLOYEE" | "CLIENT" | "DEVELOPMENT_MANAGER" | "TEAM_LEAD";
 
 export default function LoginPage() {
     const [activeRole, setActiveRole] = useState<Role>("STUDENT");
@@ -35,7 +35,7 @@ export default function LoginPage() {
         }
 
         const role = userData.role;
-        if (role === "ADMIN") router.push("/dashboard/admin");
+        if (role === "ADMIN" || role === "TEAM_LEAD" || role === "DEVELOPMENT_MANAGER") router.push("/dashboard/admin");
         else if (role === "STUDENT") router.push("/dashboard/student");
         else if (role === "EMPLOYEE") router.push("/dashboard/employee");
         else if (role === "CLIENT") router.push("/dashboard/client");
@@ -101,7 +101,7 @@ export default function LoginPage() {
                 } else if (data.status === "SUCCESS") {
                     sessionStorage.setItem("currentUser", JSON.stringify(data.user));
                     const role = data.user.role;
-                    if (role === "ADMIN") router.push("/dashboard/admin");
+                    if (role === "ADMIN" || role === "TEAM_LEAD" || role === "DEVELOPMENT_MANAGER") router.push("/dashboard/admin");
                     else if (role === "STUDENT") router.push("/dashboard/student");
                     else if (role === "EMPLOYEE") router.push("/dashboard/employee");
                     else if (role === "CLIENT") router.push("/dashboard/client");
@@ -119,7 +119,7 @@ export default function LoginPage() {
     const handleFaceLoginSuccess = (userData: any) => {
         sessionStorage.setItem("currentUser", JSON.stringify(userData));
         const role = userData.role;
-        if (role === "ADMIN") router.push("/dashboard/admin");
+        if (role === "ADMIN" || role === "TEAM_LEAD" || role === "DEVELOPMENT_MANAGER") router.push("/dashboard/admin");
         else if (role === "STUDENT") router.push("/dashboard/student");
         else if (role === "EMPLOYEE") router.push("/dashboard/employee");
         else if (role === "CLIENT") router.push("/dashboard/client");
@@ -181,7 +181,7 @@ export default function LoginPage() {
                 >
                     <div className="bg-[#121212]/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
                         <div className="flex border-b border-yellow-500/20">
-                            {["STUDENT", "EMPLOYEE", "CLIENT"].map((role) => (
+                            {["STUDENT", "EMPLOYEE", "CLIENT", "DEVELOPMENT_MANAGER"].map((role) => (
                                 <button
                                     key={role}
                                     onClick={() => { setActiveRole(role as Role); setAuthStep("LOGIN"); setError(""); }}
@@ -214,7 +214,9 @@ export default function LoginPage() {
                                         {authStep === "SET_PASSWORD" ? "Setup Password" :
                                             activeRole === 'ADMIN' ? 'System Administration' :
                                                 activeRole === 'STUDENT' ? 'Student Portal' :
-                                                    activeRole === 'EMPLOYEE' ? 'Staff Access' : 'Client Dashboard'}
+                                                    activeRole === 'EMPLOYEE' ? 'Staff Access' :
+                                                        activeRole === 'CLIENT' ? 'Client Dashboard' :
+                                                            activeRole === 'DEVELOPMENT_MANAGER' ? 'Manager Dashboard' : ''}
                                     </h2>
                                     <p className="!text-white text-sm">
                                         {authStep === "SET_PASSWORD"

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { restrictToAdmin } from "@/lib/auth-server";
 // Force recompile: 1
 
 // POST: Create Invoice
 export async function POST(request: Request) {
+    const auth = await restrictToAdmin();
+    if (!auth.authorized) return auth.response;
+
     try {
         const body = await request.json();
 
@@ -107,6 +111,9 @@ export async function POST(request: Request) {
 
 // GET: List Invoices
 export async function GET(request: Request) {
+    const auth = await restrictToAdmin();
+    if (!auth.authorized) return auth.response;
+
     try {
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get("user");

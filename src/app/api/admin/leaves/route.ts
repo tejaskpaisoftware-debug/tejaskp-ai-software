@@ -1,15 +1,30 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth-server";
 
 export async function GET(request: Request) {
     try {
+        const auth = await getAuthUser();
+        const whereClause: any = {};
+
+        // Team Lead Restriction
+        if (auth && auth.role === "TEAM_LEAD") {
+            const lead = await prisma.user.findUnique({ where: { id: auth.userId }, select: { department: true } });
+            whereClause.user = {
+                role: "STUDENT",
+                department: lead?.department || undefined
+            };
+        }
+
         const leaves = await prisma.leave.findMany({
+            where: whereClause,
             include: {
                 user: {
                     select: {
                         name: true,
                         role: true,
                         mobile: true,
+                        department: true,
                         leaveBalances: true
                     }
                 }
@@ -29,12 +44,26 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
     try {
+        const auth = await getAuthUser();
         const body = await request.json();
         const { id, status, managerRemarks, startDate, endDate, type, isHalfDay, reason } = body;
 
         if (!id || !status) {
             return NextResponse.json({ message: "ID and Status are required" }, { status: 400 });
         }
+
+        // Team Lead Restriction
+        if (auth && auth.role === "TEAM_LEAD") {
+            const lead = await prisma.user.findUnique({ where: { id: auth.userId }, select: { department: true } });
+            const record = await prisma.leave.findUnique({
+                where: { id },
+                include: { user: { select: { department: true, role: true } } }
+            });
+            if (!record || record.user?.role !== "STUDENT" || record.user?.department !== lead?.department) {
+                return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+            }
+        }
+
 
         const leave = await prisma.leave.findUnique({ where: { id } });
         if (!leave) return NextResponse.json({ message: "Leave not found" }, { status: 404 });

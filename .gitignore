@@ -42,6 +42,15 @@ next-env.d.ts
 
 /src/generated/prisma
 
+# WhatsApp Auth
+.wwebjs_auth*
+/public/.wwebjs_auth
+
+# test scripts
+test_*.js
+debug_*.js
+manual_migrate*.js
+
 # local cache
 npm-cache/
 npm-cache

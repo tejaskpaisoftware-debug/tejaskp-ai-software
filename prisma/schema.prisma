@@ -60,8 +60,11 @@ model User {
   failedFaceAttempts Int           @default(0)
   voicePassphrase    String?       // The text phrase they must say
   voiceAudioPath     String?       // The path to their enrolled WAV file
-  lockoutUntil     DateTime?
-  attendance       Attendance[]
+  lockoutUntil       DateTime?
+  parentName         String?
+  parentMobile       String?
+  parentEmail        String?
+  attendance         Attendance[]
   certificates     Certificate[]
   invoices         Invoice[]
   joiningLetters   JoiningLetter[]
@@ -156,10 +159,13 @@ model Attendance {
   date         String
   loginTime    DateTime  @default(now())
   logoutTime   DateTime?
-  status       String    @default("PENDING")
-  adminRemarks String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  status             String    @default("PENDING")
+  isLate             Boolean   @default(false)
+  isAbsent           Boolean   @default(false)
+  informedInAdvance  Boolean   @default(false)
+  adminRemarks       String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
   user         User      @relation(fields: [userId], references: [id])
 
   @@index([userId])

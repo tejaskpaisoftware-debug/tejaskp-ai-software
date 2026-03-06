@@ -24,7 +24,7 @@ export async function POST(request: Request) {
         // 1. Fetch ALL enrolled admins (1:N Match)
         const admins = await prisma.user.findMany({
             where: {
-                role: "ADMIN",
+                role: { in: ["ADMIN", "DEVELOPMENT_MANAGER"] },
                 voiceAudioPath: { not: null }
             },
             select: {
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
                 .setExpirationTime("24h")
                 .sign(secret);
 
-            return NextResponse.json({
+            const response = NextResponse.json({
                 success: true,
                 status: "SUCCESS",
                 token,
@@ -153,6 +153,18 @@ export async function POST(request: Request) {
                     mobile: matchedUser.mobile
                 }
             });
+
+            response.cookies.set({
+                name: "auth_token",
+                value: token,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/",
+                maxAge: 60 * 60 * 24 // 24 hours
+            });
+
+            return response;
 
         } else {
             return NextResponse.json({

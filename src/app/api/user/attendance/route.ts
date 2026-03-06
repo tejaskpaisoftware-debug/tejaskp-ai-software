@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { NotificationService } from "@/lib/notifications";
+import WhatsAppSingleton from "@/lib/whatsappClient";
 
 // GET today's status OR history
 export async function GET(request: Request) {
@@ -83,36 +85,57 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: "Already checked in" }, { status: 400 });
         }
 
-        // --- TIME LOGIC ---
-        // 10:45 AM Deadline
+        // --- TIME LOGIC (Reports Management System) ---
+        // Official: 10:30 AM | Late: After 10:40 AM
         const deadline = new Date(now);
-        deadline.setHours(10, 45, 0, 0); // 10:45:00 AM
+        deadline.setHours(10, 40, 0, 0); // 10:40:00 AM
 
         let status = "PRESENT";
+        let isLate = false;
         let remarks = "";
 
         if (now > deadline) {
             status = "LATE";
+            isLate = true;
 
-            // Check "Late Limit" (3rd Strike Logic)
-            // Count previous LATE entries in current month
+            // Check "Late Limit" (Repeated Lateness Warning)
             const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
 
             const lateCount = await prisma.attendance.count({
                 where: {
                     userId,
-                    status: "LATE",
-                    date: {
-                        gte: firstDayOfMonth, // >= 1st of month
-                        lt: today // Strictly strictly before today (don't count today yet)
-                    }
+                    status: "LATE"
                 }
             });
 
-            // If user has already been late 2 times, today is the 3rd time
-            if (lateCount >= 2) {
-                status = "ABSENT";
-                remarks = "Multiple Late Arrivals (3rd Strike)";
+            // If user has already been late exactly 2 times (this is the 3rd time)
+            // Trigger warning notification to student and parents via App/Email AND WhatsApp
+            if (lateCount === 2) {
+                await NotificationService.sendLateWarning(userId, lateCount + 1);
+
+                // Fetch student and parent details for WhatsApp
+                const userExt = await prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { name: true, parentMobile: true, mobile: true }
+                });
+
+                if (userExt) {
+                    // Send to Parent
+                    if (userExt.parentMobile) {
+                        await WhatsAppSingleton.sendMessage(
+                            userExt.parentMobile,
+                            `*LATE ARRIVAL WARNING - ${userExt.name}*\n\nDear Parent/Guardian,\n\nThis is to notify you that your ward, ${userExt.name}, was marked late today. This is their ${lateCount + 1}th late arrival this month.\n\nPlease ensure they check-in on time to meet the required guidelines.\n\nRegards,\nAdmin - Tejaskp AI Software`
+                        );
+                    }
+
+                    // Send to Student
+                    if (userExt.mobile) {
+                        await WhatsAppSingleton.sendMessage(
+                            userExt.mobile,
+                            `*LATE CHECK-IN NOTICE*\n\nHi ${userExt.name},\n\nYou have been marked late today. This is late instance #${lateCount + 1} for this month.\n\nPlease try to check in on time moving forward.\n\nRegards,\nAdmin - Tejaskp AI Software`
+                        );
+                    }
+                }
             }
         }
 
@@ -127,9 +150,13 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json(record);
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ message: "Internal Error" }, { status: 500 });
+    } catch (error: any) {
+        console.error("Attendance POST Error:", error);
+        return NextResponse.json({
+            message: "Internal Error",
+            error: error.message,
+            stack: error.stack
+        }, { status: 500 });
     }
 }
 
@@ -240,8 +267,12 @@ export async function PUT(request: Request) {
         });
 
         return NextResponse.json(updated);
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ message: "Internal Error" }, { status: 500 });
+    } catch (error: any) {
+        console.error("Attendance PUT Error:", error);
+        return NextResponse.json({
+            message: "Internal Error",
+            error: error.message,
+            stack: error.stack
+        }, { status: 500 });
     }
 }

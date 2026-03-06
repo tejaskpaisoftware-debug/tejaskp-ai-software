@@ -22,15 +22,17 @@ export async function GET(req: Request) {
                 createdAt: true,
                 department: true,
                 designation: true,
-                // Add commonly used fields to avoid multiple fetches
+                parentName: true,
+                parentMobile: true,
+                parentEmail: true
             }
         });
 
         if (!user) {
-            return NextResponse.json({ message: "User not found" }, { status: 404 });
+            return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json(user);
+        return NextResponse.json({ success: true, user });
     } catch (error) {
         console.error("Fetch User Error:", error);
         return NextResponse.json({ message: "Internal Error" }, { status: 500 });

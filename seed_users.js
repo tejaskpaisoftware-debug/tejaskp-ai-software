@@ -13,14 +13,30 @@ async function main() {
     console.log('Seeding database...');
 
     // Clean up potential conflicts
-    await prisma.user.deleteMany({
+    const conflictMobiles = ['admin', '9876543210', '9104630598'];
+    const conflictEmails = ['admin@tejaskpai.com', 'admin@example.com', 'student@example.com'];
+
+    const usersToDelete = await prisma.user.findMany({
         where: {
             OR: [
-                { email: 'admin@tejaskpai.com' },
-                { mobile: '9876543210' }
+                { mobile: { in: conflictMobiles } },
+                { email: { in: conflictEmails } }
             ]
-        }
+        },
+        select: { id: true }
     });
+
+    const userIds = usersToDelete.map(u => u.id);
+
+    if (userIds.length > 0) {
+        console.log(`Cleaning up data for ${userIds.length} users...`);
+        // Use transaction or sequential deletes to handle FKs
+        await prisma.mailbox.deleteMany({ where: { userId: { in: userIds } } });
+        await prisma.session.deleteMany({ where: { userId: { in: userIds } } });
+        await prisma.systemLog.deleteMany({ where: { userId: { in: userIds } } });
+        await prisma.attendance.deleteMany({ where: { userId: { in: userIds } } });
+        await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+    }
 
     // 1. Create Admin
     const adminMobile = 'admin'; // User requested login as 'admin'

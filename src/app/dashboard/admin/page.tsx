@@ -23,6 +23,14 @@ export default function AdminDashboard() {
         usersGrowth: "---",
         graph: [] as number[] // Monthly revenue array
     });
+    const [userRole, setUserRole] = useState<string>("ADMIN");
+    const [pairingMobile, setPairingMobile] = useState("");
+    const [whatsappStatus, setWhatsappStatus] = useState<{ isReady: boolean, qrCode: string | null, pairingCode: string | null, cooldownUntil: number }>({
+        isReady: false,
+        qrCode: null,
+        pairingCode: null,
+        cooldownUntil: 0
+    });
 
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -57,6 +65,7 @@ export default function AdminDashboard() {
 
         const fetchStats = async () => {
             try {
+                // Fetch Main Stats
                 const res = await fetch(`/api/admin/dashboard/stats?year=${year}`, {
                     signal: controller.signal,
                     cache: 'no-store'
@@ -68,6 +77,24 @@ export default function AdminDashboard() {
                 if (data.success && isMounted) {
                     setStats(data.stats);
                 }
+
+                // Fetch WhatsApp Background Service Status
+                const waRes = await fetch('/api/admin/whatsapp/status', {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
+                if (waRes.ok) {
+                    const waData = await waRes.json();
+                    if (isMounted && !waData.error) {
+                        setWhatsappStatus({
+                            isReady: waData.isReady,
+                            qrCode: waData.qrCode,
+                            pairingCode: waData.pairingCode,
+                            cooldownUntil: waData.cooldownUntil || 0
+                        });
+                    }
+                }
+
             } catch (error: any) {
                 if (error.name !== 'AbortError') {
                     console.error("Failed to load dashboard stats", error);
@@ -83,12 +110,59 @@ export default function AdminDashboard() {
         // Initial Fetch
         fetchStats();
 
+        // Get User Role
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                setUserRole(user.role || "ADMIN");
+            }
+        } catch (e) { console.error(e); }
+
         return () => {
             isMounted = false;
             controller.abort();
             clearTimeout(timeoutId);
         };
     }, [year]);
+
+    const handleRequestPairing = async () => {
+        if (!pairingMobile) return alert("Enter mobile number with country code (e.g. 919876543210)");
+        try {
+            const res = await fetch("/api/admin/whatsapp/status", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mobile: pairingMobile })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setWhatsappStatus(prev => ({ ...prev, pairingCode: data.pairingCode }));
+                alert("Pairing code requested! Please wait a few seconds.");
+            } else {
+                const err = await res.json();
+                alert(err.message || err.error || "Failed to generate code");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Connection error");
+        }
+    };
+
+    const handleClearWhatsApp = async () => {
+        if (!confirm("This will FORCE RESTART the WhatsApp server and clear all sessions. Use this if linking is stuck. Continue?")) return;
+        try {
+            const res = await fetch("/api/admin/whatsapp/reset", { method: "POST" });
+            if (res.ok) {
+                alert("Server reset successful! Please wait 15 seconds then refresh the page.");
+                window.location.reload();
+            } else {
+                alert("Reset failed.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Connection error during reset.");
+        }
+    };
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-IN', {
@@ -113,7 +187,11 @@ export default function AdminDashboard() {
                             DASHBOARD
                         </h1>
                         <p className="text-xl text-gray-500 font-bold mt-1 tracking-wide">
-                            Welcome back, <span className="text-[#FDB931] font-black">Administrator</span>
+                            Welcome back, <span className="text-[#FDB931] font-black">
+                                {userRole === 'TEAM_LEAD' ? 'Team Lead' :
+                                    userRole === 'DEVELOPMENT_MANAGER' ? 'Development Manager' :
+                                        'Administrator'}
+                            </span>
                         </p>
                     </div>
                     <div className="text-right">
@@ -142,48 +220,153 @@ export default function AdminDashboard() {
                         onClick={() => window.location.href = '/dashboard/admin/attendance'}
                         isClickable
                     />
-                    <StatsCard
-                        title="Total Revenue"
-                        value={formatCurrency(stats.revenue)}
-                        change={stats.revenueGrowth}
-                        isGood
-                        onClick={() => window.location.href = '/dashboard/admin/revenue'}
-                        isClickable
-                        highlight
-                    />
-                    <StatsCard title="Pending Amount" value={formatCurrency(stats.pendingAmount || 0)} change="Uncollected" />
+                    {/* Only show financial stats to Admin and Development Manager */}
+                    {(userRole === 'ADMIN' || userRole === 'DEVELOPMENT_MANAGER') && (
+
+                        <>
+                            <StatsCard
+                                title="Total Revenue"
+                                value={formatCurrency(stats.revenue)}
+                                change={stats.revenueGrowth}
+                                isGood
+                                onClick={() => window.location.href = '/dashboard/admin/revenue'}
+                                isClickable
+                                highlight
+                            />
+                            <StatsCard title="Pending Amount" value={formatCurrency(stats.pendingAmount || 0)} change="Uncollected" />
+                        </>
+                    )}
                     <StatsCard title="System Health" value="99.9%" change="Stable" isGood />
+                </div>
+
+                {/* WhatsApp Status Widget */}
+                <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 shadow-lg flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-2">WhatsApp Notification Server</h3>
+                        {whatsappStatus.isReady ? (
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-green-400 font-semibold">Connected & Ready</span>
+                                <button
+                                    onClick={handleClearWhatsApp}
+                                    className="ml-4 text-[10px] text-gray-500 hover:text-red-400 border border-white/10 px-2 py-0.5 rounded transition-colors"
+                                >
+                                    Force Reset
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <span className="text-red-400 font-semibold text-sm md:text-base">Disconnected. Choose linking method:</span>
+                                    <button
+                                        onClick={handleClearWhatsApp}
+                                        className="ml-2 text-[10px] text-yellow-500/50 hover:text-yellow-500 border border-yellow-500/10 px-2 py-0.5 rounded transition-colors"
+                                    >
+                                        Hard Reset Server
+                                    </button>
+                                </div>
+
+                                <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-3 relative overflow-hidden">
+                                    {whatsappStatus.cooldownUntil > Date.now() && (
+                                        <div className="absolute inset-0 bg-black/80 z-20 flex flex-col items-center justify-center p-4 text-center backdrop-blur-sm">
+                                            <div className="text-yellow-500 font-black text-xl mb-1">COOLDOWN ACTIVE</div>
+                                            <p className="text-xs text-gray-300 max-w-[200px] mb-3">WhatsApp security has blocked linking temporarily. Please wait:</p>
+                                            <div className="text-4xl font-black text-white tracking-widest tabular-nums">
+                                                {Math.ceil((whatsappStatus.cooldownUntil - currentTime.getTime()) / 60000)}m {Math.ceil(((whatsappStatus.cooldownUntil - currentTime.getTime()) / 1000) % 60)}s
+                                            </div>
+                                            <p className="text-[10px] text-gray-500 mt-4">This happens after too many failed attempts.</p>
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-yellow-500/80 font-bold uppercase tracking-wider">Option A: Link with Phone Number (Recommended)</p>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="919876543210"
+                                            value={pairingMobile}
+                                            onChange={(e) => setPairingMobile(e.target.value)}
+                                            className="bg-[#222] border border-white/10 rounded-lg px-3 py-2 text-sm text-white flex-1 outline-none focus:border-yellow-500 transition-colors"
+                                        />
+                                        <button
+                                            onClick={handleRequestPairing}
+                                            className="bg-yellow-500 text-black px-4 py-2 rounded-lg text-sm font-black hover:bg-yellow-400 transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+                                        >
+                                            GET CODE
+                                        </button>
+                                    </div>
+                                    {whatsappStatus.pairingCode && (
+                                        <div className="mt-2 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center animate-in fade-in zoom-in duration-300">
+                                            <p className="text-[10px] text-yellow-500 uppercase font-bold mb-1">Your Pairing Code</p>
+                                            <div className="text-3xl font-black text-white tracking-[0.3em] font-mono">{whatsappStatus.pairingCode}</div>
+                                            <p className="text-[9px] text-gray-400 mt-2 leading-tight">
+                                                On your phone: <br />
+                                                Linked Devices {'>'} Link a Device {'>'} Link with phone number instead
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {!whatsappStatus.isReady && (
+                        <div className="flex flex-col items-center gap-3 border-l border-white/5 pl-8 hidden md:flex">
+                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Option B: Scan QR</p>
+                            {whatsappStatus.qrCode ? (
+                                <div className="bg-white p-2 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] border-2 border-yellow-500/20">
+                                    <img src={whatsappStatus.qrCode} alt="WhatsApp QR Code" className="w-32 h-32 object-contain" />
+                                </div>
+                            ) : (
+                                <div className="w-32 h-32 flex items-center justify-center border border-dashed border-white/10 rounded-xl text-[10px] text-gray-600 animate-pulse text-center">
+                                    Generating <br /> QR...
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Chart Area (Real Data) */}
-                    <div className="lg:col-span-2 bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -skew-x-12 translate-x-full group-hover:animate-shine"></div>
-                        <div className="flex justify-between items-center mb-6 relative z-10">
-                            <div className="flex items-center gap-4">
-                                <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-wide drop-shadow-sm">REVENUE ANALYTICS ({year})</h3>
-                                <select
-                                    value={year}
-                                    onChange={(e) => setYear(parseInt(e.target.value))}
-                                    className="bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-1 text-sm text-yellow-500 font-bold outline-none focus:border-yellow-500/50 shadow-inner"
-                                >
-                                    {[2025, 2026, 2027].map(y => (
-                                        <option key={y} value={y}>{y}</option>
-                                    ))}
-                                </select>
+                    {userRole !== 'TEAM_LEAD' ? (
+                        <div className="lg:col-span-2 bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -skew-x-12 translate-x-full group-hover:animate-shine"></div>
+                            <div className="flex justify-between items-center mb-6 relative z-10">
+                                <div className="flex items-center gap-4">
+                                    <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-wide drop-shadow-sm">REVENUE ANALYTICS ({year})</h3>
+                                    <select
+                                        value={year}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            setYear(isNaN(val) ? new Date().getFullYear() : val);
+                                        }}
+                                        className="bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-1 text-sm text-yellow-500 font-bold outline-none focus:border-yellow-500/50 shadow-inner"
+                                    >
+                                        {[2025, 2026, 2027].map(y => (
+                                            <option key={y} value={y}>{y}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {/* Small total indicator to confirm data load */}
+                                <div className="text-xs text-yellow-500/70 font-mono bg-black/40 px-3 py-1 rounded-full border border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.1)]">
+                                    Total: {formatCurrency(stats.revenue)}
+                                </div>
                             </div>
-                            {/* Small total indicator to confirm data load */}
-                            <div className="text-xs text-yellow-500/70 font-mono bg-black/40 px-3 py-1 rounded-full border border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.1)]">
-                                Total: {formatCurrency(stats.revenue)}
+                            <div className="h-64 mt-4 w-full relative z-10">
+                                <RevenueChart3D
+                                    data={stats.graph && stats.graph.length > 0 ? stats.graph : new Array(12).fill(0)}
+                                    year={year}
+                                />
                             </div>
                         </div>
-                        <div className="h-64 mt-4 w-full relative z-10">
-                            <RevenueChart3D
-                                data={stats.graph && stats.graph.length > 0 ? stats.graph : new Array(12).fill(0)}
-                                year={year}
-                            />
+                    ) : (
+                        <div className="lg:col-span-2 bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] flex items-center justify-center">
+                            <div className="text-center">
+                                <div className="text-4xl mb-4">🛡️</div>
+                                <h3 className="text-xl font-bold text-white">Security & Operations</h3>
+                                <p className="text-gray-400 mt-2">Manage your teams and students from the sidebar.</p>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Right Column: Stacked Widgets */}
                     <div className="flex flex-col gap-6">

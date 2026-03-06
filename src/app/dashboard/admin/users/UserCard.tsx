@@ -80,9 +80,13 @@ interface UserCardProps {
     onDelete: (userId: string) => void;
     onSalarySlip: (user: UserProp) => void;
     onProfileApproval: (user: UserProp) => void;
+    onMarkLate: (userId: string) => void;
+    onMarkSickLeave: (userId: string) => void;
+    onMarkCasualLeave: (userId: string) => void;
+    onSendReport: (user: UserProp) => void;
 }
 
-export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip, onProfileApproval }: UserCardProps) {
+export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip, onProfileApproval, onMarkLate, onMarkSickLeave, onMarkCasualLeave, onSendReport }: UserCardProps) {
     const [isExpanded, setIsExpanded] = useState(true);
 
     // Helper to get course name
@@ -265,6 +269,36 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                                     </button>
                                 )}
                             </div>
+
+                            {/* Action Buttons: Mark Late & Mark Sick Leave (Full Width) */}
+                            {user.role === 'STUDENT' && (
+                                <div className="space-y-2 mt-2">
+                                    <button
+                                        onClick={() => onMarkLate(user.id)}
+                                        className="w-full bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 border border-orange-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
+                                    >
+                                        ⏰ Mark Late Today
+                                    </button>
+                                    <button
+                                        onClick={() => onMarkSickLeave(user.id)}
+                                        className="w-full bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 border border-teal-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
+                                    >
+                                        🤒 Mark Sick Leave
+                                    </button>
+                                    <button
+                                        onClick={() => onMarkCasualLeave(user.id)}
+                                        className="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
+                                    >
+                                        🏖️ Mark Casual Leave
+                                    </button>
+                                    <button
+                                        onClick={() => onSendReport(user)}
+                                        className="w-full bg-green-600/10 hover:bg-green-600/20 text-green-400 border border-green-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
+                                    >
+                                        📊 Send Report
+                                    </button>
+                                </div>
+                            )}
 
                             {/* Delete Button (Full Width) */}
                             <button

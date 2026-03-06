@@ -2,7 +2,8 @@
 
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { Check, Cloud, Moon, Sun, Snowflake, CloudRain, Flower2, Umbrella, Shield, Aperture, Bug } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const themes = [
     {
@@ -75,6 +76,22 @@ export default function SettingsPage() {
     const { theme, setTheme, setLocalTheme, isLoading, setAvengersCharacter } = useTheme() as any; // Cast to access new props safely
     const [saving, setSaving] = useState(false);
     const [showHeroModal, setShowHeroModal] = useState(false);
+    const router = useRouter();
+
+    // Role Protection
+    useEffect(() => {
+        try {
+            const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user") || localStorage.getItem("currentUser") || localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.role === "TEAM_LEAD") {
+                    router.replace('/dashboard/admin');
+                }
+            }
+        } catch (e) {
+            console.error("Role Check Error", e);
+        }
+    }, [router]);
 
     const handleThemeChange = async (newTheme: any) => {
         console.log("🖱️ Theme Config Clicked:", newTheme);

@@ -15,6 +15,7 @@ interface User {
     name: string;
     email: string;
     mobile: string;
+    parentMobile?: string;
     role: string;
     status: string;
     createdAt: string;
@@ -60,6 +61,11 @@ export default function UsersPage() {
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [approvalUser, setApprovalUser] = useState<User | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Report Sending State
+    const [reportModal, setReportModal] = useState<{ isOpen: boolean, user: User | null }>({ isOpen: false, user: null });
+    const [reportPeriod, setReportPeriod] = useState<string>('monthly');
+    const [isSendingReport, setIsSendingReport] = useState(false);
 
     // Salary Slip View State
     const [salarySlipModal, setSalarySlipModal] = useState<{ isOpen: boolean, step: 'SELECT' | 'VIEW', userId: string, userName: string, userEmail?: string, data?: any } | null>(null);
@@ -281,6 +287,135 @@ export default function UsersPage() {
             console.error(error);
             setUploadStatus('error');
             setUploadMsg("Network error");
+        }
+    };
+
+    const handleMarkLate = async (userId: string) => {
+        if (!confirm("Are you sure you want to manually mark this student as LATE for today? This will trigger a WhatsApp message if it's their 3rd late.")) return;
+
+        setUploadStatus('uploading');
+        setUploadMsg('Marking student as LATE...');
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/mark-late`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setUploadStatus('success');
+                setUploadMsg(data.message);
+                setTimeout(() => setUploadStatus('idle'), 4000);
+            } else {
+                setUploadStatus('error');
+                setUploadMsg(data.message || data.error || 'Failed to mark late');
+            }
+        } catch (error) {
+            console.error(error);
+            setUploadStatus('error');
+            setUploadMsg("Network error");
+        }
+    };
+
+    const handleMarkSickLeave = async (userId: string) => {
+        if (!confirm("Are you sure you want to manually mark this student on SICK LEAVE for today? This will trigger a WhatsApp message to the parents and student.")) return;
+
+        setUploadStatus('uploading');
+        setUploadMsg('Marking student as Sick...');
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/mark-sick-leave`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setUploadStatus('success');
+                setUploadMsg(data.message);
+                setTimeout(() => setUploadStatus('idle'), 4000);
+            } else {
+                setUploadStatus('error');
+                setUploadMsg(data.message || data.error || 'Failed to mark sick leave');
+            }
+        } catch (error) {
+            console.error(error);
+            setUploadStatus('error');
+            setUploadMsg("Network error");
+        }
+    };
+
+    const handleMarkCasualLeave = async (userId: string) => {
+        // First confirm they want to do this
+        if (!confirm("Are you sure you want to manually process a Casual Leave for this student? WhatsApp messages will be triggered based on your next answer.")) return;
+
+        // Ask the critical 2-day rule question
+        const informedInAdvance = confirm("Did the student apply for this leave AT LEAST 2 days in advance?\n\nClick [OK] for YES (Approve Leave).\nClick [Cancel] for NO (Reject Leave).");
+
+        // Use today's date automatically
+        const dateStr = new Date().toISOString().split('T')[0];
+
+        setUploadStatus('uploading');
+        setUploadMsg(informedInAdvance ? 'Approving Casual Leave...' : 'Rejecting Casual Leave...');
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/process-cl`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    informedInAdvance,
+                    date: dateStr
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setUploadStatus('success');
+                setUploadMsg(data.message);
+                setTimeout(() => setUploadStatus('idle'), 5000);
+            } else {
+                setUploadStatus('error');
+                setUploadMsg(data.message || data.error || 'Failed to process casual leave');
+            }
+        } catch (error) {
+            console.error(error);
+            setUploadStatus('error');
+            setUploadMsg("Network error");
+        }
+    };
+
+    const handleSendReport = async () => {
+        if (!reportModal.user) return;
+
+        setIsSendingReport(true);
+        setUploadStatus('uploading');
+        setUploadMsg(`Generating and sending ${reportPeriod} report via WhatsApp...`);
+
+        try {
+            const res = await fetch(`/api/admin/reports/send-whatsapp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: reportModal.user.id,
+                    period: reportPeriod
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setUploadStatus('success');
+                setUploadMsg(data.message);
+                setReportModal({ isOpen: false, user: null });
+                setTimeout(() => setUploadStatus('idle'), 5000);
+            } else {
+                setUploadStatus('error');
+                setUploadMsg(data.message || data.error || 'Failed to send report');
+            }
+        } catch (error) {
+            console.error(error);
+            setUploadStatus('error');
+            setUploadMsg("Network error");
+        } finally {
+            setIsSendingReport(false);
         }
     };
 
@@ -570,6 +705,66 @@ export default function UsersPage() {
                 )}
             </AnimatePresence>
 
+            {/* SEND REPORT MODAL */}
+            <AnimatePresence>
+                {reportModal.isOpen && reportModal.user && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            className="bg-[#0a0a0a] border border-green-500/30 p-8 rounded-2xl w-full max-w-md shadow-[0_0_50px_rgba(34,197,94,0.1)] relative"
+                        >
+                            <button onClick={() => setReportModal({ isOpen: false, user: null })} className="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
+                            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                                <span className="text-green-500">📊</span> Send Student Report
+                            </h2>
+                            <p className="text-gray-400 text-sm mb-6">Generate and send WhatsApp report for <span className="text-green-400 font-bold">{reportModal.user.name}</span></p>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs uppercase text-gray-500 mb-2 font-bold tracking-wider">Select Period</label>
+                                    <select
+                                        value={reportPeriod}
+                                        onChange={e => setReportPeriod(e.target.value)}
+                                        className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white outline-none focus:border-green-500 transition-colors"
+                                    >
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="3-months">3 Months</option>
+                                        <option value="all-time">All Time</option>
+                                    </select>
+                                </div>
+                                <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl mt-4">
+                                    <p className="text-xs text-green-300">
+                                        This will immediately calculate the student's attendance metrics for the selected period and send a formatted message to their registered mobile (and parent's mobile if available) via WhatsApp.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={handleSendReport}
+                                    disabled={isSendingReport}
+                                    className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_4px_15px_rgba(22,163,74,0.3)] mt-4 disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {isSendingReport ? (
+                                        <>
+                                            <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        <>Send via WhatsApp 🚀</>
+                                    )}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Edit Modal */}
             <AnimatePresence>
                 {editingUser && (
@@ -664,6 +859,16 @@ export default function UsersPage() {
                                                 />
                                             </div>
                                             <div className="group">
+                                                <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Parent Mobile</label>
+                                                <input
+                                                    type="text"
+                                                    value={editingUser.parentMobile || ''}
+                                                    onChange={e => setEditingUser({ ...editingUser, parentMobile: e.target.value })}
+                                                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
+                                                    placeholder="10 digit parent mobile"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2 group">
                                                 <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Email</label>
                                                 <input
                                                     type="email"
@@ -672,6 +877,23 @@ export default function UsersPage() {
                                                     className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] focus:shadow-[0_0_20px_rgba(234,179,8,0.1)] transition-all duration-300"
                                                     placeholder="john@example.com"
                                                 />
+                                            </div>
+                                            <div className="md:col-span-2 group">
+                                                <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2 ml-1 group-focus-within:text-gold-500 transition-colors">Domain (Course / Department)</label>
+                                                <select
+                                                    value={editingUser.department || ''}
+                                                    onChange={e => setEditingUser({ ...editingUser, department: e.target.value })}
+                                                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white appearance-none cursor-pointer outline-none focus:border-gold-500/50 focus:bg-[#0f0f0f] transition-all duration-300 font-medium"
+                                                >
+                                                    <option value="">Select Domain</option>
+                                                    <option value="Web Development">Web Development</option>
+                                                    <option value="AI/ML – Python">AI/ML – Python</option>
+                                                    <option value="Data Analytics">Data Analytics</option>
+                                                    <option value="Cyber Security – AWS">Cyber Security – AWS</option>
+                                                    <option value="Game Development">Game Development</option>
+                                                    <option value="Development Manager">Development Manager</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -689,6 +911,8 @@ export default function UsersPage() {
                                                         <option value="EMPLOYEE" className="bg-black text-white">Employee</option>
                                                         <option value="ADMIN" className="bg-black text-white">Admin</option>
                                                         <option value="CLIENT" className="bg-black text-white">Client</option>
+                                                        <option value="TEAM_LEAD" className="bg-black text-white">Team Lead</option>
+                                                        <option value="DEVELOPMENT_MANAGER" className="bg-black text-white">Development Manager</option>
                                                     </select>
                                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gold-500 pointer-events-none text-xs">▼</div>
                                                 </div>
@@ -1042,7 +1266,7 @@ export default function UsersPage() {
             </header>
 
             <div className="flex gap-3 mb-8 overflow-x-auto pb-4 border-b border-white/5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                {["ALL", "RECENT", "STUDENT", "EMPLOYEE", "CLIENT", "ADMIN", "PENDING_FEES"].map((role) => {
+                {["ALL", "RECENT", "STUDENT", "TEAM_LEAD", "EMPLOYEE", "CLIENT", "ADMIN", "PENDING_FEES"].map((role) => {
                     const count = role === "ALL" ? filteredUsers.length :
                         role === "RECENT" ? filteredUsers.filter(u => new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length :
                             role === "PENDING_FEES" ? filteredUsers.filter(u => (u.pendingAmount || 0) > 0).length :
@@ -1066,9 +1290,10 @@ export default function UsersPage() {
                                 {role === "ALL" ? "All Users" :
                                     role === "RECENT" ? "Recently Added" :
                                         role === "STUDENT" ? "Students" :
-                                            role === "EMPLOYEE" ? "Employees" :
-                                                role === "CLIENT" ? "Clients" :
-                                                    role === "PENDING_FEES" ? "Pending Fees" : "Admins"}
+                                            role === "TEAM_LEAD" ? "Team Leads" :
+                                                role === "EMPLOYEE" ? "Employees" :
+                                                    role === "CLIENT" ? "Clients" :
+                                                        role === "PENDING_FEES" ? "Pending Fees" : "Admins"}
                             </span>
                             <span className={`
                                 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-inner
@@ -1118,6 +1343,10 @@ export default function UsersPage() {
                                                     onDelete={handleDelete}
                                                     onSalarySlip={openSalarySlipModal}
                                                     onProfileApproval={setApprovalUser}
+                                                    onMarkLate={handleMarkLate}
+                                                    onMarkSickLeave={handleMarkSickLeave}
+                                                    onMarkCasualLeave={handleMarkCasualLeave}
+                                                    onSendReport={(u) => setReportModal({ isOpen: true, user: u as User })}
                                                 />
                                             ))}
                                     </div>

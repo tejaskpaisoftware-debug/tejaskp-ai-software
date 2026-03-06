@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         }
 
         // Role Check logic (Strict or Lenient based on requirement)
-        if (user.role !== role && user.role !== 'ADMIN') {
+        if (user.role !== role && user.role !== 'ADMIN' && user.role !== 'TEAM_LEAD' && user.role !== 'DEVELOPMENT_MANAGER') {
             return NextResponse.json(
                 { message: `Access Denied. You are registered as ${user.role}` },
                 { status: 403 }
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
         // Remove Cookie Logic - Token is sent in body
         // const cookieStore = await cookies(); ...
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             status: "SUCCESS",
             user: {
                 id: user.id,
@@ -141,6 +141,19 @@ export async function POST(request: Request) {
                 token: jwt // Send token to client
             }
         });
+
+        // Set HttpOnly cookie so API routes and Middleware can authenticate requests
+        response.cookies.set({
+            name: "auth_token",
+            value: jwt,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 // 24 hours
+        });
+
+        return response;
 
     } catch (error) {
         console.error("Login error:", error);
