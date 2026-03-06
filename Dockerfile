@@ -1,10 +1,13 @@
 # Use a stable Node.js base image
 FROM node:20-slim
 
-# Install system dependencies for Puppeteer and Chromium
+# Install system Chromium + all required dependencies
 RUN apt-get update && apt-get install -y \
+    chromium \
     ca-certificates \
     fonts-liberation \
+    fonts-noto \
+    fonts-noto-color-emoji \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
@@ -36,10 +39,13 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxss1 \
     libxtst6 \
-    lsb-release \
     wget \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
+
+# Tell Puppeteer to skip downloading Chromium and use the system one instead
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Set working directory
 WORKDIR /app
