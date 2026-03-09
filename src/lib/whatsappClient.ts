@@ -75,7 +75,11 @@ class WhatsAppManager {
                     '--disable-features=IsolateOrigins,site-per-process',
                     '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
                 ]
-            }
+            },
+            authTimeoutMs: 60000,
+            qrMaxRetries: 10,
+            takeoverOnConflict: true,
+            takeoverTimeoutMs: 10000
         });
 
         state.instance = client;
@@ -96,6 +100,7 @@ class WhatsAppManager {
 
         client.on('authenticated', () => {
             addLog(`Client AUTHENTICATED! Finalizing session...`);
+            state.isReady = true;
             state.qrCodeData = null;
             state.pairingCode = null;
             state.initError = null;
