@@ -73,13 +73,28 @@ class WhatsAppManager {
                     '--single-process',
                     '--disable-web-security',
                     '--disable-features=IsolateOrigins,site-per-process',
-                    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+                    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+                    // Aggressive Memory Management
+                    '--disable-canvas-aa',
+                    '--disable-2d-canvas-clip-aa',
+                    '--disable-gl-drawing-for-tests',
+                    '--no-pings',
+                    '--mute-audio',
+                    '--no-default-browser-check',
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-breakpad',
+                    '--disable-component-extensions-with-background-pages',
+                    '--disable-ipc-flooding-protection',
+                    '--disable-renderer-backgrounding',
+                    '--enable-features=NetworkServiceInProcess2',
+                    '--js-flags="--max-old-space-size=256"'
                 ]
             },
-            authTimeoutMs: 60000,
-            qrMaxRetries: 10,
+            authTimeoutMs: 120000, // 2 minutes for slow Render CPU
+            qrMaxRetries: 15,
             takeoverOnConflict: true,
-            takeoverTimeoutMs: 10000
+            takeoverTimeoutMs: 15000
         });
 
         state.instance = client;

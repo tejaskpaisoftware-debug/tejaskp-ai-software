@@ -38,16 +38,20 @@ export async function POST() {
         const rootDir = process.cwd();
         const userSessionPath = path.join(rootDir, authPath, `session-${userId}`);
 
-        console.log(`[WhatsApp - ${userId}] Cleaning session path: ${userSessionPath}`);
-
         try {
+            // Kill any orphaned chromium processes for this user if possible
+            // This is a "belt and suspenders" approach for Render's limited RAM
+            await execPromise('pkill -f chromium || true');
             await execPromise(`rm -rf "${userSessionPath}"`);
-            console.log(`[WhatsApp - ${userId}] Session directory cleared successfully.`);
+            console.log(`[WhatsApp - ${userId}] Session directory and orphaned processes cleared.`);
         } catch (e) {
-            console.error(`[WhatsApp - ${userId}] Failed to clear directory: ${e}`);
+            console.error(`[WhatsApp - ${userId}] Cleanup warning: ${e}`);
         }
 
-        // 3. Re-initialize
+        // 3. Small delay to let OS release file locks
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // 4. Re-initialize
         await WhatsAppManager.initialize(userId);
 
         return NextResponse.json({ success: true, message: "Server reset successful. Please refresh in 10 seconds." });
