@@ -45,17 +45,13 @@ class WhatsAppManager {
         console.log(`[WhatsApp - ${userId}] Starting background Puppeteer instance...`);
 
         // Use a consistent data path for persistent storage
-        const authPath = '.wwebjs_auth';
+        const authPath = process.env.WHATSAPP_SESSION_PATH || '.wwebjs_auth';
 
         const client = new Client({
             authStrategy: new LocalAuth({
                 clientId: userId,
                 dataPath: authPath
             }),
-            webVersionCache: {
-                type: 'remote',
-                remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1012170943-alpha.html',
-            },
             puppeteer: {
                 headless: true,
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -86,17 +82,24 @@ class WhatsAppManager {
             console.log(`[WhatsApp - ${userId}] New QR Code generated.`);
             state.qrCodeData = await qrcode.toDataURL(qr);
             state.isReady = false;
+            state.initError = null;
         });
 
         client.on('authenticated', () => {
-            console.log(`[WhatsApp - ${userId}] Client AUTHENTICATED! Clearing pairing codes.`);
+            console.log(`[WhatsApp - ${userId}] Client AUTHENTICATED! Finalizing session...`);
             state.qrCodeData = null;
             state.pairingCode = null;
             state.initError = null;
         });
 
+        client.on('auth_failure', (msg) => {
+            console.error(`[WhatsApp - ${userId}] AUTHENTICATION FAILURE:`, msg);
+            state.initError = `Auth Failure: ${msg}`;
+            state.isReady = false;
+        });
+
         client.on('ready', () => {
-            console.log(`[WhatsApp - ${userId}] Client is READY!`);
+            console.log(`[WhatsApp - ${userId}] Client is READY! Connection established.`);
             state.isReady = true;
             state.qrCodeData = null;
             state.pairingCode = null;
@@ -111,7 +114,16 @@ class WhatsAppManager {
             state.initError = null;
         });
 
+        client.on('loading_screen', (percent, message) => {
+            console.log(`[WhatsApp - ${userId}] LOADING: ${percent}% - ${message}`);
+        });
+
+        client.on('change_state', (state_val) => {
+            console.log(`[WhatsApp - ${userId}] STATE CHANGE: ${state_val}`);
+        });
+
         try {
+            console.log(`[WhatsApp - ${userId}] Initializing client (this may take 30-60s on Render)...`);
             await client.initialize();
         } catch (error: any) {
             console.error(`[WhatsApp - ${userId}] Initialization failed:`, error);
@@ -162,7 +174,8 @@ class WhatsAppManager {
         try {
             console.log(`[WhatsApp - ${userId}] Requesting Pairing Code for: ${formatted}`);
             // Extended delay to ensure the browser has loaded the QR page and settled
-            await new Promise(resolve => setTimeout(resolve, 8000));
+            // On Render, 10-15 seconds is safer
+            await new Promise(resolve => setTimeout(resolve, 10000));
 
             // CRITICAL FIX: The library expects onCodeReceivedEvent to be exposed in the browser
             // but it only exposes it if the client was initialized with pairWithPhoneNumber.

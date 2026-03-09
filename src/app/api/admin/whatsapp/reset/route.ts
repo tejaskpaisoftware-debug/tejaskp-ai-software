@@ -34,14 +34,17 @@ export async function POST() {
         await WhatsAppManager.reset(userId);
 
         // 2. Force delete user-specific session directory
+        const authPath = process.env.WHATSAPP_SESSION_PATH || '.wwebjs_auth';
         const rootDir = process.cwd();
-        const userSessionPath = path.join(rootDir, `.wwebjs_auth/session-${userId}`);
+        const userSessionPath = path.join(rootDir, authPath, `session-${userId}`);
+
+        console.log(`[WhatsApp - ${userId}] Cleaning session path: ${userSessionPath}`);
 
         try {
             await execPromise(`rm -rf "${userSessionPath}"`);
-            console.log(`[WhatsApp - ${userId}] Session directory cleared.`);
+            console.log(`[WhatsApp - ${userId}] Session directory cleared successfully.`);
         } catch (e) {
-            console.error(`[WhatsApp - ${userId}] Failed to clear directory:`, e);
+            console.error(`[WhatsApp - ${userId}] Failed to clear directory: ${e}`);
         }
 
         // 3. Re-initialize
