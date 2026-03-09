@@ -88,11 +88,19 @@ class WhatsAppManager {
             state.isReady = false;
         });
 
+        client.on('authenticated', () => {
+            console.log(`[WhatsApp - ${userId}] Client AUTHENTICATED! Clearing pairing codes.`);
+            state.qrCodeData = null;
+            state.pairingCode = null;
+            state.initError = null;
+        });
+
         client.on('ready', () => {
             console.log(`[WhatsApp - ${userId}] Client is READY!`);
             state.isReady = true;
             state.qrCodeData = null;
             state.pairingCode = null;
+            state.initError = null;
         });
 
         client.on('disconnected', (reason: string) => {
@@ -100,6 +108,7 @@ class WhatsAppManager {
             state.isReady = false;
             state.instance = null;
             state.pairingCode = null;
+            state.initError = null;
         });
 
         try {
