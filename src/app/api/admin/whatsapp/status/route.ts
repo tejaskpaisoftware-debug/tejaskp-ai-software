@@ -32,7 +32,8 @@ export async function GET() {
             qrCode: status.qrCode,
             pairingCode: status.pairingCode,
             cooldownUntil: status.cooldownUntil || 0,
-            initError: status.initError || null
+            initError: status.initError || null,
+            logs: status.logs || []
         });
     } catch (error) {
         console.error('Failed to get WhatsApp status:', error);

@@ -10,6 +10,7 @@ interface WhatsAppSessionState {
     isInitializing: boolean;
     cooldownUntil: number;
     initError?: string | null;
+    logs: string[];
 }
 
 declare global {
@@ -31,7 +32,8 @@ class WhatsAppManager {
                 isReady: false,
                 isInitializing: false,
                 cooldownUntil: 0,
-                initError: null
+                initError: null,
+                logs: []
             });
         }
         return globalThis._whatsappClients.get(userId)!;
@@ -78,28 +80,35 @@ class WhatsAppManager {
 
         state.instance = client;
 
+        const addLog = (msg: string) => {
+            const timestamp = new Date().toLocaleTimeString();
+            state.logs.push(`[${timestamp}] ${msg}`);
+            if (state.logs.length > 20) state.logs.shift();
+            console.log(`[WhatsApp - ${userId}] ${msg}`);
+        };
+
         client.on('qr', async (qr: string) => {
-            console.log(`[WhatsApp - ${userId}] New QR Code generated.`);
+            addLog(`New QR Code generated.`);
             state.qrCodeData = await qrcode.toDataURL(qr);
             state.isReady = false;
             state.initError = null;
         });
 
         client.on('authenticated', () => {
-            console.log(`[WhatsApp - ${userId}] Client AUTHENTICATED! Finalizing session...`);
+            addLog(`Client AUTHENTICATED! Finalizing session...`);
             state.qrCodeData = null;
             state.pairingCode = null;
             state.initError = null;
         });
 
         client.on('auth_failure', (msg) => {
-            console.error(`[WhatsApp - ${userId}] AUTHENTICATION FAILURE:`, msg);
+            addLog(`AUTHENTICATION FAILURE: ${msg}`);
             state.initError = `Auth Failure: ${msg}`;
             state.isReady = false;
         });
 
         client.on('ready', () => {
-            console.log(`[WhatsApp - ${userId}] Client is READY! Connection established.`);
+            addLog(`Client is READY! Connection established.`);
             state.isReady = true;
             state.qrCodeData = null;
             state.pairingCode = null;
@@ -107,7 +116,7 @@ class WhatsAppManager {
         });
 
         client.on('disconnected', (reason: string) => {
-            console.log(`[WhatsApp - ${userId}] Client disconnected: ${reason}`);
+            addLog(`Client disconnected: ${reason}`);
             state.isReady = false;
             state.instance = null;
             state.pairingCode = null;
@@ -115,18 +124,18 @@ class WhatsAppManager {
         });
 
         client.on('loading_screen', (percent, message) => {
-            console.log(`[WhatsApp - ${userId}] LOADING: ${percent}% - ${message}`);
+            addLog(`LOADING: ${percent}% - ${message}`);
         });
 
         client.on('change_state', (state_val) => {
-            console.log(`[WhatsApp - ${userId}] STATE CHANGE: ${state_val}`);
+            addLog(`STATE CHANGE: ${state_val}`);
         });
 
         try {
-            console.log(`[WhatsApp - ${userId}] Initializing client (this may take 30-60s on Render)...`);
+            addLog(`Initializing client (this may take 30-60s on Render)...`);
             await client.initialize();
         } catch (error: any) {
-            console.error(`[WhatsApp - ${userId}] Initialization failed:`, error);
+            addLog(`Initialization failed: ${error?.message || error}`);
             state.initError = error?.message || String(error);
             if (state.instance) {
                 try {
@@ -173,6 +182,7 @@ class WhatsAppManager {
 
         try {
             console.log(`[WhatsApp - ${userId}] Requesting Pairing Code for: ${formatted}`);
+            state.logs.push(`[${new Date().toLocaleTimeString()}] Requesting Pairing Code for ${formatted}`);
             // Extended delay to ensure the browser has loaded the QR page and settled
             // On Render, 10-15 seconds is safer
             await new Promise(resolve => setTimeout(resolve, 10000));
@@ -192,11 +202,13 @@ class WhatsAppManager {
             }
 
             const code = await instance.requestPairingCode(formatted);
+            state.logs.push(`[${new Date().toLocaleTimeString()}] Pairing Code Generated: ${code}`);
             console.log(`[WhatsApp - ${userId}] Pairing Code Generated: ${code}`);
             state.pairingCode = code;
             return code;
         } catch (error: any) {
             console.error(`[WhatsApp - ${userId}] Pairing Code Request Failed EXPLICITLY:`, error);
+            state.logs.push(`[${new Date().toLocaleTimeString()}] Pairing failed: ${error?.message || error}`);
 
             // Robust error stringification
             let errorMsg = error?.message || '';
@@ -241,7 +253,8 @@ class WhatsAppManager {
             qrCode: state.qrCodeData,
             pairingCode: state.pairingCode,
             cooldownUntil: state.cooldownUntil,
-            initError: state.initError || null
+            initError: state.initError || null,
+            logs: state.logs
         };
     }
 

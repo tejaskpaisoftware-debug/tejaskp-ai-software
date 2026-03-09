@@ -25,12 +25,13 @@ export default function AdminDashboard() {
     });
     const [userRole, setUserRole] = useState<string>("ADMIN");
     const [pairingMobile, setPairingMobile] = useState("");
-    const [whatsappStatus, setWhatsappStatus] = useState<{ isReady: boolean, qrCode: string | null, pairingCode: string | null, cooldownUntil: number, initError: string | null }>({
+    const [whatsappStatus, setWhatsappStatus] = useState<{ isReady: boolean, qrCode: string | null, pairingCode: string | null, cooldownUntil: number, initError: string | null, logs: string[] }>({
         isReady: false,
         qrCode: null,
         pairingCode: null,
         cooldownUntil: 0,
-        initError: null
+        initError: null,
+        logs: []
     });
 
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -92,7 +93,8 @@ export default function AdminDashboard() {
                             qrCode: waData.qrCode,
                             pairingCode: waData.pairingCode,
                             cooldownUntil: waData.cooldownUntil || 0,
-                            initError: waData.initError || null
+                            initError: waData.initError || null,
+                            logs: waData.logs || []
                         });
                     }
                 }
@@ -312,21 +314,47 @@ export default function AdminDashboard() {
                     </div>
 
                     {!whatsappStatus.isReady && (
-                        <div className="flex flex-col items-center gap-3 border-l border-white/5 pl-8 hidden md:flex">
-                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Option B: Scan QR</p>
-                            {whatsappStatus.qrCode ? (
-                                <div className="bg-white p-2 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] border-2 border-yellow-500/20">
-                                    <img src={whatsappStatus.qrCode} alt="WhatsApp QR Code" className="w-32 h-32 object-contain" />
-                                </div>
-                            ) : (
-                                <div className="w-32 h-32 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl text-[10px] text-gray-600 animate-pulse text-center relative overflow-hidden">
-                                    <span>Generating <br /> QR...</span>
+                        <div className="flex-1 flex flex-col items-center justify-center border-l border-zinc-800/50 p-4">
+                            <h4 className="text-[10px] text-zinc-500 uppercase tracking-wider mb-4">Option B: Scan QR</h4>
+                            <div className="w-32 h-32 bg-zinc-900/50 rounded-lg flex items-center justify-center border border-dashed border-zinc-700 relative overflow-hidden">
+                                {whatsappStatus.isReady ? (
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mb-2">
+                                            <div className="w-6 h-6 bg-emerald-500 rounded-full animate-pulse" />
+                                        </div>
+                                        <span className="text-[10px] text-emerald-500 font-medium">Link Active</span>
+                                    </div>
+                                ) : whatsappStatus.qrCode ? (
+                                    <img src={whatsappStatus.qrCode} alt="WhatsApp QR" className="w-full h-full object-contain" />
+                                ) : (
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2" />
+                                        <span className="text-[8px] text-zinc-500">Generating QR...</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* DIAGNOSTIC LOGS SECTION */}
+                            {whatsappStatus.logs && whatsappStatus.logs.length > 0 && (
+                                <div className="mt-4 w-full max-w-[200px]">
+                                    <div className="text-[8px] text-zinc-600 mb-1 flex justify-between uppercase">
+                                        <span>Diagnostic Logs</span>
+                                        <span className="text-emerald-500/50">Live</span>
+                                    </div>
+                                    <div className="bg-black/40 rounded border border-zinc-800/50 p-2 h-24 overflow-y-auto font-mono text-[7px] space-y-1 custom-scrollbar">
+                                        {whatsappStatus.logs.map((log, idx) => (
+                                            <div key={idx} className="text-zinc-400 break-words leading-tight border-b border-zinc-900/30 pb-1">
+                                                {log}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
+
                             {whatsappStatus.initError && (
-                                <div className="mt-2 text-[9px] text-red-400 font-mono text-center max-w-[150px] break-words">
+                                <p className="mt-2 text-[8px] text-red-500 font-medium max-w-[150px] text-center bg-red-500/10 p-1 rounded border border-red-500/20">
                                     Error: {whatsappStatus.initError}
-                                </div>
+                                </p>
                             )}
                         </div>
                     )}
