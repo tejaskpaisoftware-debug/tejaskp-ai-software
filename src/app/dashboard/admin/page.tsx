@@ -25,11 +25,12 @@ export default function AdminDashboard() {
     });
     const [userRole, setUserRole] = useState<string>("ADMIN");
     const [pairingMobile, setPairingMobile] = useState("");
-    const [whatsappStatus, setWhatsappStatus] = useState<{ isReady: boolean, qrCode: string | null, pairingCode: string | null, cooldownUntil: number }>({
+    const [whatsappStatus, setWhatsappStatus] = useState<{ isReady: boolean, qrCode: string | null, pairingCode: string | null, cooldownUntil: number, initError: string | null }>({
         isReady: false,
         qrCode: null,
         pairingCode: null,
-        cooldownUntil: 0
+        cooldownUntil: 0,
+        initError: null
     });
 
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -90,7 +91,8 @@ export default function AdminDashboard() {
                             isReady: waData.isReady,
                             qrCode: waData.qrCode,
                             pairingCode: waData.pairingCode,
-                            cooldownUntil: waData.cooldownUntil || 0
+                            cooldownUntil: waData.cooldownUntil || 0,
+                            initError: waData.initError || null
                         });
                     }
                 }
@@ -317,8 +319,13 @@ export default function AdminDashboard() {
                                     <img src={whatsappStatus.qrCode} alt="WhatsApp QR Code" className="w-32 h-32 object-contain" />
                                 </div>
                             ) : (
-                                <div className="w-32 h-32 flex items-center justify-center border border-dashed border-white/10 rounded-xl text-[10px] text-gray-600 animate-pulse text-center">
-                                    Generating <br /> QR...
+                                <div className="w-32 h-32 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl text-[10px] text-gray-600 animate-pulse text-center relative overflow-hidden">
+                                    <span>Generating <br /> QR...</span>
+                                </div>
+                            )}
+                            {whatsappStatus.initError && (
+                                <div className="mt-2 text-[9px] text-red-400 font-mono text-center max-w-[150px] break-words">
+                                    Error: {whatsappStatus.initError}
                                 </div>
                             )}
                         </div>

@@ -9,6 +9,7 @@ interface WhatsAppSessionState {
     isReady: boolean;
     isInitializing: boolean;
     cooldownUntil: number;
+    initError?: string | null;
 }
 
 declare global {
@@ -29,7 +30,8 @@ class WhatsAppManager {
                 pairingCode: null,
                 isReady: false,
                 isInitializing: false,
-                cooldownUntil: 0
+                cooldownUntil: 0,
+                initError: null
             });
         }
         return globalThis._whatsappClients.get(userId)!;
@@ -102,8 +104,9 @@ class WhatsAppManager {
 
         try {
             await client.initialize();
-        } catch (error) {
+        } catch (error: any) {
             console.error(`[WhatsApp - ${userId}] Initialization failed:`, error);
+            state.initError = error?.message || String(error);
             if (state.instance) {
                 try {
                     await state.instance.destroy();
@@ -215,7 +218,8 @@ class WhatsAppManager {
             isReady: state.isReady,
             qrCode: state.qrCodeData,
             pairingCode: state.pairingCode,
-            cooldownUntil: state.cooldownUntil
+            cooldownUntil: state.cooldownUntil,
+            initError: state.initError || null
         };
     }
 
