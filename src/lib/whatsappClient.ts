@@ -47,7 +47,8 @@ class WhatsAppManager {
         console.log(`[WhatsApp - ${userId}] Starting background Puppeteer instance...`);
 
         // Use a consistent data path for persistent storage
-        const authPath = process.env.WHATSAPP_SESSION_PATH || '.wwebjs_auth';
+        const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+        const authPath = process.env.WHATSAPP_SESSION_PATH || (isVercel ? '/tmp/.wwebjs_auth' : '.wwebjs_auth');
 
         const client = new Client({
             authStrategy: new LocalAuth({
