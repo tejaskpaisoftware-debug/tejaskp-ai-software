@@ -224,7 +224,7 @@ export default function RegisterUserPage() {
                                             {filteredColleges.map((college, i) => (
                                                 <div
                                                     key={i}
-                                                    className="px-4 py-3 hover:bg-gold-theme/10 rounded-xl text-sm cursor-pointer transition-colors"
+                                                    className="px-4 py-3 hover:bg-gold-theme/10 rounded-xl text-sm cursor-pointer transition-colors text-white font-semibold"
                                                     onMouseDown={() => {
                                                         setFormData({ ...formData, address: college });
                                                         setCollegeSearch(college);

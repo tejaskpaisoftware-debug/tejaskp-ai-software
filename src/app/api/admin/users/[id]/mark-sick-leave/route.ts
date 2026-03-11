@@ -62,7 +62,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         }
 
         // 2. Trigger Automation exactly according to user specs
-        console.log(`[Admin] Manual Sick Leave triggered WhatsApp care package for ${id}.`);
+        console.log(`[DEBUG - MARK SICK LEAVE] Action triggered by explicit user ID: ${adminUserId} for student ${id}`);
 
         let sendError = null;
         try {

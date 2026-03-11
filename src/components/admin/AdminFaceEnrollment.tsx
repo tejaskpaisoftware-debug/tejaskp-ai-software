@@ -19,6 +19,8 @@ export default function AdminFaceEnrollment({ isOpen, onClose, onSuccess, userId
     const [status, setStatus] = useState<'IDLE' | 'SCANNING' | 'PROCESSING' | 'SUCCESS' | 'ERROR'>('IDLE');
     const [message, setMessage] = useState("Initializing Security Protocol...");
 
+    const isCameraSupported = typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
     useEffect(() => {
         if (isOpen) {
             loadSecureModels();
@@ -116,7 +118,7 @@ export default function AdminFaceEnrollment({ isOpen, onClose, onSuccess, userId
                 <div className="p-8 text-center">
                     <h2 className="text-2xl font-bold text-white mb-2">{userName}</h2>
                     <p className={`text-sm mb-6 font-mono ${status === 'ERROR' ? 'text-red-400' :
-                            status === 'SUCCESS' ? 'text-green-400' : 'text-gray-400'
+                        status === 'SUCCESS' ? 'text-green-400' : 'text-gray-400'
                         }`}>
                         {message}
                     </p>
@@ -126,18 +128,38 @@ export default function AdminFaceEnrollment({ isOpen, onClose, onSuccess, userId
                             <div className="flex items-center justify-center h-full text-blue-500/50 animate-pulse font-mono text-xs uppercase">
                                 System Initializing...
                             </div>
+                        ) : !isCameraSupported ? (
+                            <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-red-500/10">
+                                <Shield size={32} className="text-red-500 mb-3" />
+                                <p className="text-red-500 font-bold text-sm mb-1">Camera Access Blocked</p>
+                                <p className="text-gray-400 text-xs leading-relaxed">
+                                    Due to browser security, camera access is only allowed on secure connections. Please use <strong>localhost</strong> or an <strong>https://</strong> URL.
+                                </p>
+                            </div>
                         ) : (
                             <>
                                 <Webcam
                                     ref={webcamRef}
                                     audio={false}
                                     screenshotFormat="image/jpeg"
-                                    videoConstraints={{ facingMode: "user" }}
-                                    className="w-full h-full object-cover"
+                                    videoConstraints={{
+                                        facingMode: "user",
+                                        width: 1280,
+                                        height: 720
+                                    }}
+                                    mirrored={true}
+                                    onUserMedia={() => console.log("Webcam (Admin): User media stream active")}
+                                    onUserMediaError={(err) => {
+                                        console.error("Webcam (Admin): User media error", err);
+                                        setStatus('ERROR');
+                                        setMessage("Camera access blocked or not found.");
+                                    }}
+                                    className="w-full h-full object-cover grayscale"
                                 />
                                 {/* Face Frame Overlay */}
                                 <div className="absolute inset-x-[25%] inset-y-[10%] border-2 border-blue-500/30 rounded-full pointer-events-none"></div>
                                 <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(59,130,246,0.1)_50%)] bg-[length:100%_4px] pointer-events-none opacity-20"></div>
+                                <div className="absolute inset-x-0 top-0 h-px bg-blue-500/50 shadow-[0_0_10px_#3B82F6] animate-scan pointer-events-none"></div>
                             </>
                         )}
 

@@ -3,6 +3,7 @@ import WhatsAppManager from '@/lib/whatsappClient';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import fs from 'fs';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
@@ -39,11 +40,17 @@ export async function POST() {
         const userSessionPath = path.join(rootDir, authPath, `session-${userId}`);
 
         try {
-            // Kill any orphaned chromium processes for this user if possible
-            // This is a "belt and suspenders" approach for Render's limited RAM
+            // Kill any orphaned chromium processes for this user
+            // On Mac, Puppeteer might launch "Google Chrome for Testing"
+            console.log(`[WhatsApp - ${userId}] cleaning up browser processes...`);
+            await execPromise('pkill -f "Google Chrome for Testing" || true');
             await execPromise('pkill -f chromium || true');
-            await execPromise(`rm -rf "${userSessionPath}"`);
-            console.log(`[WhatsApp - ${userId}] Session directory and orphaned processes cleared.`);
+            await execPromise('pkill -f puppeteer || true');
+
+            if (fs.existsSync(userSessionPath)) {
+                await execPromise(`rm -rf "${userSessionPath}"`);
+                console.log(`[WhatsApp - ${userId}] Session directory cleared: ${userSessionPath}`);
+            }
         } catch (e) {
             console.error(`[WhatsApp - ${userId}] Cleanup warning: ${e}`);
         }

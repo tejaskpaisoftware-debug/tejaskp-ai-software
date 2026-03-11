@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
         let bestMatch = null;
         let minDistance = Infinity;
-        const THRESHOLD = 0.65; // Even more relaxed for identification from login
+        const THRESHOLD = 0.45; // Strict for identification from login to prevent interchanging
 
         console.log(`[Face Login] Comparing against ${users.length} users...`);
 

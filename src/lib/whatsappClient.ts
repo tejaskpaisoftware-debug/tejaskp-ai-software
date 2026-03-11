@@ -1,5 +1,8 @@
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import * as qrcode from 'qrcode';
+import { prisma } from './prisma';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Define the state for a single WhatsApp session
 interface WhatsAppSessionState {
@@ -39,7 +42,7 @@ class WhatsAppManager {
         return globalThis._whatsappClients.get(userId)!;
     }
 
-    public static async initialize(userId: string) {
+    public static async initialize(userId: string): Promise<void> {
         const state = this.getSessionState(userId);
         if (state.instance || state.isInitializing) return;
 
@@ -156,8 +159,41 @@ class WhatsAppManager {
             addLog(`Initializing client (this may take 30-60s on Render)...`);
             await client.initialize();
         } catch (error: any) {
-            addLog(`Initialization failed: ${error?.message || error}`);
-            state.initError = error?.message || String(error);
+            const errorMsg = error?.message || String(error);
+            addLog(`Initialization failed: ${errorMsg}`);
+
+            // If it's a Puppeteer lock file error, try to clean it up once
+            if (errorMsg.includes('browser is already running') && !(state as any)._hasRetried) {
+                addLog(`Detected lock file conflict. Attempting aggressive session cleanup...`);
+                (state as any)._hasRetried = true;
+
+                try {
+                    const sessionPath = path.join(authPath, `session-${userId}`);
+                    if (fs.existsSync(sessionPath)) {
+                        const files = fs.readdirSync(sessionPath);
+                        let clearedCount = 0;
+                        files.forEach(file => {
+                            if (file.startsWith('Singleton')) {
+                                try {
+                                    fs.unlinkSync(path.join(sessionPath, file));
+                                    addLog(`Cleared lock file: ${file}`);
+                                    clearedCount++;
+                                } catch (e) { }
+                            }
+                        });
+                        addLog(`Successfully removed ${clearedCount} lock/socket files. Waiting 2s for OS to release...`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        state.isInitializing = false;
+                        state.instance = null;
+                        return await this.initialize(userId);
+                    }
+                } catch (cleanupError: any) {
+                    addLog(`Lock file cleanup failed: ${cleanupError.message}`);
+                }
+            }
+
+            state.initError = errorMsg;
             if (state.instance) {
                 try {
                     await state.instance.destroy();
@@ -287,16 +323,54 @@ class WhatsAppManager {
         }
 
         try {
+            // Dynamically fetch Sender Details (Admin or Team Lead)
+            const sender = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { name: true, role: true, department: true }
+            });
+
+            // Fallback signature
+            let signature = "\n\nRegards,\nAdmin - Tejaskp AI Software";
+
+            // If it's a team lead, use their explicit structure
+            if (sender) {
+                if (sender.role === 'TEAM_LEAD') {
+                    // Use format: Name\nTeam Lead - Domain\nTejaskp AI Software
+                    const domain = sender.department ? ` - ${sender.department}` : '';
+                    signature = `\n\nRegards,\n${sender.name}\nTeam Lead${domain}\nTejaskp AI Software`;
+                } else if (sender.role === 'ADMIN') {
+                    signature = `\n\nRegards,\n${sender.name}\nAdmin\nTejaskp AI Software`;
+                } else if (sender.role === 'DEVELOPMENT_MANAGER') {
+                    signature = `\n\nRegards,\n${sender.name}\nDevelopment Manager\nTejaskp AI Software`;
+                }
+            }
+
+            // Clean the message by removing existing rigid signatures.
+            // Some templates end with "Regards,\nAdmin - Tejaskp AI Software" 
+            // We just strip any instance of it before appending the dynamic one.
+            let finalMessage = message.replace(/\n\nRegards,[\s\S]*Tejaskp AI Software\*?/i, '');
+            finalMessage = finalMessage.replace(/\nRegards,[\s\S]*Tejaskp AI Software\*?/i, ''); // Also catch missing \n
+            finalMessage = finalMessage.trim() + signature;
+
             let formattedMobile = phone.replace(/\D/g, '');
             if (formattedMobile.length === 10) {
                 formattedMobile = '91' + formattedMobile;
             }
             const jid = `${formattedMobile}@c.us`;
 
-            await state.instance.sendMessage(jid, message);
+            await state.instance.sendMessage(jid, finalMessage);
             return true;
-        } catch (error) {
-            console.error(`[WhatsApp - ${userId}] Failed to send message:`, error);
+        } catch (error: any) {
+            console.error(`[WhatsApp - ${userId}] Failed to send message to Phone: ${phone}`);
+            console.error(error?.stack || error);
+
+            // If the browser frame crashed natively in Puppeteer, the instance is permanently dead.
+            // We must force a hard reset so it boots back up cleanly for the next request.
+            if (error?.message?.includes('detached Frame') || error?.message?.includes('Target closed') || error?.message?.includes('Session closed')) {
+                console.log(`[WhatsApp - ${userId}] Detected unrecoverable browser crash. Forcing session reset.`);
+                this.reset(userId);
+            }
+
             return false;
         }
     }
@@ -312,6 +386,24 @@ class WhatsAppManager {
         state.isReady = false;
         state.qrCodeData = null;
         state.pairingCode = null;
+
+        // Force cleanup of lock files on reset
+        try {
+            const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+            const authPath = process.env.WHATSAPP_SESSION_PATH || (isVercel ? '/tmp/.wwebjs_auth' : '.wwebjs_auth');
+            const sessionPath = path.join(authPath, `session-${userId}`);
+            if (fs.existsSync(sessionPath)) {
+                const files = fs.readdirSync(sessionPath);
+                files.forEach(file => {
+                    if (file.startsWith('Singleton')) {
+                        try { fs.unlinkSync(path.join(sessionPath, file)); } catch (e) { }
+                    }
+                });
+            }
+        } catch (e) {
+            console.error(`[WhatsApp - ${userId}] Reset cleanup failed:`, e);
+        }
+
         this.initialize(userId);
     }
 }

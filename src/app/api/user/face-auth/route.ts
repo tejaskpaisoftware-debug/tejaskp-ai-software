@@ -47,8 +47,9 @@ export async function POST(req: Request) {
         const storedDescriptor = JSON.parse(user.faceDescriptor) as number[];
         const distance = euclideanDistance(descriptorArray, storedDescriptor);
 
-        // Threshold for face-api.js is usually 0.6. Lower is stricter.
-        const THRESHOLD = 0.5;
+        // Threshold for face-api.js is usually 0.6. Lower is stricter. 0.4 is very secure.
+        const THRESHOLD = 0.4;
+        console.log(`[Face Auth] Target User: ${user.mobile}, Distance: ${distance.toFixed(4)}, Threshold: ${THRESHOLD}`);
 
         if (distance < THRESHOLD) {
             // Success

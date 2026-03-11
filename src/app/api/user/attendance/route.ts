@@ -120,9 +120,13 @@ export async function POST(request: Request) {
                 });
 
                 if (userExt) {
+                    const admin = await prisma.user.findFirst({ where: { role: 'ADMIN', status: 'ACTIVE' }, select: { id: true } });
+                    const adminId = admin?.id || 'system';
+
                     // Send to Parent
                     if (userExt.parentMobile) {
                         await WhatsAppSingleton.sendMessage(
+                            adminId,
                             userExt.parentMobile,
                             `*LATE ARRIVAL WARNING - ${userExt.name}*\n\nDear Parent/Guardian,\n\nThis is to notify you that your ward, ${userExt.name}, was marked late today. This is their ${lateCount + 1}th late arrival this month.\n\nPlease ensure they check-in on time to meet the required guidelines.\n\nRegards,\nAdmin - Tejaskp AI Software`
                         );
@@ -131,6 +135,7 @@ export async function POST(request: Request) {
                     // Send to Student
                     if (userExt.mobile) {
                         await WhatsAppSingleton.sendMessage(
+                            adminId,
                             userExt.mobile,
                             `*LATE CHECK-IN NOTICE*\n\nHi ${userExt.name},\n\nYou have been marked late today. This is late instance #${lateCount + 1} for this month.\n\nPlease try to check in on time moving forward.\n\nRegards,\nAdmin - Tejaskp AI Software`
                         );

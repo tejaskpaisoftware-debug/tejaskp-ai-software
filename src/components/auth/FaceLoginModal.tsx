@@ -18,6 +18,8 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }: FaceLogin
     const [status, setStatus] = useState<'IDLE' | 'SCANNING' | 'VERIFYING' | 'SUCCESS' | 'ERROR'>('IDLE');
     const [message, setMessage] = useState("Initializing Smart Login...");
 
+    const isCameraSupported = typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
     useEffect(() => {
         if (isOpen) {
             loadModels();
@@ -141,16 +143,29 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }: FaceLogin
                             <div className="flex items-center justify-center h-full text-yellow-500/50 animate-pulse font-mono text-xs uppercase">
                                 Calibrating AI...
                             </div>
+                        ) : !isCameraSupported ? (
+                            <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-red-500/10">
+                                <X size={28} className="text-red-500 mb-3" />
+                                <p className="text-red-500 font-bold text-sm mb-1">Camera Access Blocked</p>
+                                <p className="text-gray-400 text-xs leading-relaxed">
+                                    Your browser requires a secure connection to use the camera. Please access the site via <strong>localhost</strong> or an <strong>https://</strong> URL.
+                                </p>
+                            </div>
                         ) : (
                             <>
                                 <Webcam
                                     ref={webcamRef}
                                     audio={false}
                                     screenshotFormat="image/jpeg"
-                                    videoConstraints={{ facingMode: "user" }}
+                                    videoConstraints={{
+                                        facingMode: "user",
+                                        width: 1280,
+                                        height: 720
+                                    }}
+                                    mirrored={true}
+                                    onUserMedia={() => console.log("Webcam: User media stream active")}
                                     className="w-full h-full object-cover grayscale"
                                 />
-                                <div className="absolute inset-0 border-[2px] border-yellow-500/20 rounded-full scale-90 m-auto pointer-events-none animate-pulse"></div>
                                 <div className="absolute inset-x-0 top-0 h-px bg-yellow-500/50 shadow-[0_0_10px_#EAB308] animate-scan pointer-events-none"></div>
                             </>
                         )}

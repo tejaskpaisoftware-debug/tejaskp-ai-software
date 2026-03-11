@@ -5,48 +5,53 @@ export async function POST() {
     try {
         console.log("Processing Data Reset Request...");
 
-        // 1. Transaction to Delete All Data
-        await prisma.$transaction(async (tx) => {
-            // Delete Dependencies
-            await tx.attendance.deleteMany({});
-            await tx.leave.deleteMany({});
-            await tx.joiningLetter.deleteMany({});
-            await tx.session.deleteMany({});
-            await tx.invoice.deleteMany({});
+        // 1. Delete All Data (Sequential to avoid transaction timeouts)
+        // A. Deep Child Records (Task, Chat, Game, AI)
+        await prisma.taskAttachment.deleteMany({});
+        await prisma.taskComment.deleteMany({});
+        await prisma.taskHistory.deleteMany({});
+        await prisma.task.deleteMany({});
 
-            // Fix: Delete Missing User Relations to prevent FK Errors
-            await tx.certificate.deleteMany({});
-            await tx.salarySlip.deleteMany({});
-            await tx.submission.deleteMany({});
-            await tx.notification.deleteMany({});
-            await tx.referral.deleteMany({});
+        await prisma.emailAttachment.deleteMany({});
+        await prisma.emailRecipient.deleteMany({});
+        await prisma.email.deleteMany({});
+        await prisma.mailbox.deleteMany({});
 
-            // Fix: Delete Chat & AI Data
-            await tx.message.deleteMany({});
-            await tx.conversation.deleteMany({});
-            await tx.aiMessage.deleteMany({});
-            await tx.aiSession.deleteMany({});
+        await prisma.message.deleteMany({});
+        await prisma.conversation.deleteMany({});
 
-            // Fix: Delete Game Data
-            await tx.racingPlayer.deleteMany({});
-            await tx.racingSession.deleteMany({});
-            await tx.racingLeaderboard.deleteMany({});
+        await prisma.aiMessage.deleteMany({});
+        await prisma.aiSession.deleteMany({});
 
-            // Delete Students (Non-Admin Users)
-            await tx.user.deleteMany({
-                where: { role: { not: 'ADMIN' } }
-            });
+        await prisma.racingPlayer.deleteMany({});
+        await prisma.racingSession.deleteMany({});
+        await prisma.racingLeaderboard.deleteMany({});
 
-            // Note: Purchases are preserved (Company Expenses)
-            // Note: Admin Logs are technically preserved if linked to Admin, but we can clean orphans
+        // B. Direct User Dependencies
+        await prisma.attendance.deleteMany({});
+        await prisma.leaveBalance.deleteMany({});
+        await prisma.leave.deleteMany({});
+        await prisma.joiningLetter.deleteMany({});
+        await prisma.session.deleteMany({});
+        await prisma.invoice.deleteMany({});
+        await prisma.certificate.deleteMany({});
+        await prisma.salarySlip.deleteMany({});
+        await prisma.submission.deleteMany({});
+        await prisma.notification.deleteMany({});
+        await prisma.referral.deleteMany({});
+        await prisma.studentDocument.deleteMany({});
 
-            // Clean Orphan Logs
-            const admins = await tx.user.findMany({ where: { role: 'ADMIN' }, select: { id: true } });
-            const adminIds = admins.map(a => a.id);
+        // C. Final User Clean-up (Exclude Admins)
+        await prisma.user.deleteMany({
+            where: { role: { not: 'ADMIN' } }
+        });
 
-            await tx.systemLog.deleteMany({
-                where: { userId: { notIn: adminIds } }
-            });
+        // D. System Clean-up (Orphaned Logs)
+        const admins = await prisma.user.findMany({ where: { role: 'ADMIN' }, select: { id: true } });
+        const adminIds = admins.map(a => a.id);
+
+        await prisma.systemLog.deleteMany({
+            where: { userId: { notIn: adminIds } }
         });
 
         return NextResponse.json({ success: true, message: "All student data deleted successfully." });

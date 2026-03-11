@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ReportGenerator, ReportPeriod } from '@/lib/reportGenerator';
 import { WhatsAppService } from '@/lib/whatsapp';
+import WhatsAppManager from '@/lib/whatsappClient';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
@@ -22,6 +23,14 @@ export async function POST(request: Request) {
         const adminUserId = await getAuthUserId();
         if (!adminUserId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const state = WhatsAppManager.getStatus(adminUserId);
+        if (!state.isReady) {
+            return NextResponse.json(
+                { success: false, error: 'Your WhatsApp is disconnected. Please scan the QR code to reconnect.' },
+                { status: 500 }
+            );
         }
 
         const body = await request.json();
@@ -78,7 +87,7 @@ export async function POST(request: Request) {
             });
         } else {
             return NextResponse.json(
-                { success: false, error: 'Failed to dispatch WhatsApp messages.' },
+                { success: false, error: 'Failed to message the student or parent. Their number might be invalid.' },
                 { status: 500 }
             );
         }

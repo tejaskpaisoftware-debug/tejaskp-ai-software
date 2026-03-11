@@ -4,15 +4,15 @@ import { restrictToAdmin } from "@/lib/auth-server";
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const auth = await restrictToAdmin();
     if (!auth.authorized) return auth.response;
     try {
-        const { id } = params; // Changed from await params to params
+        const { id } = await params;
 
         await prisma.salarySlip.delete({
-            where: { id: id }
+            where: { id: id },
         });
 
         return NextResponse.json({ success: true, message: "Salary slip deleted successfully" });

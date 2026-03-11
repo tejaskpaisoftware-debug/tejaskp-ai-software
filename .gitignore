@@ -54,3 +54,16 @@ manual_migrate*.js
 # local cache
 npm-cache/
 npm-cache
+
+# debug files
+debug.log
+student_debug.log
+whatsapp_error.txt
+check_roles.ts
+check_sessions.js
+find_users.js
+get_admin.js
+get_user.js
+trigger_wa.js
+.wwebjs_cache/
+src/app/test-cam/

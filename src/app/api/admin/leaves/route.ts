@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth-server";
+import { NotificationService } from "@/lib/notifications";
 
 export async function GET(request: Request) {
     try {
@@ -133,6 +134,21 @@ export async function PUT(request: Request) {
                 managerRemarks
             }
         });
+
+        // 4. TRIGGER WHATSAPP NOTIFICATION
+        try {
+            if (auth && auth.userId) {
+                if (status === 'APPROVED' && updated.type === 'CL') {
+                    await NotificationService.sendCasualLeaveApproved(auth.userId, updated.userId);
+                    console.log(`[WHATSAPP] Dispatching Approval for CL for User ${updated.userId}`);
+                } else if (status === 'REJECTED' && updated.type === 'CL') {
+                    await NotificationService.sendCasualLeaveRejected(auth.userId, updated.userId);
+                    console.log(`[WHATSAPP] Dispatching Rejection for CL for User ${updated.userId}`);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to send WhatsApp leave notification:", e);
+        }
 
         return NextResponse.json(updated);
     } catch (error) {

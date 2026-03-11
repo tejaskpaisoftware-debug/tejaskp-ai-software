@@ -170,6 +170,7 @@ model Attendance {
 
   @@index([userId])
   @@index([date])
+  @@unique([userId, date])
   @@map("attendance")
 }
 

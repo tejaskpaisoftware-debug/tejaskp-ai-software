@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
+console.log("UserCard.tsx LOADED");
+
 function LeaveBalanceSection({ user }: { user: UserProp }) {
     const [balance, setBalance] = useState<any>(null);
     const currentYear = new Date().getFullYear();
@@ -84,9 +86,10 @@ interface UserCardProps {
     onMarkSickLeave: (userId: string) => void;
     onMarkCasualLeave: (userId: string) => void;
     onSendReport: (user: UserProp) => void;
+    onViewAttendanceChart: (user: UserProp) => void;
 }
 
-export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip, onProfileApproval, onMarkLate, onMarkSickLeave, onMarkCasualLeave, onSendReport }: UserCardProps) {
+export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip, onProfileApproval, onMarkLate, onMarkSickLeave, onMarkCasualLeave, onSendReport, onViewAttendanceChart }: UserCardProps) {
     const [isExpanded, setIsExpanded] = useState(true);
 
     // Helper to get course name
@@ -130,7 +133,10 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                     </div>
 
                     <div>
-                        <h3 className="font-bold text-white text-lg leading-tight">{user.name}</h3>
+                        <h3 className="font-bold text-white text-lg leading-tight flex items-center gap-2">
+                            {user.name}
+                            <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse ring-4 ring-yellow-400/20" title="Code Updated" />
+                        </h3>
                         <div className="flex items-center gap-2 mt-1">
                             <span className={`text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold border ${user.role === 'ADMIN' ? 'border-red-500/30 text-red-400' :
                                 user.role === 'EMPLOYEE' ? 'border-purple-500/30 text-purple-400' :
@@ -296,6 +302,12 @@ export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSal
                                         className="w-full bg-green-600/10 hover:bg-green-600/20 text-green-400 border border-green-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
                                     >
                                         📊 Send Report
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); console.log('BUTTON CLICKED IN USER CARD FOR:', user.name); onViewAttendanceChart(user); }}
+                                        className="w-full bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 py-2 rounded text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-[0_0_15px_rgba(79,70,229,0.15)]"
+                                    >
+                                        ✨ AI Attendance Chart
                                     </button>
                                 </div>
                             )}

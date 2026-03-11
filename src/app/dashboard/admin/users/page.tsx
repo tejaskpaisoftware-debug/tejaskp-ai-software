@@ -9,6 +9,7 @@ import SalarySlipTemplate from '@/components/documents/SalarySlipTemplate';
 import jsPDF from "jspdf";
 import { toPng, toJpeg } from "html-to-image";
 import UserCard from "./UserCard";
+import AttendanceChartModal from "@/components/admin/AttendanceChartModal";
 
 interface User {
     id: string;
@@ -74,6 +75,7 @@ export default function UsersPage() {
     const [viewLoading, setViewLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isSendingEmail, setIsSendingEmail] = useState(false);
+    const [attendanceModal, setAttendanceModal] = useState<{ isOpen: boolean, user: User | null }>({ isOpen: false, user: null });
     const salarySlipRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -1346,7 +1348,11 @@ export default function UsersPage() {
                                                     onMarkLate={handleMarkLate}
                                                     onMarkSickLeave={handleMarkSickLeave}
                                                     onMarkCasualLeave={handleMarkCasualLeave}
-                                                    onSendReport={(u) => setReportModal({ isOpen: true, user: u as User })}
+                                                    onSendReport={(u) => setReportModal({ isOpen: true, user: u as unknown as User })}
+                                                    onViewAttendanceChart={(u) => {
+                                                        console.log('PROP TRIGGERED IN PAGE.TSX FOR USER:', (u as any)?.name);
+                                                        setAttendanceModal({ isOpen: true, user: u as unknown as User });
+                                                    }}
                                                 />
                                             ))}
                                     </div>
@@ -1452,6 +1458,13 @@ export default function UsersPage() {
                 )}
             </AnimatePresence>
 
+            {/* Attendance Chart & Insights Modal */}
+            <AttendanceChartModal
+                isOpen={attendanceModal.isOpen}
+                onClose={() => setAttendanceModal({ isOpen: false, user: null })}
+                userId={attendanceModal.user?.id || ''}
+                userName={attendanceModal.user?.name || ''}
+            />
 
         </div >
     );
