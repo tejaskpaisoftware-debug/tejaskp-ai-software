@@ -21,7 +21,7 @@ services:
       - key: VERCEL
         value: "0"
       - key: NEXTAUTH_URL
-        value: https://tejaskp-ai-software.onrender.com
+        value: https://www.tejaskp.in
       - key: NODE_ENV
         value: production
       - key: SMTP_HOST
