@@ -1,6 +1,9 @@
 # Deploying Tejaskp AI Portal to Render
 
-Because the WhatsApp integration requires a constant background browser process, it must be hosted on a persistent server like Render rather than a serverless platform like Vercel.
+Because the WhatsApp integration requires a constant background browser process (Puppeteer), it must be hosted on a persistent server like Render. 
+
+> [!WARNING]
+> While the main portal works on Vercel, **WhatsApp messaging is automatically disabled on Vercel** to prevent server crashes. Use Render if you need WhatsApp features.
 
 ## Step 1: Push Changes to GitHub
 I have already created the `Dockerfile` and `render.yaml` files. You need to push these to your GitHub repository:

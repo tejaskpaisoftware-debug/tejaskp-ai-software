@@ -50,8 +50,16 @@ class WhatsAppManager {
         console.log(`[WhatsApp - ${userId}] Starting background Puppeteer instance...`);
 
         // Use a consistent data path for persistent storage
-        const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
-        const authPath = process.env.WHATSAPP_SESSION_PATH || (isVercel ? '/tmp/.wwebjs_auth' : '.wwebjs_auth');
+        const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.NEXT_PUBLIC_VERCEL_ENV;
+        
+        if (isVercel) {
+            console.warn(`[WhatsApp - ${userId}] SKIPPING INITIALIZATION: WhatsApp (Puppeteer) is not supported on Vercel (Serverless). Please use Render for full WhatsApp functionality.`);
+            state.initError = "WhatsApp features are disabled on Vercel. Contact Admin to migrate to Render.";
+            state.isInitializing = false;
+            return;
+        }
+
+        const authPath = process.env.WHATSAPP_SESSION_PATH || '.wwebjs_auth';
 
         const client = new Client({
             authStrategy: new LocalAuth({
@@ -302,7 +310,8 @@ class WhatsAppManager {
 
     public static getStatus(userId: string) {
         const state = this.getSessionState(userId);
-        if (!state.instance && !state.isInitializing) {
+        const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.NEXT_PUBLIC_VERCEL_ENV;
+        if (!state.instance && !state.isInitializing && !isVercel) {
             this.initialize(userId);
         }
         return {
@@ -389,8 +398,10 @@ class WhatsAppManager {
 
         // Force cleanup of lock files on reset
         try {
-            const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
-            const authPath = process.env.WHATSAPP_SESSION_PATH || (isVercel ? '/tmp/.wwebjs_auth' : '.wwebjs_auth');
+            const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.NEXT_PUBLIC_VERCEL_ENV;
+            if (isVercel) return; // Cleanup not applicable on Vercel
+
+            const authPath = process.env.WHATSAPP_SESSION_PATH || '.wwebjs_auth';
             const sessionPath = path.join(authPath, `session-${userId}`);
             if (fs.existsSync(sessionPath)) {
                 const files = fs.readdirSync(sessionPath);
