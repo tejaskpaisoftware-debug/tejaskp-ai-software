@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "tunnel": "npx -y localtunnel --port 3000",
+    "tunnel:fixed": "npx -y localtunnel --port 3000 --subdomain tejaskpai-system",
+    "cf": "npx -y cloudflared tunnel --url http://localhost:3000",
+    "serveo": "ssh -R 80:localhost:3000 serveo.net",
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "eslint",

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import "../stars.css"; // Import the CSS stars
 import { ScanFace, Mic } from "lucide-react";
-import FaceLoginModal from "@/components/auth/FaceLoginModal";
+import FaceLoginModal, { preloadFaceModels } from "@/components/auth/FaceLoginModal";
 import VoiceLoginModal from "@/components/auth/VoiceLoginModal";
 
 
@@ -42,13 +42,18 @@ export default function LoginPage() {
         else router.push("/dashboard");
     };
 
-    // 🛡️ SECURITY: Clear any stale session data on mount
+    // 🛡️ SECURITY & OPTIMIZATION: Clear stale session and Preload AI
     useEffect(() => {
         sessionStorage.removeItem("currentUser");
         sessionStorage.removeItem("user");
-        localStorage.removeItem("currentUser"); // Clean old flows
+        localStorage.removeItem("currentUser");
         localStorage.removeItem("user");
         sessionStorage.clear();
+
+        // Warm up AI models after 2s to prioritize initial page structure
+        setTimeout(() => {
+            preloadFaceModels();
+        }, 2000);
     }, []);
 
     const handleLogin = async (e: React.FormEvent) => {

@@ -3,8 +3,31 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
-import { X, Camera, RefreshCw, CheckCircle } from 'lucide-react';
+import { X, Camera, RefreshCw, CheckCircle, WifiOff } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+// Singleton to track model loading state globally
+let modelsLoaded = false;
+let isModelLoading = false;
+
+export const preloadFaceModels = async () => {
+    if (modelsLoaded || isModelLoading) return;
+    isModelLoading = true;
+    try {
+        const MODEL_URL = '/models';
+        await Promise.all([
+            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]);
+        modelsLoaded = true;
+        console.log("FaceLoginModal: AI Models Preloaded Successfully");
+    } catch (err) {
+        console.error("FaceLoginModal: Preload Failed", err);
+    } finally {
+        isModelLoading = false;
+    }
+};
 
 interface FaceLoginModalProps {
     isOpen: boolean;
@@ -18,24 +41,66 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }: FaceLogin
     const [status, setStatus] = useState<'IDLE' | 'SCANNING' | 'VERIFYING' | 'SUCCESS' | 'ERROR'>('IDLE');
     const [message, setMessage] = useState("Initializing Smart Login...");
 
-    const isCameraSupported = typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    const [isCameraSupported, setIsCameraSupported] = useState<boolean>(true);
+    const [isSecureContext, setIsSecureContext] = useState<boolean>(true);
+
+    useEffect(() => {
+        setIsCameraSupported(typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+        setIsSecureContext(typeof window !== 'undefined' && !!window.isSecureContext);
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
             loadModels();
+            requestCamera();
         }
     }, [isOpen]);
 
+    const requestCamera = async () => {
+        if (!isCameraSupported) {
+            console.warn("FaceLoginModal: Camera API not supported in this environment.");
+            setStatus('ERROR');
+            setMessage(isSecureContext ? "Camera API not found." : "Camera requires a SECURE connection (HTTPS).");
+            return false;
+        }
+
+        try {
+            console.log("FaceLoginModal: Requesting camera access...");
+            if (!navigator?.mediaDevices?.getUserMedia) {
+                throw new Error("getUserMedia is not supported on this browser/context.");
+            }
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            console.log("FaceLoginModal: Camera access granted");
+            stream.getTracks().forEach(track => track.stop());
+            return true;
+        } catch (err) {
+            console.error("FaceLoginModal: Camera access error:", err);
+            setStatus('ERROR');
+            setMessage(isSecureContext ? "Camera access denied or failed." : "Camera requires a SECURE connection (HTTPS).");
+            return false;
+        }
+    };
+
     const loadModels = async () => {
+        if (modelsLoaded) {
+            setLoadingModels(false);
+            setMessage("Position your face for Smart Login");
+            setStatus('SCANNING');
+            return;
+        }
+
         try {
             setStatus('IDLE');
             setMessage("Loading AI Models...");
-            const MODEL_URL = '/models';
-            await Promise.all([
-                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-            ]);
+            
+            // Helpful tip for tunnel users
+            const tunnelTimeout = setTimeout(() => {
+                setMessage("Tunnel connection is slow. Still loading AI...");
+            }, 3000);
+
+            await preloadFaceModels();
+            
+            clearTimeout(tunnelTimeout);
             setLoadingModels(false);
             setMessage("Position your face for Smart Login");
             setStatus('SCANNING');
@@ -144,13 +209,23 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }: FaceLogin
                                 Calibrating AI...
                             </div>
                         ) : !isCameraSupported ? (
-                            <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-red-500/10">
-                                <X size={28} className="text-red-500 mb-3" />
-                                <p className="text-red-500 font-bold text-sm mb-1">Camera Access Blocked</p>
-                                <p className="text-gray-400 text-xs leading-relaxed">
-                                    Your browser requires a secure connection to use the camera. Please access the site via <strong>localhost</strong> or an <strong>https://</strong> URL.
-                                </p>
-                            </div>
+                                <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-red-500/10">
+                                    <X size={28} className="text-red-500 mb-3" />
+                                    <p className="text-red-500 font-bold text-sm mb-1">
+                                        {isSecureContext ? "Camera Not Detected" : "Security Block (Insecure Connection)"}
+                                    </p>
+                                    <p className="text-gray-400 text-xs leading-relaxed">
+                                        {isSecureContext 
+                                            ? "Your browser cannot find or access the camera. Please check your system settings."
+                                            : "Camera access is restricted to HTTPS for your safety. Please use a secure URL or localhost."
+                                        }
+                                    </p>
+                                    {!isSecureContext && (
+                                        <div className="mt-4 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-[10px] text-yellow-500 uppercase font-bold animate-pulse">
+                                            Run "npm run tunnel" for HTTPS
+                                        </div>
+                                    )}
+                                </div>
                         ) : (
                             <>
                                 <Webcam
@@ -159,11 +234,17 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }: FaceLogin
                                     screenshotFormat="image/jpeg"
                                     videoConstraints={{
                                         facingMode: "user",
-                                        width: 1280,
-                                        height: 720
+                                        width: { ideal: 1280 },
+                                        height: { ideal: 720 },
+                                        aspectRatio: 1
                                     }}
                                     mirrored={true}
                                     onUserMedia={() => console.log("Webcam: User media stream active")}
+                                    onUserMediaError={(err) => {
+                                        console.error("Webcam: User media error", err);
+                                        setStatus('ERROR');
+                                        setMessage("Camera access blocked or not found.");
+                                    }}
                                     className="w-full h-full object-cover grayscale"
                                 />
                                 <div className="absolute inset-x-0 top-0 h-px bg-yellow-500/50 shadow-[0_0_10px_#EAB308] animate-scan pointer-events-none"></div>
@@ -184,8 +265,22 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }: FaceLogin
                     </div>
 
                     {!loadingModels && status !== 'SUCCESS' && (
-                        <div className="space-y-3">
-                            <div className="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-2 italic">Scanning active...</div>
+                        <div className="space-y-4">
+                            {status === 'ERROR' ? (
+                                <button
+                                    onClick={() => {
+                                        setStatus('SCANNING');
+                                        setMessage("Retrying camera access...");
+                                        requestCamera();
+                                    }}
+                                    className="flex items-center gap-2 mx-auto px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-black font-bold rounded-lg transition-all active:scale-95 shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+                                >
+                                    <Camera size={18} />
+                                    TRY AGAIN
+                                </button>
+                            ) : (
+                                <div className="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-2 italic">Scanning active...</div>
+                            )}
                         </div>
                     )}
                 </div>

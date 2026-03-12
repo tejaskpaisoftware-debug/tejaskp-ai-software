@@ -19,7 +19,13 @@ export default function AdminFaceEnrollment({ isOpen, onClose, onSuccess, userId
     const [status, setStatus] = useState<'IDLE' | 'SCANNING' | 'PROCESSING' | 'SUCCESS' | 'ERROR'>('IDLE');
     const [message, setMessage] = useState("Initializing Security Protocol...");
 
-    const isCameraSupported = typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    const [isCameraSupported, setIsCameraSupported] = useState<boolean>(true);
+    const [isSecureContext, setIsSecureContext] = useState<boolean>(true);
+
+    useEffect(() => {
+        setIsCameraSupported(typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+        setIsSecureContext(typeof window !== 'undefined' && !!window.isSecureContext);
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -131,10 +137,20 @@ export default function AdminFaceEnrollment({ isOpen, onClose, onSuccess, userId
                         ) : !isCameraSupported ? (
                             <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-red-500/10">
                                 <Shield size={32} className="text-red-500 mb-3" />
-                                <p className="text-red-500 font-bold text-sm mb-1">Camera Access Blocked</p>
-                                <p className="text-gray-400 text-xs leading-relaxed">
-                                    Due to browser security, camera access is only allowed on secure connections. Please use <strong>localhost</strong> or an <strong>https://</strong> URL.
+                                <p className="text-red-500 font-bold text-sm mb-1">
+                                    {isSecureContext ? "Camera Not Detected" : "Security Block (Insecure Connection)"}
                                 </p>
+                                <p className="text-gray-400 text-xs leading-relaxed">
+                                    {isSecureContext 
+                                        ? "Your browser cannot find or access the camera. Please check your system settings."
+                                        : "Camera access is restricted to HTTPS for your safety. Please use a secure URL or localhost."
+                                    }
+                                </p>
+                                {!isSecureContext && (
+                                    <div className="mt-4 p-2 bg-blue-500/10 border border-blue-500/20 rounded text-[10px] text-blue-500 uppercase font-bold animate-pulse">
+                                        Run "npm run tunnel" for HTTPS
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <>
