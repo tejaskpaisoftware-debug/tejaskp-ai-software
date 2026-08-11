@@ -12,14 +12,21 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { mobile, password, role } = body;
+        const identifier = String(mobile || "").trim();
 
-        const user = await prisma.user.findUnique({
-            where: { mobile }
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { mobile: identifier },
+                    { email: { equals: identifier, mode: "insensitive" } },
+                    { employeeId: identifier }
+                ]
+            }
         });
 
         if (!user) {
             return NextResponse.json(
-                { message: "User not found. Please contact Admin." },
+                { message: "User not found. Please check your credentials or contact Admin." },
                 { status: 404 }
             );
         }

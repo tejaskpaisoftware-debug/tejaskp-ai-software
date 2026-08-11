@@ -7,3 +7,8 @@ tejaskp-ios-portal
 tejaskp-mobile
 ios
 android
+.wwebjs_auth
+.wwebjs_auth_test
+.wwebjs_cache
+*.log
+dev.db

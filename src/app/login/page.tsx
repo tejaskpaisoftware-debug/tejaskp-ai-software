@@ -186,7 +186,7 @@ export default function LoginPage() {
                 >
                     <div className="bg-[#121212]/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
                         <div className="flex border-b border-yellow-500/20">
-                            {["STUDENT", "EMPLOYEE", "CLIENT", "DEVELOPMENT_MANAGER"].map((role) => (
+                            {["STUDENT", "EMPLOYEE", "CLIENT", "DEVELOPMENT_MANAGER", "ADMIN"].map((role) => (
                                 <button
                                     key={role}
                                     onClick={() => { setActiveRole(role as Role); setAuthStep("LOGIN"); setError(""); }}
