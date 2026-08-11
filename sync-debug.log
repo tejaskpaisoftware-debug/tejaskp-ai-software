@@ -16,3 +16,7 @@
 [2026-01-28T14:15:03.792Z] Checking msg: "Re: sd" from tejaskpaisoftware@gmail.com
 [2026-01-28T14:15:03.969Z] 📥 Importing: Re: sd
 [2026-01-28T14:15:05.615Z] ✅ Sync complete. Imported 1 messages.
+[2026-05-01T09:32:09.872Z] 🔄 Starting IMAP Sync for user: 03794841-2f75-4984-89a2-bbec1c1d2d3b
+[2026-05-01T09:32:09.873Z] Connecting to imap.secureserver.net...
+[2026-05-01T09:32:13.256Z] ❌ IMAP Sync Error: Authentication failed.
+[2026-05-01T09:32:13.259Z] ✅ Sync complete. Imported 0 messages.

@@ -69,6 +69,7 @@ class WhatsAppManager {
             puppeteer: {
                 headless: true,
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+                timeout: 60000, // Increase launch timeout to 60s
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -213,6 +214,19 @@ class WhatsAppManager {
         }
     }
 
+    public static isUnrecoverableBrowserError(error: any): boolean {
+        const msg = error?.message?.toLowerCase() || '';
+        return (
+            msg.includes('detached frame') ||
+            msg.includes('target closed') ||
+            msg.includes('session closed') ||
+            msg.includes('browser has disconnected') ||
+            msg.includes('protocol error') ||
+            msg.includes('navigating frame was detached') ||
+            msg.includes('execution context was destroyed')
+        );
+    }
+
     public static async requestPairingCode(userId: string, mobile: string): Promise<string | null> {
         let state = this.getSessionState(userId);
 
@@ -248,6 +262,14 @@ class WhatsAppManager {
         try {
             console.log(`[WhatsApp - ${userId}] Requesting Pairing Code for: ${formatted}`);
             state.logs.push(`[${new Date().toLocaleTimeString()}] Requesting Pairing Code for ${formatted}`);
+            
+            // PRE-CHECK: Ensure the browser and page are actually alive before waiting 10s
+            if (!instance.pupBrowser || !instance.pupPage || instance.pupPage.isClosed()) {
+                console.error(`[WhatsApp - ${userId}] Browser or Page is dead before pairing request.`);
+                this.reset(userId);
+                throw new Error('BROWSER_CRASH: The WhatsApp browser instance crashed. Retrying initialization...');
+            }
+
             // Extended delay to ensure the browser has loaded the QR page and settled
             // On Render, 10-15 seconds is safer
             await new Promise(resolve => setTimeout(resolve, 10000));
@@ -273,6 +295,14 @@ class WhatsAppManager {
             return code;
         } catch (error: any) {
             console.error(`[WhatsApp - ${userId}] Pairing Code Request Failed EXPLICITLY:`, error);
+            
+            if (this.isUnrecoverableBrowserError(error)) {
+                console.log(`[WhatsApp - ${userId}] Detected unrecoverable browser crash in pairing request. Forcing session reset.`);
+                state.logs.push(`[${new Date().toLocaleTimeString()}] Browser crashed during pairing. Resetting...`);
+                this.reset(userId);
+                throw new Error('BROWSER_CRASH: Connection to WhatsApp was lost. Please wait a moment and try again.');
+            }
+
             state.logs.push(`[${new Date().toLocaleTimeString()}] Pairing failed: ${error?.message || error}`);
 
             // Robust error stringification
@@ -375,8 +405,8 @@ class WhatsAppManager {
 
             // If the browser frame crashed natively in Puppeteer, the instance is permanently dead.
             // We must force a hard reset so it boots back up cleanly for the next request.
-            if (error?.message?.includes('detached Frame') || error?.message?.includes('Target closed') || error?.message?.includes('Session closed')) {
-                console.log(`[WhatsApp - ${userId}] Detected unrecoverable browser crash. Forcing session reset.`);
+            if (this.isUnrecoverableBrowserError(error)) {
+                console.log(`[WhatsApp - ${userId}] Detected unrecoverable browser crash during send. Forcing session reset.`);
                 this.reset(userId);
             }
 

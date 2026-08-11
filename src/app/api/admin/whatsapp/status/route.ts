@@ -72,6 +72,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: message }, { status: 400 });
         }
 
+        if (WhatsAppManager.isUnrecoverableBrowserError(error)) {
+            return NextResponse.json({ 
+                message: 'BROWSER_CRASH: Connection to WhatsApp was lost during request. Please click "Hard Reset Server" if this persists.',
+                error: true 
+            }, { status: 500 });
+        }
+
         return NextResponse.json({
             message: message || 'Internal Server Error',
             details: error.stack || undefined,
