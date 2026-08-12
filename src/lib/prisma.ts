@@ -14,7 +14,11 @@ if (!process.env.DATABASE_URL) {
 export const prisma =
     globalForPrisma.prismaDb_racing_v2 ||
     new PrismaClient({
-        log: ['query'],
+        datasources: process.env.DATABASE_URL
+            ? { db: { url: process.env.DATABASE_URL } }
+            : undefined,
+        log: ['error', 'warn'],
     })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prismaDb_racing_v2 = prisma
+
