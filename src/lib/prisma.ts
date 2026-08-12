@@ -7,15 +7,13 @@ import { PrismaClient } from '@prisma/client';
 const globalForPrisma = global as unknown as { prismaDb_racing_v2: PrismaClient }
 
 // Fallback if env var is missing (e.g. running locally without .env setup)
-if (!process.env.DATABASE_URL) {
-    process.env.DATABASE_URL = "file:./dev.db";
-}
+const dbUrl = process.env.DATABASE_URL?.trim();
 
 export const prisma =
     globalForPrisma.prismaDb_racing_v2 ||
     new PrismaClient({
-        datasources: process.env.DATABASE_URL
-            ? { db: { url: process.env.DATABASE_URL } }
+        datasources: dbUrl
+            ? { db: { url: dbUrl } }
             : undefined,
         log: ['error', 'warn'],
     })
