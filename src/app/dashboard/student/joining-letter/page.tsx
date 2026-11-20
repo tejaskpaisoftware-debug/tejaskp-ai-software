@@ -112,6 +112,7 @@ export default function StudentJoiningLetterPage() {
                         ref={letterRef}
                         formData={letterData}
                         formatDate={formatDate}
+                        theme={letterData?.theme || "official"}
                         duration={(() => {
                             if (!letterData?.startDate || !letterData?.endDate) return "6 Months";
                             try {

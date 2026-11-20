@@ -3,7 +3,22 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-// AdminSidebar removed (handled by layout)
+import { 
+    TrendingUp, 
+    ArrowDownRight, 
+    ArrowUpRight, 
+    DollarSign, 
+    Calendar, 
+    Search, 
+    Plus, 
+    Clock, 
+    X, 
+    Percent, 
+    AlertCircle, 
+    MessageCircle, 
+    Filter,
+    BarChart3
+} from "lucide-react";
 
 export default function RevenuePage() {
     const router = useRouter();
@@ -46,7 +61,6 @@ export default function RevenuePage() {
     }, [router]);
 
     useEffect(() => {
-        // Initial fetch only if not custom
         if (activeTab !== 'custom') {
             fetchRevenueData();
         }
@@ -100,7 +114,7 @@ export default function RevenuePage() {
             if (json.success) {
                 setIsPurchaseModalOpen(false);
                 setPurchaseForm({ amount: '', description: '', date: '', category: '' });
-                fetchRevenueData(); // Refresh data
+                fetchRevenueData();
             }
         } catch (error) {
             console.error(error);
@@ -135,10 +149,10 @@ export default function RevenuePage() {
 
     const handleWhatsAppNotify = (user: any) => {
         const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 5); // Default due date 5 days from now
+        dueDate.setDate(dueDate.getDate() + 5);
         const formattedDueDate = dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-        const message = `*OFFICIAL PAYMENT REMOTE - TEJASKP AI SOFTWARE*
+        const message = `*OFFICIAL PAYMENT NOTICE - TEJASKP AI SOFTWARE*
 
 Dear ${user.name},
 
@@ -150,25 +164,21 @@ This is a reminder regarding your outstanding fees.
 
 Please clear your dues by *${formattedDueDate}*.
 
-⚠️ *Penalty Warning:* 
-A late fee penalty of *₹100/day* will be applicable if payment is not received by the due date, as per government regulations employed by TEJASKP AI SOFTWARE.
-
-Please make the payment immediately to avoid penalties.
+⚠️ *Penalty Notice:* 
+A late fee of *₹100/day* applies if payment is not received by the due date.
 
 Regards,
 *Accounts Department*
 TEJASKP AI SOFTWARE`;
 
-        // Create WhatsApp link (Direct Web Access)
         const encodedMessage = encodeURIComponent(message);
-        // Using web.whatsapp.com directly skips the "Continue to Chat" landing page on desktop
         window.open(`https://web.whatsapp.com/send?phone=91${user.mobile}&text=${encodedMessage}`, '_blank');
     };
 
     if (loading && !data) {
         return (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-                <div className="text-gold-theme animate-pulse">Loading Financial Data...</div>
+                <div className="text-slate-500 font-semibold animate-pulse">Loading Financial Analytics...</div>
             </div>
         );
     }
@@ -176,11 +186,12 @@ TEJASKP AI SOFTWARE`;
     if (error) {
         return (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-                <div className="text-red-500 bg-red-500/10 border border-red-500/20 p-6 rounded-xl text-center">
-                    <p className="font-bold mb-2">Error</p>
-                    <p>{error}</p>
-                    <button onClick={fetchRevenueData} className="mt-4 px-4 py-2 bg-red-500 text-foreground rounded hover:bg-red-600 transition-colors">
-                        Retry
+                <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl text-center max-w-md">
+                    <AlertCircle className="w-8 h-8 text-rose-500 mx-auto mb-2" />
+                    <p className="font-bold text-slate-900 mb-1">Financial Data Error</p>
+                    <p className="text-sm text-slate-600">{error}</p>
+                    <button onClick={fetchRevenueData} className="mt-4 px-4 py-2 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition-colors text-xs uppercase tracking-wider">
+                        Retry Fetch
                     </button>
                 </div>
             </div>
@@ -195,15 +206,11 @@ TEJASKP AI SOFTWARE`;
 
     const transactions = data?.transactions || [];
 
-
-
-    // Filter transactions
     const filteredTransactions = transactions.filter((tx: any) => {
         const matchesSearch = tx.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (tx.details && tx.details.toLowerCase().includes(searchTerm.toLowerCase()));
 
         if (!matchesSearch) return false;
-
         if (filterType === 'all') return true;
 
         const txDate = new Date(tx.date);
@@ -213,7 +220,6 @@ TEJASKP AI SOFTWARE`;
         }
 
         if (filterType === 'month' && filterValue) {
-            // filterValue format: YYYY-MM
             const [year, month] = filterValue.split('-');
             return txDate.getFullYear() === parseInt(year) && (txDate.getMonth() + 1) === parseInt(month);
         }
@@ -223,12 +229,10 @@ TEJASKP AI SOFTWARE`;
         }
 
         if (filterType === 'week' && filterValue) {
-            // filterValue format: YYYY-Www
             const [yearStr, weekStr] = filterValue.split('-W');
             const year = parseInt(yearStr);
             const week = parseInt(weekStr);
 
-            // Calculate week number for txDate
             const d = new Date(Date.UTC(txDate.getFullYear(), txDate.getMonth(), txDate.getDate()));
             const dayNum = d.getUTCDay() || 7;
             d.setUTCDate(d.getUTCDate() + 4 - dayNum);
@@ -241,7 +245,6 @@ TEJASKP AI SOFTWARE`;
         return true;
     });
 
-    // Calculate Total for Filtered Transactions
     const filteredTotal = filteredTransactions.reduce((sum: number, tx: any) => {
         if (tx.type === 'REVENUE') {
             return sum + (tx.amount || 0);
@@ -251,25 +254,32 @@ TEJASKP AI SOFTWARE`;
     }, 0);
 
     return (
-        <>
-            <header className="flex justify-between items-start">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-widest mb-2">REVENUE & EXPENSES</h1>
-                    <p className="text-gray-400">Financial performance and profit analysis.</p>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <BarChart3 className="w-3.5 h-3.5" /> Financial Intelligence
+                        </span>
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Revenue & Expenses</h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Financial performance, net margins, expenditure logs, and pending fee collection.
+                    </p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {/* Year Selector */}
+                <div className="flex items-center gap-3">
                     {activeTab !== 'custom' && (
-                        <div className="flex items-center gap-2 bg-card border border-theme px-3 py-1 rounded-lg">
-                            <span className="text-xs text-gray-400 uppercase tracking-widest">Fiscal Year</span>
+                        <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Fiscal Year</span>
                             <select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                                className="bg-transparent text-gold-400 font-bold focus:outline-none cursor-pointer"
+                                className="bg-transparent text-sm font-bold text-amber-700 focus:outline-none cursor-pointer"
                             >
                                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                                    <option key={y} value={y} className="bg-card text-foreground">{y}</option>
+                                    <option key={y} value={y} className="text-slate-900">{y}</option>
                                 ))}
                             </select>
                         </div>
@@ -277,130 +287,201 @@ TEJASKP AI SOFTWARE`;
 
                     <button
                         onClick={() => setIsPurchaseModalOpen(true)}
-                        className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                        className="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
                     >
-                        + Add Expense
+                        <Plus className="w-4 h-4" /> Add Expense
                     </button>
                 </div>
-            </header>
-
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                <RevenueCard title="Total Revenue" amount={data?.overview?.selectedYearTotal ?? data?.overview?.total ?? 0} sub="All Time" isHighlight />
-                <RevenueCard title="Total Expenses" amount={data?.overview?.selectedYearExpenses ?? 0} sub="All Time" color="red" />
-                <RevenueCard
-                    title="Net Profit"
-                    amount={data?.overview?.netProfit ?? 0}
-                    sub="All Time"
-                    color={(data?.overview?.netProfit || 0) >= 0 ? "green" : "red"}
-                />
-                <RevenueCard title="Margin" amount={`${((data?.overview?.netProfit / (data?.overview?.selectedYearTotal || 1)) * 100).toFixed(1)}%`} sub="Profit Margin" isText />
-                <RevenueCard title="Pending Amount" amount={data?.overview?.pendingAmount || 0} sub="Uncollected Fees" color="custom-blue" onClick={handleViewPendingDues} />
             </div>
 
-            {/* Main Analytics Section */}
-            <div className="bg-card/40 border border-theme rounded-2xl p-6 backdrop-blur-sm">
-                <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-xl font-bold text-foreground">Financial Trends</h2>
-                        <div className="flex gap-4 text-xs">
-                            <span className="flex items-center gap-1 text-gold-400"><div className="w-2 h-2 rounded-full bg-gold-400" /> Revenue</span>
-                            <span className="flex items-center gap-1 text-red-400"><div className="w-2 h-2 rounded-full bg-red-400" /> Expenses</span>
-                            <span className="flex items-center gap-1 text-green-400"><div className="w-2 h-2 rounded-full bg-green-400" /> Profit</span>
+            {/* KPI Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+                {/* Total Revenue - Highlight */}
+                <div className="bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 p-5 rounded-2xl shadow-sm border border-amber-400 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Total Revenue</p>
+                            <TrendingUp className="w-4 h-4 opacity-80" />
+                        </div>
+                        <h3 className="text-2xl font-extrabold tracking-tight mt-1">
+                            {formatCurrency(data?.overview?.selectedYearTotal ?? data?.overview?.total ?? 0)}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] font-medium opacity-80 mt-3">Fiscal Year Total</p>
+                </div>
+
+                {/* Total Expenses */}
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Expenses</p>
+                            <span className="p-1 rounded bg-rose-50 text-rose-600"><ArrowDownRight className="w-3.5 h-3.5" /></span>
+                        </div>
+                        <h3 className="text-2xl font-extrabold text-rose-600 tracking-tight mt-1">
+                            {formatCurrency(data?.overview?.selectedYearExpenses ?? 0)}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-3">Recorded Purchases</p>
+                </div>
+
+                {/* Net Profit */}
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Net Profit</p>
+                            <span className={`p-1 rounded ${(data?.overview?.netProfit || 0) >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                                <ArrowUpRight className="w-3.5 h-3.5" />
+                            </span>
+                        </div>
+                        <h3 className={`text-2xl font-extrabold tracking-tight mt-1 ${(data?.overview?.netProfit || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {formatCurrency(data?.overview?.netProfit ?? 0)}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-3">Revenue minus Expenses</p>
+                </div>
+
+                {/* Margin */}
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Profit Margin</p>
+                            <span className="p-1 rounded bg-slate-100 text-slate-600"><Percent className="w-3.5 h-3.5" /></span>
+                        </div>
+                        <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
+                            {`${((data?.overview?.netProfit / (data?.overview?.selectedYearTotal || 1)) * 100).toFixed(1)}%`}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-3">Operating Ratio</p>
+                </div>
+
+                {/* Pending Amount - Interactive */}
+                <div 
+                    onClick={handleViewPendingDues}
+                    className="bg-white border border-amber-200 hover:border-amber-400 p-5 rounded-2xl shadow-sm flex flex-col justify-between cursor-pointer transition-all hover:bg-amber-50/20 group"
+                >
+                    <div>
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Pending Dues</p>
+                            <span className="p-1 rounded bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform"><Clock className="w-3.5 h-3.5" /></span>
+                        </div>
+                        <h3 className="text-2xl font-extrabold text-amber-600 tracking-tight mt-1">
+                            {formatCurrency(data?.overview?.pendingAmount || 0)}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] font-semibold text-amber-700 mt-3 group-hover:underline">
+                        Click to view pending list →
+                    </p>
+                </div>
+            </div>
+
+            {/* Main Financial Analytics Chart */}
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 className="text-base font-bold text-slate-900">Financial Performance Dynamics</h2>
+                        <div className="flex items-center gap-4 text-xs mt-1">
+                            <span className="flex items-center gap-1.5 font-semibold text-amber-600">
+                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Revenue
+                            </span>
+                            <span className="flex items-center gap-1.5 font-semibold text-rose-500">
+                                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Expenses
+                            </span>
+                            <span className="flex items-center gap-1.5 font-semibold text-emerald-600">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Net Profit
+                            </span>
                         </div>
                     </div>
 
-                    <div className="flex gap-4 items-center">
+                    <div className="flex flex-wrap items-center gap-3">
                         {activeTab === 'custom' && (
-                            <div className="flex gap-2 animate-in fade-in slide-in-from-right-4">
+                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-1 px-2">
                                 <input
                                     type="date"
                                     value={dateRange.from}
                                     onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                                    style={{ colorScheme: 'dark' }}
-                                    className="bg-card border border-gold-500/30 rounded px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                                    className="bg-transparent text-xs text-slate-800 font-medium outline-none"
                                 />
-                                <span className="text-gray-400">-</span>
+                                <span className="text-slate-400 text-xs">to</span>
                                 <input
                                     type="date"
                                     value={dateRange.to}
                                     onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                                    style={{ colorScheme: 'dark' }}
-                                    className="bg-card border border-gold-500/30 rounded px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                                    className="bg-transparent text-xs text-slate-800 font-medium outline-none"
                                 />
                             </div>
                         )}
 
-                        <div className="flex bg-card rounded-lg p-1 border border-theme">
-                            {['yearly', 'monthly', 'weekly', 'daily', 'custom'].map((tab) => (
+                        <div className="flex bg-slate-100 rounded-xl p-1 border border-slate-200">
+                            {(['yearly', 'monthly', 'weekly', 'daily', 'custom'] as const).map((tab) => (
                                 <button
                                     key={tab}
-                                    onClick={() => setActiveTab(tab as any)}
-                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === tab
-                                        ? 'bg-gold-500 text-obsidian'
-                                        : 'text-gray-400 hover:text-foreground'
-                                        }`}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${
+                                        activeTab === tab
+                                            ? 'bg-amber-500 text-slate-950 shadow-sm'
+                                            : 'text-slate-600 hover:text-slate-900'
+                                    }`}
                                 >
-                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                    {tab}
                                 </button>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Chart Area */}
-                <div className="h-80 w-full relative p-4 border-b border-white/5">
+                {/* SVG Area Chart */}
+                <div className="h-80 w-full relative pt-2">
                     {loading ? (
-                        <div className="w-full h-full flex items-center justify-center text-gold-theme animate-pulse">
-                            Updating Data...
+                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-medium animate-pulse">
+                            Recalculating analytics...
                         </div>
                     ) : currentGraphData.length === 0 ? (
-                        <div className="w-full h-full flex items-center justify-center text-gray-500">
-                            {activeTab === 'custom' ? 'Select a date range.' : `No financial data found for ${selectedYear}.`}
+                        <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                            {activeTab === 'custom' ? 'Select a custom date range above.' : `No financial data found for fiscal year ${selectedYear}.`}
                         </div>
                     ) : (
-                        <div className="w-full h-full relative">
-                            <RevenueAreaChart data={currentGraphData} />
-                        </div>
+                        <RevenueAreaChart data={currentGraphData} formatCurrency={formatCurrency} />
                     )}
                 </div>
             </div>
 
-            {/* Detailed Transactions List */}
-            <div className="bg-card/40 border border-theme rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-gold-500/10 flex justify-between items-center">
-                    <div className="flex items-baseline gap-4">
-                        <h3 className="font-bold text-foreground">Full Financial History</h3>
-                        <div className="text-sm font-normal text-gray-400">
-                            Total: <span className="text-foreground font-mono font-bold mr-3">{filteredTransactions.length}</span>
-                            Amount: <span className={`font-mono font-bold ${filteredTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatCurrency(filteredTotal)}</span>
+            {/* Financial History Table */}
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+                <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h3 className="font-bold text-slate-900">Audit Trail & Transaction Ledger</h3>
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                {filteredTransactions.length} items
+                            </span>
                         </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Net Balance for Filter: <span className={`font-mono font-bold ${filteredTotal >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>{formatCurrency(filteredTotal)}</span>
+                        </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        {/* Filter Type Selector */}
+
+                    <div className="flex flex-wrap items-center gap-2.5">
                         <select
                             value={filterType}
                             onChange={(e) => {
                                 setFilterType(e.target.value as any);
-                                setFilterValue(''); // Reset value on type change
+                                setFilterValue('');
                             }}
-                            className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-gold-400 focus:outline-none focus:border-gold-500 cursor-pointer"
+                            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-amber-500 cursor-pointer"
                         >
-                            <option value="all">All Time</option>
+                            <option value="all">All Records</option>
                             <option value="day">By Day</option>
                             <option value="week">By Week</option>
                             <option value="month">By Month</option>
                             <option value="year">By Year</option>
                         </select>
 
-                        {/* Dynamic Input based on Filter Type */}
                         {filterType === 'day' && (
                             <input
                                 type="date"
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
-                                style={{ colorScheme: 'dark' }}
-                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-amber-500"
                             />
                         )}
 
@@ -409,8 +490,7 @@ TEJASKP AI SOFTWARE`;
                                 type="week"
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
-                                style={{ colorScheme: 'dark' }}
-                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-amber-500"
                             />
                         )}
 
@@ -419,8 +499,7 @@ TEJASKP AI SOFTWARE`;
                                 type="month"
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
-                                style={{ colorScheme: 'dark' }}
-                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500"
+                                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-amber-500"
                             />
                         )}
 
@@ -428,7 +507,7 @@ TEJASKP AI SOFTWARE`;
                             <select
                                 value={filterValue}
                                 onChange={(e) => setFilterValue(e.target.value)}
-                                className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500 cursor-pointer"
+                                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-amber-500 cursor-pointer"
                             >
                                 <option value="">Select Year</option>
                                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
@@ -437,48 +516,59 @@ TEJASKP AI SOFTWARE`;
                             </select>
                         )}
 
-                        <input
-                            type="text"
-                            placeholder="Search student..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-card border border-gold-500/30 rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:border-gold-500 w-48"
-                        />
+                        <div className="relative">
+                            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                                type="text"
+                                placeholder="Search by name or note..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 outline-none focus:border-amber-500 w-44"
+                            />
+                        </div>
                     </div>
                 </div>
-                <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+
+                <div className="overflow-x-auto max-h-[480px] overflow-y-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-white/5 text-gold-theme/80 text-xs uppercase tracking-wider sticky top-0 backdrop-blur-md">
+                        <thead className="bg-slate-50/90 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 sticky top-0 backdrop-blur-sm z-10">
                             <tr>
-                                <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4">Description / Student</th>
-                                <th className="px-6 py-4">Type</th>
-                                <th className="px-6 py-4 text-right">Amount</th>
+                                <th className="px-6 py-3.5">Timestamp</th>
+                                <th className="px-6 py-3.5">Description / Client</th>
+                                <th className="px-6 py-3.5">Category</th>
+                                <th className="px-6 py-3.5 text-right">Amount (₹)</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+                        <tbody className="divide-y divide-slate-100 text-sm">
                             {filteredTransactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500 italic">No transactions found.</td>
+                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">No transactions match the selected filter.</td>
                                 </tr>
                             ) : (
                                 filteredTransactions.map((tx: any, i: number) => (
-                                    <tr key={i} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="text-foreground font-mono">{new Date(tx.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-                                            <div className="text-xs text-gray-500 font-mono mt-0.5">{new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
+                                    <tr key={i} className="hover:bg-slate-50/60 transition-colors">
+                                        <td className="px-6 py-3.5">
+                                            <div className="text-slate-900 font-mono text-xs font-semibold">
+                                                {new Date(tx.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                                            </div>
+                                            <div className="text-[10px] text-slate-400 font-mono">
+                                                {new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-foreground">{tx.name}</div>
-                                            {tx.details && <div className="text-xs text-gray-500">{tx.details}</div>}
+                                        <td className="px-6 py-3.5">
+                                            <div className="font-semibold text-slate-900">{tx.name}</div>
+                                            {tx.details && <div className="text-xs text-slate-500">{tx.details}</div>}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded text-[10px] font-bold border ${tx.type === 'REVENUE' ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-red-400 border-red-400/30 bg-red-400/10'
-                                                }`}>
+                                        <td className="px-6 py-3.5">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                                tx.type === 'REVENUE' 
+                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                                                    : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                            }`}>
                                                 {tx.type}
                                             </span>
                                         </td>
-                                        <td className={`px-6 py-4 text-right font-bold ${tx.type === 'REVENUE' ? 'text-green-400' : 'text-red-400'}`}>
+                                        <td className={`px-6 py-3.5 text-right font-bold font-mono ${tx.type === 'REVENUE' ? 'text-emerald-600' : 'text-rose-600'}`}>
                                             {tx.type === 'EXPENSE' ? '-' : '+'}{formatCurrency(tx.amount)}
                                         </td>
                                     </tr>
@@ -489,238 +579,219 @@ TEJASKP AI SOFTWARE`;
                 </div>
             </div>
 
-
-
-            {/* Purchase Modal - Keep existing code ... */}
+            {/* Add Expense Purchase Modal */}
             <AnimatePresence>
-                {
-                    isPurchaseModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-card border border-gold-500/30 rounded-2xl p-8 w-full max-w-md relative"
+                {isPurchaseModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 w-full max-w-md relative shadow-2xl"
+                        >
+                            <button 
+                                onClick={() => setIsPurchaseModalOpen(false)} 
+                                className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100"
                             >
-                                <button onClick={() => setIsPurchaseModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
-                                <h2 className="text-2xl font-bold text-foreground mb-6">Add Expense</h2>
-                                <form onSubmit={handleAddPurchase} className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Amount (INR)</label>
-                                        <input
-                                            type="number"
-                                            required
-                                            value={purchaseForm.amount}
-                                            onChange={e => setPurchaseForm({ ...purchaseForm, amount: e.target.value })}
-                                            className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Date</label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={purchaseForm.date}
-                                            onChange={e => setPurchaseForm({ ...purchaseForm, date: e.target.value })}
-                                            style={{ colorScheme: 'dark' }}
-                                            className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Description</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={purchaseForm.description}
-                                            onChange={e => setPurchaseForm({ ...purchaseForm, description: e.target.value })}
-                                            className="w-full bg-background border border-theme rounded-lg px-4 py-2 text-foreground focus:border-gold-500 outline-none"
-                                            placeholder="e.g. Office Supplies"
-                                        />
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        disabled={submittingPurchase}
-                                        className="w-full bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-3 rounded-lg transition-colors mt-4"
-                                    >
-                                        {submittingPurchase ? 'Saving...' : 'Add Expense'}
-                                    </button>
-                                </form>
-                            </motion.div>
-                        </div>
-                    )
-                }
-            </AnimatePresence >
+                                <X className="w-5 h-5" />
+                            </button>
+                            <h2 className="text-xl font-bold text-slate-900 mb-1">Record Company Expense</h2>
+                            <p className="text-xs text-slate-500 mb-5">Add procurement, supplies, or software subscription costs.</p>
+
+                            <form onSubmit={handleAddPurchase} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Amount (INR)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        value={purchaseForm.amount}
+                                        onChange={e => setPurchaseForm({ ...purchaseForm, amount: e.target.value })}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 font-bold focus:border-amber-500 outline-none text-sm"
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Date</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={purchaseForm.date}
+                                        onChange={e => setPurchaseForm({ ...purchaseForm, date: e.target.value })}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:border-amber-500 outline-none text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Description / Vendor</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={purchaseForm.description}
+                                        onChange={e => setPurchaseForm({ ...purchaseForm, description: e.target.value })}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:border-amber-500 outline-none text-sm"
+                                        placeholder="e.g. AWS Cloud Hosting, Office Equipment"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={submittingPurchase}
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-sm hover:shadow text-xs uppercase tracking-wider mt-2"
+                                >
+                                    {submittingPurchase ? 'Recording Expense...' : 'Save Expense Record'}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Pending Dues Modal */}
             <AnimatePresence>
-                {
-                    isPendingModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-card border border-gold-500/30 rounded-2xl p-8 w-full max-w-4xl relative max-h-[90vh] flex flex-col"
+                {isPendingModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 w-full max-w-4xl relative max-h-[85vh] flex flex-col shadow-2xl"
+                        >
+                            <button 
+                                onClick={() => setIsPendingModalOpen(false)} 
+                                className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100"
                             >
-                                <button onClick={() => setIsPendingModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-foreground">✕</button>
-                                <div className="mb-6">
-                                    <h2 className="text-2xl font-bold text-foreground">Pending Dues</h2>
-                                    <p className="text-gray-400 text-sm">List of users with outstanding payments.</p>
-                                </div>
+                                <X className="w-5 h-5" />
+                            </button>
+                            <div className="mb-5">
+                                <h2 className="text-xl font-bold text-slate-900">Outstanding Fee Receivables</h2>
+                                <p className="text-xs text-slate-500 mt-0.5">Students and clients with overdue or partial balances.</p>
+                            </div>
 
-                                <div className="flex-1 overflow-y-auto pr-2">
-                                    {loadingPending ? (
-                                        <div className="text-center text-gold-theme py-10">Loading...</div>
-                                    ) : pendingUsers.length === 0 ? (
-                                        <div className="text-center text-gray-500 py-10">No pending dues found.</div>
-                                    ) : (
-                                        <table className="w-full text-left border-collapse">
-                                            <thead className="text-xs text-gold-theme/80 uppercase tracking-widest sticky top-0 bg-card z-10">
-                                                <tr>
-                                                    <th className="py-3 border-b border-white/10">User</th>
-                                                    <th className="py-3 border-b border-white/10">Mobile</th>
-                                                    <th className="py-3 border-b border-white/10 text-right">Total Fees</th>
-                                                    <th className="py-3 border-b border-white/10 text-right">Paid</th>
-                                                    <th className="py-3 border-b border-white/10 text-right text-red-400">Pending</th>
-                                                    <th className="py-3 border-b border-white/10 text-center">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="text-sm text-gray-300 divide-y divide-white/5">
-                                                {pendingUsers.map((user, i) => (
-                                                    <tr key={i} className="hover:bg-white/5 transition-colors">
-                                                        <td className="py-3 font-bold text-foreground">{user.name} <span className="text-xs font-normal text-gray-500 block">{user.course}</span></td>
-                                                        <td className="py-3 font-mono text-xs">{user.mobile}</td>
-                                                        <td className="py-3 text-right font-mono">{formatCurrency(user.totalFees || 0)}</td>
-                                                        <td className="py-3 text-right font-mono text-green-400">{formatCurrency(user.paidAmount || 0)}</td>
-                                                        <td className="py-3 text-right font-mono font-bold text-red-400">{formatCurrency(user.pendingAmount || 0)}</td>
-                                                        <td className="py-3 text-center">
-                                                            <button
-                                                                onClick={() => handleWhatsAppNotify(user)}
-                                                                className="bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/50 p-2 rounded-lg transition-all"
-                                                                title="Send WhatsApp Reminder"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                                                                </svg>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                            <tfoot className="bg-white/5 font-bold text-foreground sticky bottom-0">
-                                                <tr>
-                                                    <td colSpan={4} className="py-3 px-4 text-right uppercase text-xs tracking-widest text-gold-theme">Total Pending</td>
-                                                    <td className="py-3 text-right text-red-500 text-lg">
-                                                        {formatCurrency(pendingUsers.reduce((sum, u) => sum + (u.pendingAmount || 0), 0))}
+                            <div className="flex-1 overflow-y-auto pr-1">
+                                {loadingPending ? (
+                                    <div className="text-center text-slate-400 py-12 animate-pulse">Loading pending student roster...</div>
+                                ) : pendingUsers.length === 0 ? (
+                                    <div className="text-center text-slate-400 py-12">No pending balances found! All fees cleared.</div>
+                                ) : (
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-white border-b border-slate-200 z-10">
+                                            <tr>
+                                                <th className="py-3">Student Name</th>
+                                                <th className="py-3">Mobile Contact</th>
+                                                <th className="py-3 text-right">Total Fees</th>
+                                                <th className="py-3 text-right">Paid</th>
+                                                <th className="py-3 text-right text-rose-600">Pending</th>
+                                                <th className="py-3 text-center">WhatsApp Notify</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-sm divide-y divide-slate-100">
+                                            {pendingUsers.map((user, i) => (
+                                                <tr key={i} className="hover:bg-slate-50/70 transition-colors">
+                                                    <td className="py-3 font-semibold text-slate-900">
+                                                        {user.name} 
+                                                        <span className="text-xs font-normal text-slate-500 block">{user.course}</span>
                                                     </td>
-                                                    <td></td>
+                                                    <td className="py-3 font-mono text-xs text-slate-600">{user.mobile}</td>
+                                                    <td className="py-3 text-right font-mono text-slate-700">{formatCurrency(user.totalFees || 0)}</td>
+                                                    <td className="py-3 text-right font-mono text-emerald-600 font-semibold">{formatCurrency(user.paidAmount || 0)}</td>
+                                                    <td className="py-3 text-right font-mono font-bold text-rose-600">{formatCurrency(user.pendingAmount || 0)}</td>
+                                                    <td className="py-3 text-center">
+                                                        <button
+                                                            onClick={() => handleWhatsAppNotify(user)}
+                                                            className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                                                            title="Send WhatsApp Payment Reminder"
+                                                        >
+                                                            <MessageCircle className="w-3.5 h-3.5" /> Remind
+                                                        </button>
+                                                    </td>
                                                 </tr>
-                                            </tfoot>
-                                        </table>
-                                    )}
-                                </div>
-                            </motion.div>
-                        </div>
-                    )
-                }
-            </AnimatePresence >
-        </>
+                                            ))}
+                                        </tbody>
+                                        <tfoot className="bg-slate-50 font-bold text-slate-900 sticky bottom-0 border-t border-slate-200">
+                                            <tr>
+                                                <td colSpan={4} className="py-3.5 px-4 text-right uppercase text-xs tracking-wider text-slate-600">
+                                                    Aggregate Outstanding
+                                                </td>
+                                                <td className="py-3.5 text-right text-rose-600 text-base font-mono">
+                                                    {formatCurrency(pendingUsers.reduce((sum, u) => sum + (u.pendingAmount || 0), 0))}
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 }
 
-// Chart Component (Needs to be redefined here if overwritten)
-function RevenueAreaChart({ data }: { data: any[] }) {
-    // Layout Calculation
+function RevenueAreaChart({ data, formatCurrency }: { data: any[], formatCurrency: (v: number) => string }) {
     const padding = { top: 10, bottom: 20, left: 0, right: 0 };
     const graphHeight = 100 - padding.top - padding.bottom;
 
-    // 1. Calculate min and max
     const allValues = data.flatMap(d => [d.revenue, d.expense, d.profit]);
     const maxVal = Math.max(...allValues, 100);
     const minVal = Math.min(...allValues, 0);
     const range = maxVal - minVal;
 
-    // Y Position Helper (Maps value to 0-100 range respecting padding)
     const getY = (val: number) => {
         if (range === 0) return padding.top + (graphHeight / 2);
         const normalized = (val - minVal) / range;
         return (padding.top + graphHeight) - (normalized * graphHeight);
     };
 
-    // Path & Point Generator
-    const generatePath = (key: string) => {
+    const zeroY = getY(0);
+
+    const getLineData = (key: 'revenue' | 'expense' | 'profit') => {
         const points = data.map((d, i) => {
-            let x = 0;
-            if (data.length > 1) {
-                x = (i / (data.length - 1)) * 100;
-            } else {
-                x = 50;
-            }
-            // @ts-ignore
+            const x = data.length > 1 ? (i / (data.length - 1)) * 100 : 50;
             const y = getY(d[key]);
             return { x, y, val: d[key], label: d.period };
         });
 
-        if (points.length === 0) return { path: "", points: [] };
+        if (points.length === 0) return { path: '', area: '', points: [] };
 
         let path = `M ${points[0].x} ${points[0].y}`;
-        points.forEach((p, i) => {
-            if (i === 0) return;
-            path += ` L ${p.x} ${p.y}`;
-        });
+        for (let i = 1; i < points.length; i++) {
+            path += ` L ${points[i].x} ${points[i].y}`;
+        }
+
         return { path, points };
     };
 
-    const revenue = generatePath('revenue');
-    const expense = generatePath('expense');
-    const profit = generatePath('profit');
+    const revenue = getLineData('revenue');
+    const expense = getLineData('expense');
+    const profit = getLineData('profit');
 
-    const zeroY = getY(0);
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            compactDisplay: "short",
-            notation: "compact",
-            maximumFractionDigits: 1
-        }).format(amount);
-    };
-
-    // Hover State for Tooltip
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
     return (
-        <div className="absolute inset-0 w-full h-full flex flex-col">
-            <div className="relative flex-1 w-full h-full">
-                {/* Y-Axis Labels (HTML Overlay) */}
-                <div className="absolute left-0 top-0 bottom-0 w-full pointer-events-none flex flex-col justify-between text-[10px] text-gray-500 pb-8 pl-2 z-10 font-mono opacity-50">
-                    <span style={{ top: `${padding.top}%`, position: 'absolute' }}>{formatCurrency(maxVal)}</span>
+        <div className="w-full h-full flex flex-col justify-between select-none">
+            <div className="relative w-full flex-1">
+                <div className="absolute left-0 top-0 bottom-0 text-[10px] font-mono text-slate-400 flex flex-col justify-between pointer-events-none z-10 pl-1">
+                    <span>{formatCurrency(maxVal)}</span>
                     {minVal < 0 && <span style={{ top: `${zeroY}%`, position: 'absolute' }}>{formatCurrency(0)}</span>}
                     <span style={{ top: `${padding.top + graphHeight}%`, position: 'absolute' }}>{formatCurrency(minVal)}</span>
                 </div>
 
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
-                    {/* Zero/Baseline Grid Line */}
-                    <line x1="0" y1={zeroY} x2="100" y2={zeroY} stroke="#FFFFFF" strokeOpacity="0.1" strokeDasharray="2 2" strokeWidth="0.5" />
+                    {/* Grid Lines */}
+                    <line x1="0" y1={zeroY} x2="100" y2={zeroY} stroke="#CBD5E1" strokeDasharray="2 2" strokeWidth="0.5" />
+                    <line x1="0" y1={padding.top} x2="100" y2={padding.top} stroke="#E2E8F0" strokeDasharray="1 1" strokeWidth="0.3" />
+                    <line x1="0" y1={padding.top + graphHeight} x2="100" y2={padding.top + graphHeight} stroke="#E2E8F0" strokeWidth="0.4" />
 
-                    {/* Max Value Grid Line */}
-                    <line x1="0" y1={padding.top} x2="100" y2={padding.top} stroke="#FFFFFF" strokeOpacity="0.05" strokeDasharray="1 1" strokeWidth="0.2" />
+                    {/* Revenue Line (Amber) */}
+                    <motion.path d={revenue.path} fill="none" stroke="#D97706" strokeWidth="0.9" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8 }} />
 
-                    {/* Bottom Grid Line */}
-                    <line x1="0" y1={padding.top + graphHeight} x2="100" y2={padding.top + graphHeight} stroke="#FFFFFF" strokeOpacity="0.05" strokeWidth="0.5" />
+                    {/* Expense Line (Rose) */}
+                    <motion.path d={expense.path} fill="none" stroke="#F43F5E" strokeWidth="0.9" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.1 }} />
 
-                    {/* Revenue Line (Gold) */}
-                    <motion.path d={revenue.path} fill="none" stroke="#FFD700" strokeWidth="0.8" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1 }} />
+                    {/* Profit Line (Emerald) */}
+                    <motion.path d={profit.path} fill="none" stroke="#10B981" strokeWidth="1.1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.2 }} />
 
-                    {/* Expense Line (Red) */}
-                    <motion.path d={expense.path} fill="none" stroke="#FF4444" strokeWidth="0.8" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.2 }} />
-
-                    {/* Profit Line (Green) */}
-                    <motion.path d={profit.path} fill="none" stroke="#4ADE80" strokeWidth="1" strokeDasharray="1 0" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.4 }} />
-
-                    {/* Interaction Zones (Bars across full height) */}
+                    {/* Interaction Zones */}
                     {data.map((_, i) => {
                         const x = data.length > 1 ? (i / (data.length - 1)) * 100 : 50;
                         const colWidth = 100 / data.length;
@@ -739,48 +810,44 @@ function RevenueAreaChart({ data }: { data: any[] }) {
                         );
                     })}
 
-                    {/* Active Hover Indicators (Only show when hovered) */}
-                    {hoveredIndex !== null && (
+                    {hoveredIndex !== null && revenue.points[hoveredIndex] && (
                         <>
-                            {/* Vertical Guide Line */}
                             <line
                                 x1={revenue.points[hoveredIndex].x} y1={padding.top}
                                 x2={revenue.points[hoveredIndex].x} y2={padding.top + graphHeight}
-                                stroke="white" strokeOpacity="0.2" strokeDasharray="2 2" strokeWidth="0.5"
+                                stroke="#94A3B8" strokeDasharray="2 2" strokeWidth="0.5"
                             />
-                            {/* Points */}
-                            <circle cx={revenue.points[hoveredIndex].x} cy={revenue.points[hoveredIndex].y} r="1.5" fill="#FFD700" />
-                            <circle cx={expense.points[hoveredIndex].x} cy={expense.points[hoveredIndex].y} r="1.5" fill="#FF4444" />
-                            <circle cx={profit.points[hoveredIndex].x} cy={profit.points[hoveredIndex].y} r="1.5" fill="#4ADE80" />
+                            <circle cx={revenue.points[hoveredIndex].x} cy={revenue.points[hoveredIndex].y} r="1.5" fill="#D97706" />
+                            <circle cx={expense.points[hoveredIndex].x} cy={expense.points[hoveredIndex].y} r="1.5" fill="#F43F5E" />
+                            <circle cx={profit.points[hoveredIndex].x} cy={profit.points[hoveredIndex].y} r="1.5" fill="#10B981" />
                         </>
                     )}
                 </svg>
 
-                {/* HTML Tooltip (Absolute Positioned over the graph area) */}
-                {hoveredIndex !== null && (
+                {hoveredIndex !== null && revenue.points[hoveredIndex] && (
                     <div
-                        className="absolute z-50 bg-card/95 border border-gold-500/30 rounded-lg p-3 shadow-2xl backdrop-blur-md min-w-[120px] pointer-events-none"
+                        className="absolute z-30 bg-white border border-slate-200 rounded-xl p-3 shadow-xl pointer-events-none min-w-[130px]"
                         style={{
                             left: `${revenue.points[hoveredIndex].x}%`,
-                            top: '10%',
+                            top: '5%',
                             transform: 'translateX(-50%)',
                         }}
                     >
-                        <p className="text-xs text-center font-bold text-foreground border-b border-white/10 pb-1 mb-1 whitespace-nowrap">
+                        <p className="text-xs text-center font-bold text-slate-900 border-b border-slate-100 pb-1 mb-1.5 whitespace-nowrap">
                             {revenue.points[hoveredIndex].label}
                         </p>
-                        <div className="space-y-1">
-                            <div className="flex justify-between items-center text-[10px] gap-3">
-                                <span className="text-gold-400 font-medium">Revenue</span>
-                                <span className="text-foreground font-mono">{formatCurrency(revenue.points[hoveredIndex].val)}</span>
+                        <div className="space-y-1 text-[11px]">
+                            <div className="flex justify-between items-center gap-3">
+                                <span className="text-amber-700 font-semibold">Revenue</span>
+                                <span className="text-slate-900 font-mono font-bold">{formatCurrency(revenue.points[hoveredIndex].val)}</span>
                             </div>
-                            <div className="flex justify-between items-center text-[10px] gap-3">
-                                <span className="text-red-400 font-medium">Expense</span>
-                                <span className="text-foreground font-mono">{formatCurrency(expense.points[hoveredIndex].val)}</span>
+                            <div className="flex justify-between items-center gap-3">
+                                <span className="text-rose-600 font-semibold">Expense</span>
+                                <span className="text-slate-900 font-mono font-bold">{formatCurrency(expense.points[hoveredIndex].val)}</span>
                             </div>
-                            <div className="flex justify-between items-center text-[10px] gap-3 pt-1 border-t border-white/5">
-                                <span className="text-green-400 font-medium">Profit</span>
-                                <span className={`font-mono font-bold ${profit.points[hoveredIndex].val >= 0 ? 'text-green-400' : 'text-red-500'}`}>
+                            <div className="flex justify-between items-center gap-3 pt-1 border-t border-slate-100">
+                                <span className="text-emerald-700 font-semibold">Profit</span>
+                                <span className={`font-mono font-bold ${profit.points[hoveredIndex].val >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                                     {formatCurrency(profit.points[hoveredIndex].val)}
                                 </span>
                             </div>
@@ -789,8 +856,7 @@ function RevenueAreaChart({ data }: { data: any[] }) {
                 )}
             </div>
 
-            {/* X-Axis Labels (Below the graph) */}
-            <div className="flex justify-between px-2 pt-2 text-[10px] text-gray-400 font-mono w-full">
+            <div className="flex justify-between px-2 pt-2 text-[10px] text-slate-400 font-mono w-full">
                 {data.map((d, i) => {
                     const showLabel = data.length < 15 || i % Math.ceil(data.length / 10) === 0 || i === data.length - 1;
                     return (
@@ -800,56 +866,6 @@ function RevenueAreaChart({ data }: { data: any[] }) {
                     );
                 })}
             </div>
-        </div>
-    );
-}
-
-function RevenueCard({ title, amount, sub, isHighlight, isText, color, onClick }: any) {
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
-        }).format(amount);
-    };
-
-    let borderColor = 'border-gold-500/10';
-    let textColor = 'text-foreground';
-    let subColor = 'bg-card/40';
-
-    if (color === 'red') {
-        borderColor = 'border-red-500/30';
-        textColor = 'text-red-400';
-        subColor = 'bg-red-500/5';
-    } else if (color === 'green') {
-        borderColor = 'border-green-500/30';
-        textColor = 'text-green-400';
-        subColor = 'bg-green-500/10';
-    } else if (color === 'custom-blue') {
-        borderColor = 'border-blue-500/30';
-        textColor = 'text-blue-400';
-        subColor = 'bg-blue-500/5';
-    } else if (isHighlight) {
-        return (
-            <div
-                onClick={onClick}
-                className={`p-6 rounded-xl border border-gold-400 bg-gold-500 text-obsidian shadow-[0_0_20px_rgba(255,215,0,0.3)] transition-transform hover:-translate-y-1 ${onClick ? 'cursor-pointer hover:shadow-lg' : ''}`}
-            >
-                <p className="text-xs uppercase tracking-widest mb-2 font-bold opacity-70">{title}</p>
-                <h3 className="text-3xl font-bold mb-1">{isText ? amount : formatCurrency(amount)}</h3>
-                <p className="text-xs opacity-60">{sub}</p>
-            </div>
-        );
-    }
-
-    return (
-        <div
-            onClick={onClick}
-            className={`p-6 rounded-xl border backdrop-blur-sm transition-transform hover:-translate-y-1 ${borderColor} ${subColor} ${onClick ? 'cursor-pointer hover:bg-white/5' : ''}`}
-        >
-            <p className="text-xs uppercase tracking-widest mb-2 font-bold text-gray-400">{title}</p>
-            <h3 className={`text-3xl font-bold mb-1 ${textColor}`}>{isText ? amount : formatCurrency(amount)}</h3>
-            <p className="text-xs text-gray-500">{sub}</p>
         </div>
     );
 }

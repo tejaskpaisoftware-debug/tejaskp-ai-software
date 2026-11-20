@@ -197,40 +197,43 @@ export default function CertificatePage() {
         }
     };
 
+    const computeDuration = (startStr: string, endStr: string) => {
+        if (!startStr || !endStr) return "";
+        try {
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            const startMonth = start.toLocaleString('default', { month: 'long' });
+            const endMonth = end.toLocaleString('default', { month: 'long' });
+            const year = end.getFullYear();
+
+            if (start.getFullYear() === end.getFullYear()) {
+                return `${startMonth}-${endMonth} year ${year}`;
+            }
+            return `${startMonth} ${start.getFullYear()} - ${endMonth} ${year}`;
+        } catch (e) {
+            return "";
+        }
+    };
+
     const getDurationText = () => {
         if (formData.customDuration) return formData.customDuration;
-        if (formData.startDate && formData.endDate) {
-            try {
-                // Format: "May-June year 2025" or similar based on date-fns
-                // User example: "May-June year 2025"
-                const start = new Date(formData.startDate);
-                const end = new Date(formData.endDate);
-                const startMonth = start.toLocaleString('default', { month: 'long' });
-                const endMonth = end.toLocaleString('default', { month: 'long' });
-                const year = end.getFullYear();
-
-                // If same year
-                if (start.getFullYear() === end.getFullYear()) {
-                    return `${startMonth}-${endMonth} year ${year}`;
-                }
-                return `${startMonth} ${start.getFullYear()} - ${endMonth} ${year}`;
-
-            } catch (e) { return "" }
-        }
-        return "Duration not set";
+        return computeDuration(formData.startDate, formData.endDate) || "Duration not set";
     };
 
     if (step === 'verify') {
         return (
-            <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-                <div className="bg-card/40 border border-theme rounded-xl p-8 backdrop-blur-sm w-[400px] text-center">
-                    <h2 className="text-2xl font-bold text-foreground mb-6">Generate Certificate</h2>
-                    <p className="text-gray-400 mb-6 text-sm">Enter mobile number to fetch candidate.</p>
+            <div className="flex items-center justify-center min-h-[60vh] p-4">
+                <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-xl max-w-md w-full text-center">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-700 flex items-center justify-center mx-auto mb-4 text-xl">
+                        🎓
+                    </div>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">Generate Certificate</h2>
+                    <p className="text-slate-500 mb-6 text-xs">Enter mobile number to fetch candidate and internship details.</p>
 
                     <input
                         type="text"
-                        placeholder="Enter Mobile Number"
-                        className="w-full bg-background/50 border border-theme rounded p-3 text-foreground focus:border-gold-500 outline-none mb-6 text-center text-lg tracking-widest"
+                        placeholder="10-digit Mobile Number"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden mb-5 text-center text-base tracking-widest font-mono transition-colors"
                         value={verificationMobile}
                         onChange={e => setVerificationMobile(e.target.value)}
                     />
@@ -238,99 +241,121 @@ export default function CertificatePage() {
                     <button
                         onClick={handleVerify}
                         disabled={isVerifying || !verificationMobile}
-                        className="w-full bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50"
+                        className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-xs disabled:opacity-50 text-sm"
                     >
                         {isVerifying ? "Verifying..." : "Verify & Proceed"}
                     </button>
-                    <button onClick={() => setStep('create')} className="mt-4 text-xs text-gray-500 underline hover:text-foreground">Skip & Create Manually</button>
+                    <button onClick={() => setStep('create')} className="mt-4 text-xs text-slate-500 hover:text-slate-900 underline block mx-auto">
+                        Skip & Create Manually
+                    </button>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="max-w-[1700px] mx-auto flex gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
 
             {/* LEFT: FORM INPUTS */}
-            <div className="w-[350px] bg-card/40 border border-theme rounded-xl p-6 backdrop-blur-sm sticky top-8 shrink-0">
-                <div className="flex justify-between items-center mb-6 border-b border-theme pb-4">
-                    <h2 className="text-xl font-bold text-foreground">Details</h2>
-                    <button onClick={() => setStep('verify')} className="text-xs text-gray-500 hover:text-gold-theme">Change User</button>
+            <div className="w-full lg:w-[380px] bg-white border border-slate-200/80 rounded-xl p-6 shadow-xs lg:sticky lg:top-6 shrink-0">
+                <div className="flex justify-between items-center mb-5 border-b border-slate-200 pb-3">
+                    <div>
+                        <h2 className="text-lg font-bold text-slate-900">Certificate Details</h2>
+                        <p className="text-xs text-slate-500">Configure certificate parameters</p>
+                    </div>
+                    <button onClick={() => setStep('verify')} className="text-xs font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
+                        Change User
+                    </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3.5 max-h-[72vh] overflow-y-auto pr-2 custom-scrollbar">
                     <div>
-                        <label className="block text-xs uppercase text-gray-500 mb-1">Candidate Name</label>
-                        <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                        <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Candidate Name</label>
+                        <input type="text" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
                             value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Email</label>
-                            <input type="email" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Email</label>
+                            <input type="email" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
                                 value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                         </div>
                         <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Mobile</label>
-                            <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Mobile</label>
+                            <input type="text" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
                                 value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-xs uppercase text-gray-500 mb-1">Course / Internship Domain</label>
-                        <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
+                        <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Course / Internship Domain</label>
+                        <input type="text" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
                             placeholder="e.g. Full Stack Development"
                             value={formData.course} onChange={e => setFormData({ ...formData, course: e.target.value })} />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">Start Date</label>
-                            <input type="date" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
+                            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Start Date</label>
+                            <input type="date" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
+                                value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value, customDuration: "" })} />
                         </div>
                         <div>
-                            <label className="block text-xs uppercase text-gray-500 mb-1">End Date</label>
-                            <input type="date" className="w-full bg-background/50 border border-theme rounded p-2 text-foreground focus:border-gold-500 outline-none"
-                                value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">End Date</label>
+                            <input type="date" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
+                                value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value, customDuration: "" })} />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-xs uppercase text-gray-500 mb-1">Date Text Overlay (Auto)</label>
-                        <input type="text" readOnly className="w-full bg-background/50 border border-theme rounded p-2 text-gray-400 focus:border-gold-500 outline-none"
-                            value={getDurationText()} />
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                                Date Text Overlay
+                            </label>
+                            {formData.customDuration && (
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, customDuration: "" })}
+                                    className="text-[10px] text-amber-600 hover:text-amber-700 underline font-semibold"
+                                >
+                                    Reset to Auto
+                                </button>
+                            )}
+                        </div>
+                        <input
+                            type="text"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors font-medium"
+                            placeholder="e.g. November-December year 2026"
+                            value={formData.customDuration !== "" ? formData.customDuration : computeDuration(formData.startDate, formData.endDate)}
+                            onChange={e => setFormData({ ...formData, customDuration: e.target.value })}
+                        />
                     </div>
 
                     <div>
-                        <label className="block text-xs uppercase text-gray-500 mb-1">Custom Text Override</label>
-                        <input type="text" className="w-full bg-background/50 border border-theme rounded p-2 text-gold-200 focus:border-gold-500 outline-none"
-                            placeholder="Overwrite auto text..."
-                            value={formData.customDuration} onChange={e => setFormData({ ...formData, customDuration: e.target.value })} />
+                        <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Issue Date</label>
+                        <input type="date" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
+                            value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
                     </div>
 
-                    <hr className="border-gold-500/10 my-4" />
-
-                    <div className="flex gap-4 mt-6">
-                        <button onClick={handleSave} disabled={isSaving || isGenerating} className="flex-1 bg-green-600 hover:bg-green-700 text-foreground font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50">
+                    <div className="flex gap-2.5 pt-3">
+                        <button onClick={handleSave} disabled={isSaving || isGenerating} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg transition-colors shadow-xs disabled:opacity-50 text-xs">
                             {isSaving ? "Saving..." : "Save"}
                         </button>
-                        <button onClick={handleDownload} disabled={isGenerating} className="flex-1 bg-gold-500 hover:bg-gold-400 text-obsidian font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50">
+                        <button onClick={handleDownload} disabled={isGenerating} className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg transition-colors shadow-xs disabled:opacity-50 text-xs">
                             {isGenerating ? "Gen PDF" : "Download"}
                         </button>
                     </div>
 
-                    <button onClick={handleEmail} disabled={isSendingEmail || isGenerating} className={`w-full mt-4 font-bold py-3 rounded transition-colors shadow-lg disabled:opacity-50 ${isSendingEmail ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500 text-foreground"}`}>
-                        {isSendingEmail ? "Sending..." : "Send Email to User"}
+                    <button onClick={handleEmail} disabled={isSendingEmail || isGenerating} className={`w-full font-bold py-2.5 rounded-lg transition-colors shadow-xs disabled:opacity-50 text-xs ${isSendingEmail ? "bg-slate-400 cursor-not-allowed text-white" : "bg-blue-600 hover:bg-blue-500 text-white"}`}>
+                        {isSendingEmail ? "Sending..." : "✉ Send Email to User"}
                     </button>
                 </div>
             </div>
 
             {/* RIGHT: LIVE PREVIEW (A4 Landscape) */}
-            <div className="flex-1 flex justify-center bg-gray-900/50 p-8 rounded-xl border border-white/5 overflow-hidden relative">
-                <div className="scale-[0.65] origin-top shadow-2xl transform translate-y-4">
+            <div className="flex-1 w-full flex justify-center items-start bg-slate-200/80 p-8 rounded-xl border border-slate-200 shadow-inner overflow-hidden relative min-h-[600px]">
+                <div className="scale-[0.62] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.72] xl:scale-[0.8] origin-top shadow-2xl">
                     <CertificateTemplate
                         ref={certificateRef}
                         name={formData.name}

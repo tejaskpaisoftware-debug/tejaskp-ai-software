@@ -7,6 +7,27 @@ interface CertificateProps {
     course?: string;
 }
 
+const formatIssueDate = (d: string) => {
+    if (!d) return "";
+    try {
+        const parts = d.split('-');
+        if (parts.length === 3 && parts[0].length === 4) {
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            const dt = new Date(year, month, day);
+            if (!isNaN(dt.getTime())) {
+                return dt.toLocaleDateString("en-US", { day: 'numeric', month: 'long', year: 'numeric' });
+            }
+        }
+        const dt = new Date(d);
+        if (!isNaN(dt.getTime())) {
+            return dt.toLocaleDateString("en-US", { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+    } catch (e) {}
+    return d;
+};
+
 const CertificateTemplate = forwardRef<HTMLDivElement, CertificateProps>(({ name, duration, date, course }, ref) => {
     return (
         <div
@@ -74,7 +95,7 @@ const CertificateTemplate = forwardRef<HTMLDivElement, CertificateProps>(({ name
                     {/* LEFT: ISSUE DATE */}
                     <div className="text-left">
                         <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Issue Date</p>
-                        <p className="text-lg text-[#1a1a1a] font-serif font-bold">{new Date(date).toLocaleDateString("en-US", { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                        <p className="text-lg text-[#1a1a1a] font-serif font-bold">{formatIssueDate(date)}</p>
                     </div>
 
                     {/* CENTER: GOLD SEAL */}

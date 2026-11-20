@@ -83,37 +83,41 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
     };
 
     return (
-        <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
+        <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex justify-between items-start">
+            <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-full">
-                        <ArrowLeft className="w-5 h-5 text-gray-600" />
+                    <button onClick={() => router.back()} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors">
+                        <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                        <p className="text-gray-500 text-sm">{user.email} • {user.mobile}</p>
-                        <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${user.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                            {user.status}
-                        </span>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{user.name}</h1>
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                }`}>
+                                {user.status}
+                            </span>
+                        </div>
+                        <p className="text-slate-500 text-xs sm:text-sm mt-1">{user.email} • {user.mobile}</p>
                     </div>
                 </div>
-                <div className="text-right">
-                    <p className="text-sm font-medium text-gray-500">Role</p>
-                    <p className="font-semibold text-gray-800">{user.role}</p>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-slate-500">Role:</span>
+                    <span className="px-3 py-1 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-800 border border-amber-300">
+                        {user.role}
+                    </span>
                 </div>
             </div>
 
             {/* Navigation */}
-            <div className="flex gap-2 overflow-x-auto border-b border-gray-200 pb-1">
+            <div className="flex gap-2 overflow-x-auto border-b border-slate-200 pb-1 scrollbar-none">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-t-lg text-sm font-medium transition-colors ${activeTab === tab.id
-                            ? "bg-white border-b-2 border-indigo-600 text-indigo-600"
-                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${activeTab === tab.id
+                            ? "bg-amber-500 text-slate-950 shadow-xs shadow-amber-500/20 font-bold"
+                            : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900"
                             }`}
                     >
                         <tab.icon className="w-4 h-4" />
@@ -123,7 +127,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Content Area */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 min-h-[400px]">
+            <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200/80 min-h-[400px]">
 
                 {/* OVERVIEW TAB */}
                 {activeTab === "overview" && (
@@ -387,37 +391,37 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
 
             {/* Preview Modal */}
             {preview && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
-                        <header className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
-                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200">
+                        <header className="flex justify-between items-center p-4 border-b border-slate-200 bg-slate-50">
+                            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                                 {preview.type === 'PDF' ? '📄 Report Preview' : '📊 Excel Data Preview'}
                             </h3>
                             <div className="flex gap-2">
                                 <a
                                     href={preview.url}
                                     download
-                                    className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition flex items-center gap-2"
+                                    className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition-colors shadow-xs flex items-center gap-1.5"
                                 >
                                     ⬇ Download Original
                                 </a>
-                                <button onClick={closePreview} className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">
+                                <button onClick={closePreview} className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition-colors">
                                     ✕ Close
                                 </button>
                             </div>
                         </header>
-                        <div className="flex-1 overflow-auto bg-gray-100 p-4">
+                        <div className="flex-1 overflow-auto bg-slate-100 p-4">
                             {preview.type === 'PDF' ? (
-                                <iframe src={preview.url} className="w-full h-full rounded border border-gray-300 bg-white" />
+                                <iframe src={preview.url} className="w-full h-full rounded-xl border border-slate-300 bg-white" />
                             ) : (
-                                <div className="bg-white rounded shadow-sm border border-gray-200 overflow-auto max-h-full">
+                                <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-auto max-h-full">
                                     {preview.data ? (
-                                        <table className="w-full text-sm text-left">
+                                        <table className="w-full text-xs text-left">
                                             <tbody>
                                                 {preview.data.map((row: any[], i) => (
-                                                    <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                                                    <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                                                         {row.map((cell, j) => (
-                                                            <td key={j} className="border-r border-gray-100 px-4 py-2 whitespace-nowrap text-gray-700 font-mono">
+                                                            <td key={j} className="border-r border-slate-100 px-3.5 py-2 whitespace-nowrap text-slate-700 font-mono">
                                                                 {cell}
                                                             </td>
                                                         ))}
@@ -426,7 +430,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                                             </tbody>
                                         </table>
                                     ) : (
-                                        <div className="p-8 text-center text-gray-500">Loading Excel Data...</div>
+                                        <div className="p-8 text-center text-slate-500 text-xs">Loading Excel Data...</div>
                                     )}
                                 </div>
                             )}
@@ -441,18 +445,18 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
 function InfoRow({ label, value }: { label: string, value: any }) {
     if (!value) return null;
     return (
-        <div className="flex justify-between py-1 border-b border-gray-100">
-            <span className="text-gray-500">{label}</span>
-            <span className="font-medium text-gray-800">{value}</span>
+        <div className="flex justify-between py-2 border-b border-slate-100 last:border-0">
+            <span className="text-slate-500 text-xs font-medium">{label}</span>
+            <span className="font-semibold text-slate-800 text-xs">{value}</span>
         </div>
     );
 }
 
-function StatCard({ label, value, prefix = "", color = "text-gray-900" }: any) {
+function StatCard({ label, value, prefix = "", color = "text-slate-900" }: any) {
     return (
-        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <p className="text-xs text-gray-500">{label}</p>
-            <p className={`text-lg font-bold ${color}`}>{prefix}{value || 0}</p>
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+            <p className="text-xs font-medium text-slate-500 mb-1">{label}</p>
+            <p className={`text-xl font-bold ${color}`}>{prefix}{value || 0}</p>
         </div>
     );
 }

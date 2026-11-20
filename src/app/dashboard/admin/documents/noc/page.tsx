@@ -87,99 +87,103 @@ export default function AdminNocPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-black text-foreground">
-                NOC Submissions
-            </h1>
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                        NOC Submissions
+                    </h1>
+                    <p className="text-xs text-slate-500 mt-0.5">Review, verify, and approve student No Objection Certificates</p>
+                </div>
+            </header>
 
             {/* Filters */}
-            <div className="flex items-center gap-4 bg-card border border-theme p-4 rounded-xl backdrop-blur-md">
-                <Search className="text-muted-foreground" size={20} />
+            <div className="flex items-center gap-3 bg-white border border-slate-200/80 p-3 rounded-xl shadow-xs">
+                <Search className="text-slate-400 ml-1" size={18} />
                 <input
                     type="text"
-                    placeholder="Search by name, mobile or course..."
+                    placeholder="Search by candidate name, mobile or course..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="bg-transparent border-none outline-none text-foreground w-full placeholder-muted-foreground"
+                    className="bg-transparent border-none outline-hidden text-slate-900 w-full placeholder-slate-400 text-xs sm:text-sm"
                 />
             </div>
 
             {/* Table */}
-            <div className="bg-card border border-theme rounded-xl overflow-hidden shadow-2xl">
+            <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-muted/50 text-gold-500 uppercase text-xs font-bold tracking-wider">
+                        <thead className="bg-slate-50 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
                             <tr>
-                                <th className="p-6">Student</th>
-                                <th className="p-6">Course</th>
-                                <th className="p-6">Submission Date</th>
-                                <th className="p-6">Document</th>
-                                <th className="p-6 text-center">Status</th>
-                                <th className="p-6 text-right">Actions</th>
+                                <th className="p-4 pl-6">Student</th>
+                                <th className="p-4">Course</th>
+                                <th className="p-4">Submission Date</th>
+                                <th className="p-4">Document</th>
+                                <th className="p-4 text-center">Status</th>
+                                <th className="p-4 pr-6 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border">
+                        <tbody className="divide-y divide-slate-100 text-xs">
                             {loading ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading submissions...</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-400">Loading submissions...</td></tr>
                             ) : filteredDocs.length === 0 ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No submissions found.</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-400">No submissions found.</td></tr>
                             ) : (
                                 filteredDocs.map((doc) => (
-                                    <tr key={doc.id} className="hover:bg-muted/50 transition-colors group">
-                                        <td className="p-6">
-                                            <div className="font-bold text-foreground">{doc.user.name}</div>
-                                            <div className="text-xs text-muted-foreground">{doc.user.mobile}</div>
-                                            <div className="text-xs text-blue-500">{doc.user.email}</div>
+                                    <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors group">
+                                        <td className="p-4 pl-6">
+                                            <div className="font-semibold text-slate-900 text-sm">{doc.user.name}</div>
+                                            <div className="text-[11px] text-slate-500 mt-0.5">{doc.user.mobile}</div>
+                                            <div className="text-[11px] text-blue-600">{doc.user.email}</div>
                                         </td>
-                                        <td className="p-6 text-muted-foreground font-medium">
+                                        <td className="p-4 text-slate-600 font-medium">
                                             {doc.user.course || "N/A"}
                                         </td>
-                                        <td className="p-6 text-muted-foreground text-sm">
+                                        <td className="p-4 text-slate-500">
                                             {new Date(doc.createdAt).toLocaleDateString()}
-                                            <br />
-                                            <span className="text-[10px] text-muted-foreground/70">{new Date(doc.createdAt).toLocaleTimeString()}</span>
+                                            <div className="text-[10px] text-slate-400">{new Date(doc.createdAt).toLocaleTimeString()}</div>
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-4">
                                             <button
                                                 onClick={() => viewDocument(doc.fileUrl)}
-                                                className="flex items-center gap-2 text-gold-500 hover:text-gold-400 hover:underline transition-all bg-transparent border-0 cursor-pointer"
+                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
                                             >
-                                                <FileText size={16} />
-                                                <span className="text-sm font-bold">View PDF</span>
+                                                <FileText size={14} />
+                                                <span>View PDF</span>
                                             </button>
                                         </td>
-                                        <td className="p-6 text-center">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${doc.status === 'APPROVED' ? 'bg-green-500/10 text-green-500 border-green-500/30' :
-                                                doc.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
-                                                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'
+                                        <td className="p-4 text-center">
+                                            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${doc.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                doc.status === 'REJECTED' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                                    'bg-amber-50 text-amber-700 border-amber-200'
                                                 }`}>
                                                 {doc.status}
                                             </span>
                                         </td>
-                                        <td className="p-6 text-right space-x-2">
+                                        <td className="p-4 pr-6 text-right space-x-1.5">
                                             {doc.status === 'PENDING' || editingId === doc.id ? (
                                                 <>
                                                     <button
                                                         onClick={() => handleStatusUpdate(doc.id, 'APPROVED')}
-                                                        className="p-2 rounded hover:bg-green-500/20 text-green-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-600 transition-colors"
                                                         title="Approve"
                                                     >
-                                                        <CheckCircle size={20} />
+                                                        <CheckCircle size={18} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleStatusUpdate(doc.id, 'REJECTED')}
-                                                        className="p-2 rounded hover:bg-red-500/20 text-red-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-600 transition-colors"
                                                         title="Reject"
                                                     >
-                                                        <XCircle size={20} />
+                                                        <XCircle size={18} />
                                                     </button>
                                                 </>
                                             ) : (
                                                 <button
                                                     onClick={() => setEditingId(doc.id)}
-                                                    className="p-2 rounded hover:bg-theme/10 text-muted-foreground hover:text-foreground transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
                                                     title="Edit Status"
                                                 >
-                                                    <Edit2 size={18} />
+                                                    <Edit2 size={16} />
                                                 </button>
                                             )}
                                         </td>
@@ -192,16 +196,16 @@ export default function AdminNocPage() {
             </div>
             {/* PDF Viewer Modal */}
             {viewingUrl && (
-                <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
-                    <div className="w-full max-w-5xl h-[85vh] bg-white rounded-lg overflow-hidden flex flex-col items-center relative">
+                <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex flex-col items-center justify-center p-4">
+                    <div className="w-full max-w-5xl h-[85vh] bg-white rounded-2xl overflow-hidden flex flex-col items-center relative shadow-2xl border border-slate-200">
                         <button
                             onClick={() => {
                                 setViewingUrl(null);
                                 if (viewingUrl.startsWith('blob:')) URL.revokeObjectURL(viewingUrl);
                             }}
-                            className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 z-10 shadow-lg"
+                            className="absolute top-4 right-4 bg-slate-900/80 text-white p-2 rounded-full hover:bg-slate-950 z-10 shadow-lg"
                         >
-                            <XCircle size={24} />
+                            <XCircle size={20} />
                         </button>
                         <iframe
                             src={viewingUrl}

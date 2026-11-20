@@ -341,7 +341,7 @@ class WhatsAppManager {
     public static getStatus(userId: string) {
         const state = this.getSessionState(userId);
         const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.NEXT_PUBLIC_VERCEL_ENV;
-        if (!state.instance && !state.isInitializing && !isVercel) {
+        if (!state.instance && !state.isInitializing && !isVercel && !state.initError) {
             this.initialize(userId);
         }
         return {

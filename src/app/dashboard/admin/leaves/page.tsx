@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Calendar, CheckCircle2, XCircle, Clock, 
+    RefreshCw, Pencil, Plus, Trash2, User, AlertCircle
+} from 'lucide-react';
 
 interface LeaveRequest {
     id: string;
@@ -27,6 +31,7 @@ export default function AdminLeavesPage() {
     const [remarks, setRemarks] = useState<{ [key: string]: string }>({});
     const [holidays, setHolidays] = useState<any[]>([]);
     const [newHoliday, setNewHoliday] = useState({ name: '', date: '', type: 'PUBLIC' });
+    const [editLeave, setEditLeave] = useState<LeaveRequest | null>(null);
 
     useEffect(() => {
         fetchLeaves();
@@ -90,14 +95,12 @@ export default function AdminLeavesPage() {
             });
 
             if (res.ok) {
-                fetchLeaves(); // Refresh
+                fetchLeaves();
             }
         } catch (error) {
             console.error(error);
         }
     };
-
-    const [editLeave, setEditLeave] = useState<LeaveRequest | null>(null);
 
     const handleEditSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -114,14 +117,13 @@ export default function AdminLeavesPage() {
                     type: editLeave.type,
                     isHalfDay: editLeave.isHalfDay,
                     reason: editLeave.reason,
-                    // Preserve status/remarks, mainly updating content
                     status: editLeave.status
                 })
             });
 
             if (res.ok) {
                 setEditLeave(null);
-                window.location.reload(); // Refresh to show updated status immediately
+                fetchLeaves();
             } else {
                 alert("Failed to update status");
             }
@@ -130,168 +132,222 @@ export default function AdminLeavesPage() {
         }
     };
 
+    const currentYear = new Date().getFullYear();
+
     const getBalance = (user: any, year: number) => {
         if (!user.leaveBalances || user.leaveBalances.length === 0) return null;
         return user.leaveBalances.find((b: any) => b.year === year);
     };
 
+    const roleBadges: Record<string, string> = {
+        STUDENT: 'bg-amber-50 text-amber-700 border-amber-200',
+        EMPLOYEE: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        ADMIN: 'bg-rose-50 text-rose-700 border-rose-200',
+        TEAM_LEAD: 'bg-blue-50 text-blue-700 border-blue-200',
+    };
+
+    const statusBadges: Record<string, string> = {
+        APPROVED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        REJECTED: 'bg-rose-50 text-rose-700 border-rose-200',
+        PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
+    };
+
     return (
-        <div className="p-8 text-foreground relative">
-            <header className="flex justify-between items-center mb-8">
+        <div className="space-y-6 animate-in fade-in duration-300">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">
-                        Leave Requests
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Leave Management & Approvals
                     </h1>
-                    <p className="text-gray-400 mt-2">Manage employee and student leave applications.</p>
+                    <p className="text-sm text-slate-500 mt-1">Review leave applications, manage official holidays, and verify balance allowances.</p>
                 </div>
+
                 <button
                     onClick={fetchLeaves}
-                    className="bg-gold-theme text-obsidian px-6 py-2 rounded-lg font-bold hover:bg-gold-400 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition-colors shadow-xs shadow-amber-500/20"
                 >
-                    Refresh
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Refresh</span>
                 </button>
-            </header>
+            </div>
 
-            {/* Holidays Manager */}
-            <div className="mb-10 bg-card/30 border border-theme p-6 rounded-xl">
-                <h3 className="text-xl font-bold mb-4">Manage Holidays</h3>
-                <div className="flex gap-4 items-end">
-                    <form onSubmit={handleHolidaySubmit} className="flex gap-4 flex-1 items-end">
-                        <div className="flex-1">
-                            <label className="text-xs uppercase text-gray-400 block mb-1">Holiday Name</label>
-                            <input
-                                type="text"
-                                className="w-full bg-background border border-gray-700 rounded px-3 py-2"
-                                value={newHoliday.name}
-                                onChange={e => setNewHoliday({ ...newHoliday, name: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs uppercase text-gray-400 block mb-1">Date</label>
-                            <input
-                                type="date"
-                                className="w-full bg-background border border-gray-700 rounded px-3 py-2"
-                                value={newHoliday.date}
-                                onChange={e => setNewHoliday({ ...newHoliday, date: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <button type="submit" className="bg-theme text-white px-4 py-2 rounded hover:bg-theme/80 font-bold">Add Holiday</button>
-                    </form>
+            {/* Manage Holidays Card */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs">
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                    <Calendar className="w-4 h-4 text-amber-600" />
+                    <h3 className="text-sm font-bold text-slate-900">Manage Official Holidays</h3>
                 </div>
+
+                <form onSubmit={handleHolidaySubmit} className="flex flex-col sm:flex-row gap-3 items-end">
+                    <div className="flex-1 w-full">
+                        <label className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Holiday Title</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. Diwali, Republic Day"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                            value={newHoliday.name}
+                            onChange={e => setNewHoliday({ ...newHoliday, name: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <div className="w-full sm:w-48">
+                        <label className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Date</label>
+                        <input
+                            type="date"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 cursor-pointer"
+                            value={newHoliday.date}
+                            onChange={e => setNewHoliday({ ...newHoliday, date: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs shrink-0"
+                    >
+                        + Add Holiday
+                    </button>
+                </form>
+
                 {holidays.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-2">
                         {holidays.map(h => (
-                            <span key={h.id} className="bg-background border border-gray-700 px-3 py-1 rounded text-sm text-gray-300">
-                                {h.date}: {h.name}
+                            <span key={h.id} className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full text-xs font-medium text-slate-700">
+                                <span className="font-semibold text-slate-900">{h.name}:</span>
+                                <span className="font-mono text-slate-500">{h.date}</span>
                             </span>
                         ))}
                     </div>
                 )}
             </div>
 
+            {/* Leave Applications List */}
             {loading ? (
-                <div className="text-center py-20 text-gold-theme animate-pulse">Loading requests...</div>
+                <div className="text-center py-20 text-slate-500 bg-white rounded-2xl border border-slate-200/80">
+                    <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                    <p className="text-xs font-medium">Loading leave requests...</p>
+                </div>
             ) : leaves.length === 0 ? (
-                <div className="text-center py-20 bg-card/30 rounded-2xl border border-theme">
-                    <p className="text-gray-400">No leave requests found.</p>
+                <div className="text-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                    <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-slate-700">No leave requests found</p>
+                    <p className="text-xs text-slate-400 mt-1">All leave applications have been processed.</p>
                 </div>
             ) : (
                 <div className="grid gap-4">
                     {leaves.map((leave) => {
-                        const balance = getBalance(leave.user, 2025); // Hardcoded year for now
+                        const balance = getBalance(leave.user, currentYear);
+                        const isPending = leave.status === 'PENDING';
+
                         return (
                             <motion.div
                                 key={leave.id}
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 6 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-card/50 border border-theme rounded-xl p-6 flex flex-col gap-4 hover:border-gold-500/40 transition-colors relative"
+                                className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all relative"
                             >
-                                <div className="absolute top-4 right-4">
-                                    <button
-                                        onClick={() => setEditLeave(leave)}
-                                        className="text-gray-400 hover:text-white p-2"
-                                        title="Edit Leave"
-                                    >
-                                        ✏️
-                                    </button>
-                                </div>
-
-                                <div className="flex flex-col md:flex-row justify-between gap-4">
-                                    <div className="flex-1 space-y-2">
+                                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                                    
+                                    {/* Left: User & Leave Details */}
+                                    <div className="flex-1 space-y-3">
                                         <div className="flex items-center gap-3">
-                                            <h3 className="text-lg font-bold text-foreground">{leave.user.name || leave.user.mobile}</h3>
-                                            <span className={`text-xs px-2 py-1 rounded bg-muted text-muted-foreground border border-gray-700`}>
-                                                {leave.user.role}
-                                            </span>
-                                        </div>
-
-                                        {/* Show Balances */}
-                                        <div className="flex gap-4 text-xs mt-2 bg-black/20 p-2 rounded w-fit">
-                                            <span className="text-gold-theme">CL: {balance?.cl || 0}</span>
-                                            <span className="text-blue-400">SL: {balance?.sl || 0}</span>
-                                            <span className="text-green-400">PL: {balance?.pl || 0}</span>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4 mt-2">
-                                            <div>
-                                                <span className="text-xs uppercase tracking-wider text-gold-theme/60 block mb-1">Duration</span>
-                                                <span className="text-foreground">{leave.startDate} <span className="text-gray-600 mx-1">to</span> {leave.endDate}</span>
-                                                {leave.isHalfDay && <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">Half Day</span>}
+                                            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-sm">
+                                                {leave.user.name ? leave.user.name.slice(0, 2).toUpperCase() : 'U'}
                                             </div>
                                             <div>
-                                                <span className="text-xs uppercase tracking-wider text-gold-theme/60 block mb-1">Type</span>
-                                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${leave.type?.includes('SL') ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'}`}>
-                                                    {leave.type || 'CL'}
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="font-bold text-slate-900 text-sm">
+                                                        {leave.user.name || leave.user.mobile}
+                                                    </h3>
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border ${roleBadges[leave.user.role] || 'bg-slate-100 text-slate-600'}`}>
+                                                        {leave.user.role}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-slate-400 font-mono">{leave.user.mobile}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Leave Balances Pill */}
+                                        <div className="inline-flex items-center gap-3 text-xs bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/80">
+                                            <span className="text-[11px] font-semibold text-slate-400 uppercase">Available:</span>
+                                            <span className="font-medium text-amber-700">CL: {balance?.cl || 0}</span>
+                                            <span className="font-medium text-blue-700">SL: {balance?.sl || 0}</span>
+                                            <span className="font-medium text-emerald-700">PL: {balance?.pl || 0}</span>
+                                        </div>
+
+                                        {/* Duration & Type Grid */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Duration</span>
+                                                <span className="font-medium text-slate-800">
+                                                    {leave.startDate} <span className="text-slate-400">to</span> {leave.endDate}
                                                 </span>
+                                                {leave.isHalfDay && (
+                                                    <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-blue-50 text-blue-700 font-semibold rounded border border-blue-200">
+                                                        Half Day
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Leave Type</span>
+                                                <span className="font-semibold text-slate-900">{leave.type || 'Casual (CL)'}</span>
+                                            </div>
+                                            <div className="col-span-2 sm:col-span-1">
+                                                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Reason</span>
+                                                <p className="text-slate-700 italic truncate" title={leave.reason}>
+                                                    "{leave.reason}"
+                                                </p>
                                             </div>
                                         </div>
-                                        <div className="mt-2">
-                                            <span className="text-xs uppercase tracking-wider text-gold-theme/60 block mb-1">Reason</span>
-                                            <span className="text-foreground italic bg-black/20 p-2 rounded block">"{leave.reason}"</span>
-                                        </div>
-                                    </div>
 
-                                    <div className="flex flex-col items-end gap-4 min-w-[200px] mt-8 md:mt-0">
-                                        <div className={`px-4 py-2 rounded-lg font-bold text-sm tracking-wide border w-full text-center
-                                            ${leave.status === 'APPROVED' ? 'bg-green-500/10 text-green-500 border-green-500/30' :
-                                                leave.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
-                                                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'}
-                                        `}>
-                                            {leave.status}
-                                        </div>
-
-                                        {leave.status === 'PENDING' && (
-                                            <div className="w-full space-y-2">
-                                                <textarea
-                                                    placeholder="Manager Remarks (Optional)"
-                                                    className="w-full bg-background border border-gray-700 rounded p-2 text-sm h-20"
+                                        {/* Admin Remarks Input */}
+                                        {isPending && (
+                                            <div className="pt-1">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Add optional manager remarks before approval / rejection..."
                                                     value={remarks[leave.id] || ''}
                                                     onChange={(e) => setRemarks({ ...remarks, [leave.id]: e.target.value })}
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                                                 />
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => handleStatusUpdate(leave.id, 'APPROVED')}
-                                                        className="flex-1 py-2 bg-green-600 hover:bg-green-500 text-foreground rounded-lg font-bold transition-colors text-sm"
-                                                    >
-                                                        Approve
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleStatusUpdate(leave.id, 'REJECTED')}
-                                                        className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-foreground rounded-lg font-bold transition-colors text-sm"
-                                                    >
-                                                        Reject
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {leave.managerRemarks && leave.status !== 'PENDING' && (
-                                            <div className="text-xs text-right text-gray-400">
-                                                <span className="text-gold-theme">Remark:</span> {leave.managerRemarks}
                                             </div>
                                         )}
                                     </div>
+
+                                    {/* Right: Actions & Status */}
+                                    <div className="flex flex-row lg:flex-col items-end justify-between gap-3 shrink-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border ${statusBadges[leave.status] || 'bg-slate-100 text-slate-700'}`}>
+                                                {leave.status}
+                                            </span>
+
+                                            <button
+                                                onClick={() => setEditLeave(leave)}
+                                                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                                                title="Edit leave application"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                        </div>
+
+                                        {isPending && (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleStatusUpdate(leave.id, 'APPROVED')}
+                                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-xs"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button
+                                                    onClick={() => handleStatusUpdate(leave.id, 'REJECTED')}
+                                                    className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-colors shadow-xs"
+                                                >
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
                                 </div>
                             </motion.div>
                         );
@@ -299,69 +355,69 @@ export default function AdminLeavesPage() {
                 </div>
             )}
 
-            {/* Edit Modal (Status Update Only) */}
-            {editLeave && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="bg-[#111] border border-gray-800 rounded-xl p-6 max-w-lg w-full shadow-2xl"
-                    >
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Update Leave Status</h3>
-                            <button onClick={() => setEditLeave(null)} className="text-gray-400 hover:text-white">✕</button>
-                        </div>
-                        <form onSubmit={handleEditSubmit} className="space-y-4">
-                            {/* Read-Only Details */}
-                            <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-lg">
-                                <div>
-                                    <span className="text-xs uppercase text-gray-500 font-bold block mb-1">Duration</span>
-                                    <span className="text-sm text-gray-300">{editLeave.startDate} <span className="text-gray-600">to</span> {editLeave.endDate}</span>
+            {/* Edit Modal */}
+            <AnimatePresence>
+                {editLeave && (
+                    <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-lg shadow-xl relative"
+                        >
+                            <h3 className="text-base font-bold text-slate-900 mb-4">Edit Leave Application</h3>
+                            <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={editLeave.startDate}
+                                            onChange={e => setEditLeave({ ...editLeave, startDate: e.target.value })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">End Date</label>
+                                        <input
+                                            type="date"
+                                            value={editLeave.endDate}
+                                            onChange={e => setEditLeave({ ...editLeave, endDate: e.target.value })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="text-xs uppercase text-gray-500 font-bold block mb-1">Type</span>
-                                    <span className="text-sm text-gray-300">{editLeave.type} {editLeave.isHalfDay ? '(Half)' : ''}</span>
-                                </div>
-                                <div className="col-span-2">
-                                    <span className="text-xs uppercase text-gray-500 font-bold block mb-1">Reason</span>
-                                    <span className="text-sm text-gray-300 italic">"{editLeave.reason}"</span>
-                                </div>
-                            </div>
 
-                            {/* Status Editor */}
-                            <div>
-                                <label className="text-xs uppercase text-gray-500 font-bold mb-1 block">Status</label>
-                                <select
-                                    className="w-full bg-[#111] border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-gold-500/50 outline-none appearance-none"
-                                    value={editLeave.status}
-                                    onChange={e => setEditLeave({ ...editLeave, status: e.target.value })}
-                                    style={{ colorScheme: 'dark' }}
-                                >
-                                    <option value="PENDING" className="bg-gray-900 text-white">PENDING</option>
-                                    <option value="APPROVED" className="bg-gray-900 text-white">APPROVED</option>
-                                    <option value="REJECTED" className="bg-gray-900 text-white">REJECTED</option>
-                                </select>
-                            </div>
+                                <div>
+                                    <label className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Reason</label>
+                                    <textarea
+                                        value={editLeave.reason}
+                                        onChange={e => setEditLeave({ ...editLeave, reason: e.target.value })}
+                                        rows={3}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800"
+                                    />
+                                </div>
 
-                            <div className="pt-4 flex gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setEditLeave(null)}
-                                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-lg font-bold text-sm transition-colors text-gray-300"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 py-3 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-black rounded-lg font-bold text-sm transition-all shadow-lg hover:shadow-gold-500/20"
-                                >
-                                    Update Status
-                                </button>
-                            </div>
-                        </form>
-                    </motion.div>
-                </div>
-            )}
+                                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditLeave(null)}
+                                        className="px-4 py-2 border border-slate-200 rounded-lg font-semibold text-slate-600 hover:bg-slate-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg shadow-xs"
+                                    >
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

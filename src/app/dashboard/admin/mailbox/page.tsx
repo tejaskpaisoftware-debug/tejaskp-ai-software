@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Mail, Plus, Trash2, Search, User as UserIcon,
-    Shield, HardDrive, Inbox, Send, AlertTriangle, CheckCircle, X
+    Shield, HardDrive, Inbox, Send, AlertTriangle, CheckCircle2, X
 } from "lucide-react";
+import MailboxSection from "@/components/employee/MailboxSection";
 
-// Helper for Auth Header
 const getAuthHeader = (): HeadersInit => {
     const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user");
     if (userStr) {
@@ -18,8 +18,6 @@ const getAuthHeader = (): HeadersInit => {
     }
     return {};
 };
-
-import MailboxSection from "@/components/employee/MailboxSection";
 
 export default function AdminMailboxManager() {
     const [activeTab, setActiveTab] = useState<'server' | 'personal'>('server');
@@ -39,7 +37,6 @@ export default function AdminMailboxManager() {
 
     useEffect(() => {
         fetchData();
-        // Get current admin ID
         const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user");
         if (userStr) {
             try {
@@ -116,219 +113,267 @@ export default function AdminMailboxManager() {
         }
     };
 
-    // Filtered lists
     const filteredMailboxes = mailboxes.filter(m =>
         m.emailAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.user?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        (m.user?.name && m.user.name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const availableUsers = users.filter(u => !mailboxes.find(m => m.userId === u.id));
 
     return (
-        <div className="p-8 space-y-8 bg-background min-h-screen text-foreground">
+        <div className="space-y-6 animate-in fade-in duration-300">
             {/* Header */}
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-gold-400 to-yellow-600 uppercase">
-                        Mail Server Manager
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Internal Mail Server Manager
                     </h1>
-                    <p className="text-muted-foreground font-bold tracking-widest text-xs uppercase mt-2 italic text-left">
-                        Internal Communication Infrastructure
+                    <p className="text-sm text-slate-500 mt-1">
+                        Provision corporate mailboxes, oversee inbox quota limits, and manage communication routing.
                     </p>
                 </div>
 
-                <div className="flex bg-muted/20 p-1 rounded-xl">
-                    <button
-                        onClick={() => setActiveTab('server')}
-                        className={`px-6 py-2 rounded-lg font-black uppercase text-xs tracking-widest transition-all ${activeTab === 'server' ? 'bg-gold-500 text-black shadow-lg' : 'text-muted-foreground hover:text-white'}`}
-                    >
-                        Server Admin
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('personal')}
-                        className={`px-6 py-2 rounded-lg font-black uppercase text-xs tracking-widest transition-all ${activeTab === 'personal' ? 'bg-gold-500 text-black shadow-lg' : 'text-muted-foreground hover:text-white'}`}
-                    >
-                        My Mailbox
-                    </button>
-                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                        <button
+                            onClick={() => setActiveTab('server')}
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                                activeTab === 'server'
+                                    ? 'bg-white text-slate-900 shadow-2xs'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
+                            Server Infrastructure
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('personal')}
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                                activeTab === 'personal'
+                                    ? 'bg-white text-slate-900 shadow-2xs'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
+                            Admin Inbox
+                        </button>
+                    </div>
 
-                {activeTab === 'server' && (
-                    <button
-                        onClick={() => setShowProvisionModal(true)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-gold-500 to-yellow-600 text-black px-6 py-3 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg transform active:scale-95 transition-all hover:scale-105"
-                    >
-                        <Plus size={18} strokeWidth={3} />
-                        Provision Mailbox
-                    </button>
-                )}
-            </header>
+                    {activeTab === 'server' && (
+                        <button
+                            onClick={() => setShowProvisionModal(true)}
+                            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-xs shadow-amber-500/20"
+                        >
+                            <Plus className="w-4 h-4" />
+                            <span>Provision Mailbox</span>
+                        </button>
+                    )}
+                </div>
+            </div>
 
             {activeTab === 'personal' ? (
-                <MailboxSection userId={currentAdminId} />
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs">
+                    <MailboxSection userId={currentAdminId} />
+                </div>
             ) : (
                 <>
-                    {/* Stats Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="glass-card-3d p-6 border-l-4 border-gold-500">
-                            <div className="flex justify-between items-start mb-4">
-                                <Mail className="text-gold-500" size={24} />
-                                <span className="text-3xl font-black text-white">{mailboxes.length}</span>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Active Mailboxes</span>
+                                <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                    <Mail className="w-4 h-4" />
+                                </div>
                             </div>
-                            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest text-left">Active Mailboxes</p>
+                            <div className="text-2xl sm:text-3xl font-black text-slate-900">{mailboxes.length}</div>
+                            <span className="text-xs text-slate-400 mt-1 block">Provisioned user accounts</span>
                         </div>
-                        <div className="glass-card-3d p-6 border-l-4 border-blue-500">
-                            <div className="flex justify-between items-start mb-4">
-                                <HardDrive className="text-blue-500" size={24} />
-                                <span className="text-3xl font-black text-white">{(mailboxes.length * 5).toLocaleString()} GB</span>
+
+                        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Storage Capacity</span>
+                                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <HardDrive className="w-4 h-4" />
+                                </div>
                             </div>
-                            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest text-left">Total Provisioned Space</p>
+                            <div className="text-2xl sm:text-3xl font-black text-slate-900">
+                                {(mailboxes.length * 5).toLocaleString()} GB
+                            </div>
+                            <span className="text-xs text-slate-400 mt-1 block">Total allocated volume</span>
                         </div>
-                        <div className="glass-card-3d p-6 border-l-4 border-green-500">
-                            <div className="flex justify-between items-start mb-4">
-                                <Shield className="text-green-500" size={24} />
-                                <span className="text-3xl font-black text-white">Secure</span>
+
+                        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Server Security</span>
+                                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                    <Shield className="w-4 h-4" />
+                                </div>
                             </div>
-                            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest text-left">System Status</p>
+                            <div className="text-2xl sm:text-3xl font-black text-emerald-600">Active & TLS</div>
+                            <span className="text-xs text-slate-400 mt-1 block">Encrypted mail relay</span>
                         </div>
                     </div>
 
-                    {/* Search and List */}
-                    <div className="space-y-4">
-                        <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-                            <input
-                                type="text"
-                                placeholder="Search by email or name..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-card border border-muted p-4 pl-12 rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-bold text-foreground"
-                            />
-                        </div>
+                    {/* Search Bar */}
+                    <div className="relative">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Filter by email address or user name..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-white border border-slate-200/90 rounded-xl py-2.5 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 shadow-xs"
+                        />
+                    </div>
 
-                        <div className="grid gap-4">
-                            {loading ? (
-                                <div className="text-center p-12 text-muted-foreground font-bold italic">Loading data infrastructure...</div>
-                            ) : filteredMailboxes.length === 0 ? (
-                                <div className="text-center p-12 text-muted-foreground font-bold italic">No mailboxes found based on search parameters.</div>
-                            ) : (
-                                filteredMailboxes.map((mb) => (
+                    {/* Mailbox List Cards */}
+                    {loading ? (
+                        <div className="text-center py-20 text-slate-400 bg-white rounded-2xl border border-slate-200/80">
+                            <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                            <p className="text-xs font-medium">Loading mailboxes...</p>
+                        </div>
+                    ) : filteredMailboxes.length === 0 ? (
+                        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                            <Mail className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p className="text-sm font-semibold text-slate-700">No mailboxes found</p>
+                            <p className="text-xs text-slate-400 mt-1">Adjust search or provision a new mailbox above.</p>
+                        </div>
+                    ) : (
+                        <div className="grid gap-3.5">
+                            {filteredMailboxes.map((mb) => {
+                                const storageMB = ((mb.storageUsed || 0) / (1024 * 1024)).toFixed(1);
+                                const percentage = Math.min(100, Math.round(((mb.storageUsed || 0) / (mb.storageLimit || 5368709120)) * 100));
+
+                                return (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
                                         key={mb.id}
-                                        className="glass-card-3d p-4 flex flex-col md:flex-row items-center justify-between gap-4 border border-white/5 hover:border-gold-500/30 transition-all group"
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs hover:shadow-sm transition-all"
                                     >
-                                        <div className="flex items-center gap-4 w-full md:w-auto">
-                                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-muted bg-muted/20 flex items-center justify-center font-black text-xl text-gold-500">
+                                        <div className="flex items-center gap-3.5">
+                                            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-sm overflow-hidden shrink-0">
                                                 {mb.user?.photoUrl ? (
                                                     <img src={mb.user.photoUrl} alt="" className="w-full h-full object-cover" />
-                                                ) : mb.user?.name?.charAt(0) || <UserIcon />}
+                                                ) : mb.user?.name ? mb.user.name.slice(0, 2).toUpperCase() : <Mail className="w-4 h-4 text-slate-400" />}
                                             </div>
-                                            <div className="text-left">
-                                                <h3 className="text-lg font-black text-white uppercase">{mb.user?.name || "Unknown User"}</h3>
-                                                <p className="text-sm font-bold text-gold-500 flex items-center gap-2 tracking-tight">
-                                                    <Mail size={14} />
-                                                    {mb.emailAddress}
+                                            <div>
+                                                <h3 className="font-bold text-slate-900 text-sm leading-snug">
+                                                    {mb.user?.name || "Unknown Account"}
+                                                </h3>
+                                                <p className="text-xs text-amber-600 font-mono font-medium flex items-center gap-1.5 mt-0.5">
+                                                    <Mail className="w-3.5 h-3.5" />
+                                                    <span>{mb.emailAddress}</span>
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                                        <div className="flex items-center gap-5 justify-between md:justify-end">
                                             <div className="text-right">
-                                                <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                                                <div className="w-32 sm:w-40 h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
                                                     <div
-                                                        className="h-full bg-gold-500"
-                                                        style={{ width: `${(mb.storageUsed / mb.storageLimit) * 100 || 0}%` }}
+                                                        className="h-full bg-amber-500 rounded-full transition-all"
+                                                        style={{ width: `${percentage}%` }}
                                                     />
                                                 </div>
-                                                <p className="text-[10px] font-black text-muted-foreground uppercase mt-1">
-                                                    {((mb.storageUsed || 0) / (1024 * 1024)).toFixed(1)} MB / 5 GB
-                                                </p>
+                                                <span className="text-[10px] font-mono text-slate-400 mt-1 block">
+                                                    {storageMB} MB used of 5 GB
+                                                </span>
                                             </div>
+
                                             <button
                                                 onClick={() => handleDelete(mb.id)}
-                                                className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 active:scale-95 transition-all"
+                                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
+                                                title="Delete mailbox"
                                             >
-                                                <Trash2 size={20} />
+                                                <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </motion.div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Provision Modal */}
-                    {showProvisionModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="bg-card glass-morphism border border-gold-500/30 w-full max-w-lg rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(234,179,8,0.2)]"
-                            >
-                                <form onSubmit={handleProvision} className="p-8 space-y-6">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Provision Mailbox</h2>
-                                        <button type="button" onClick={() => setShowProvisionModal(false)} className="text-muted-foreground hover:text-white transition-colors">
-                                            <X size={24} />
-                                        </button>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <label className="block text-xs font-black text-gold-500 uppercase tracking-widest text-left">Select Account</label>
-                                        <select
-                                            value={selectedUserId}
-                                            onChange={(e) => setSelectedUserId(e.target.value)}
-                                            className="w-full bg-muted/30 border border-muted p-4 rounded-xl text-white font-bold outline-none focus:border-gold-500 appearance-none"
-                                            required
-                                        >
-                                            <option value="" className="bg-background">Choose a user...</option>
-                                            {availableUsers.map(u => (
-                                                <option key={u.id} value={u.id} className="bg-background">
-                                                    {u.name} ({u.role})
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <label className="block text-xs font-black text-gold-500 uppercase tracking-widest text-left">Email Identity</label>
-                                        <div className="flex gap-2 items-center">
-                                            <input
-                                                type="text"
-                                                placeholder="username"
-                                                value={emailPrefix}
-                                                onChange={(e) => setEmailPrefix(e.target.value.replace(/[^a-zA-Z0-9._-]/g, ''))}
-                                                className="flex-1 bg-muted/30 border border-muted p-4 rounded-xl text-white font-black outline-none focus:border-gold-500 transition-all text-right"
-                                                required
-                                            />
-                                            <span className="text-muted-foreground font-black text-lg">@{domain}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 bg-gold-500/5 rounded-xl border border-gold-500/20 flex gap-3">
-                                        <AlertTriangle className="text-gold-500 shrink-0" size={20} />
-                                        <p className="text-[10px] font-bold text-gold-200 uppercase leading-relaxed text-left">
-                                            Assigning a mailbox allows this user to communicate internally. This identity is permanent and can only be changed by infrastructure admins.
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={provisioning || !selectedUserId || !emailPrefix}
-                                        className="w-full bg-gradient-to-r from-gold-500 to-yellow-600 text-black p-4 rounded-xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-                                    >
-                                        {provisioning ? "Configuring Infrastructure..." : (
-                                            <>
-                                                <CheckCircle size={20} />
-                                                Confirm Provisioning
-                                            </>
-                                        )}
-                                    </button>
-                                </form>
-                            </motion.div>
+                                );
+                            })}
                         </div>
                     )}
+
+                    {/* Provision Modal */}
+                    <AnimatePresence>
+                        {showProvisionModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+                                <motion.div
+                                    initial={{ scale: 0.95, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.95, opacity: 0 }}
+                                    className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl p-6"
+                                >
+                                    <form onSubmit={handleProvision} className="space-y-4 text-xs">
+                                        <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                                            <h2 className="text-base font-bold text-slate-900">Provision Internal Mailbox</h2>
+                                            <button type="button" onClick={() => setShowProvisionModal(false)} className="text-slate-400 hover:text-slate-700">
+                                                <X className="w-5 h-5" />
+                                            </button>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Target Account</label>
+                                            <select
+                                                value={selectedUserId}
+                                                onChange={(e) => setSelectedUserId(e.target.value)}
+                                                className="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                                                required
+                                            >
+                                                <option value="">Select a user account...</option>
+                                                {availableUsers.map(u => (
+                                                    <option key={u.id} value={u.id}>
+                                                        {u.name} ({u.role}) - {u.mobile}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Assigned Email Identity</label>
+                                            <div className="flex gap-2 items-center">
+                                                <input
+                                                    type="text"
+                                                    placeholder="username"
+                                                    value={emailPrefix}
+                                                    onChange={(e) => setEmailPrefix(e.target.value.replace(/[^a-zA-Z0-9._-]/g, ''))}
+                                                    className="flex-1 bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-slate-900 font-mono text-right focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                                                    required
+                                                />
+                                                <span className="text-slate-500 font-mono text-xs font-semibold px-2 py-2 bg-slate-100 border border-slate-200 rounded-lg">
+                                                    @{domain}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] flex gap-2">
+                                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                            <p>
+                                                This mailbox allows the user to exchange internal company communications and receive automated notification dispatches.
+                                            </p>
+                                        </div>
+
+                                        <div className="flex gap-2 pt-3 border-t border-slate-100">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowProvisionModal(false)}
+                                                className="flex-1 py-2 border border-slate-200 rounded-lg text-slate-600 font-semibold hover:bg-slate-50"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={provisioning || !selectedUserId || !emailPrefix}
+                                                className="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg shadow-xs shadow-amber-500/20 disabled:opacity-50"
+                                            >
+                                                {provisioning ? "Provisioning..." : "Confirm Provisioning"}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
                 </>
             )}
         </div>

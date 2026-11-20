@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "tunnel": "npx -y localtunnel --port 3000",
     "tunnel:fixed": "npx -y localtunnel --port 3000 --subdomain tejaskpai-system",
     "cf": "npx -y cloudflared tunnel --url http://localhost:3000",

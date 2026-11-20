@@ -1,9 +1,18 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, Search, Download, User, AlertTriangle, Clock, CheckCircle } from "lucide-react";
+import { 
+    Calendar, 
+    Search, 
+    Download, 
+    User, 
+    AlertTriangle, 
+    Clock, 
+    CheckCircle,
+    FileSpreadsheet,
+    Users
+} from "lucide-react";
 
 export default function AttendanceReportsPage() {
     const [month, setMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
@@ -36,125 +45,152 @@ export default function AttendanceReportsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-background text-foreground p-8">
-            <header className="mb-8">
-                <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-b from-[#FFF5C3] via-[#FDB931] to-[#9F6900] uppercase tracking-widest drop-shadow-md">
-                    Attendance Reports
-                </h1>
-                <p className="text-gray-500 font-bold mt-2">Comprehensive Monthly Student Punctuality & Performance Summary</p>
-            </header>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <FileSpreadsheet className="w-3.5 h-3.5" /> Performance Reports
+                        </span>
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Attendance Reports</h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Comprehensive monthly student punctuality, late entries, task discipline, and attendance metrics.
+                    </p>
+                </div>
+            </div>
 
             {/* Filters */}
-            <div className="grid md:grid-cols-3 gap-6 mb-8 group">
-                <div className="bg-[#1a1a1a] border border-white/10 p-4 rounded-xl flex items-center gap-4 focus-within:border-yellow-500/50 transition-all">
-                    <Calendar className="text-yellow-500" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white border border-slate-200/80 p-3.5 rounded-xl flex items-center gap-3 shadow-sm focus-within:border-amber-500 transition-colors">
+                    <Calendar className="w-4 h-4 text-amber-600 shrink-0" />
                     <input
                         type="month"
                         value={month}
                         onChange={(e) => setMonth(e.target.value)}
-                        className="bg-transparent outline-none flex-1 text-white font-bold"
+                        className="bg-transparent outline-none flex-1 text-slate-900 font-semibold text-sm"
                     />
                 </div>
-                <div className="bg-[#1a1a1a] border border-white/10 p-4 rounded-xl flex items-center gap-4 focus-within:border-yellow-500/50 transition-all md:col-span-2">
-                    <Search className="text-gray-500" />
+                <div className="bg-white border border-slate-200/80 p-3.5 rounded-xl flex items-center gap-3 shadow-sm focus-within:border-amber-500 transition-colors sm:col-span-2">
+                    <Search className="w-4 h-4 text-slate-400 shrink-0" />
                     <input
                         type="text"
-                        placeholder="Search student name or ID..."
+                        placeholder="Search student by name or enrollment ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-transparent outline-none flex-1 text-white"
+                        className="bg-transparent outline-none flex-1 text-slate-900 text-sm"
                     />
                 </div>
             </div>
 
             {loading ? (
-                <div className="flex flex-col items-center justify-center h-64 gap-4">
-                    <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-500 animate-pulse font-bold uppercase tracking-widest">Generating Report...</p>
+                <div className="flex flex-col items-center justify-center h-64 gap-3 bg-white border border-slate-200/80 rounded-2xl shadow-sm">
+                    <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-slate-400 font-semibold text-xs uppercase tracking-wider">Generating Student Attendance Report...</p>
                 </div>
             ) : filteredReport.length === 0 ? (
-                <div className="text-center p-12 bg-[#1a1a1a] rounded-2xl border border-dashed border-white/10">
-                    <AlertTriangle className="mx-auto mb-4 text-gray-600" size={40} />
-                    <p className="text-gray-500 font-bold">No data found for this period.</p>
+                <div className="text-center p-12 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                    <AlertTriangle className="mx-auto mb-3 text-slate-400" size={36} />
+                    <p className="text-slate-700 font-bold">No attendance records found</p>
+                    <p className="text-xs text-slate-400 mt-1">Try selecting a different month or adjusting your search term.</p>
                 </div>
             ) : (
-                <div className="grid gap-8">
-                    {/* Summary Cards */}
-                    <div className="grid md:grid-cols-4 gap-6">
-                        <SummaryCard title="Total Students" value={report.length} icon={<User className="text-blue-400" />} />
-                        <SummaryCard
-                            title="Total Lates"
-                            value={report.reduce((acc, curr) => acc + curr.stats.late, 0)}
-                            icon={<Clock className="text-yellow-400" />}
+                <div className="space-y-6">
+                    {/* Summary KPI Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <SummaryCard 
+                            title="Total Students" 
+                            value={report.length} 
+                            icon={<Users className="w-5 h-5 text-slate-600" />} 
+                            bgIcon="bg-slate-100"
                         />
                         <SummaryCard
-                            title="Total Absents"
-                            value={report.reduce((acc, curr) => acc + curr.stats.absent, 0)}
-                            icon={<AlertTriangle className="text-red-400" />}
+                            title="Total Late Entries"
+                            value={report.reduce((acc, curr) => acc + (curr.stats?.late || 0), 0)}
+                            icon={<Clock className="w-5 h-5 text-amber-600" />}
+                            bgIcon="bg-amber-50"
                         />
                         <SummaryCard
-                            title="Present Avg"
-                            value={Math.round(report.reduce((acc, curr) => acc + (curr.stats.present / curr.stats.totalDays), 0) / report.length * 100) + "%"}
-                            icon={<CheckCircle className="text-green-400" />}
+                            title="Total Absences"
+                            value={report.reduce((acc, curr) => acc + (curr.stats?.absent || 0), 0)}
+                            icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+                            bgIcon="bg-rose-50"
+                        />
+                        <SummaryCard
+                            title="Attendance Average"
+                            value={Math.round(report.reduce((acc, curr) => acc + ((curr.stats?.present || 0) / (curr.stats?.totalDays || 1)), 0) / (report.length || 1) * 100) + "%"}
+                            icon={<CheckCircle className="w-5 h-5 text-emerald-600" />}
+                            bgIcon="bg-emerald-50"
                         />
                     </div>
 
-                    {/* Detailed Matrix */}
-                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                    {/* Detailed Matrix Table */}
+                    <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
+                        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                            <h2 className="text-base font-bold text-slate-900">Monthly Punctuality & Task Ledger</h2>
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                {filteredReport.length} Students
+                            </span>
+                        </div>
+
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse min-w-[1000px]">
-                                <thead className="bg-[#222] text-yellow-500 uppercase text-xs font-black tracking-widest">
+                            <table className="w-full text-left border-collapse min-w-[950px]">
+                                <thead className="bg-slate-50/90 text-slate-500 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
                                     <tr>
-                                        <th className="p-5 border-b border-white/5">Student Name</th>
-                                        <th className="p-5 border-b border-white/5 text-center">Present</th>
-                                        <th className="p-5 border-b border-white/5 text-center">Late Entries</th>
-                                        <th className="p-5 border-b border-white/5 text-center">Absent</th>
-                                        <th className="p-5 border-b border-white/5 text-center">No Task Days</th>
-                                        <th className="p-5 border-b border-white/5">Parent Contact</th>
-                                        <th className="p-5 border-b border-white/5">Action</th>
+                                        <th className="p-4 pl-6">Student Name</th>
+                                        <th className="p-4 text-center">Present</th>
+                                        <th className="p-4 text-center">Late Entries</th>
+                                        <th className="p-4 text-center">Absent</th>
+                                        <th className="p-4 text-center">No Task Days</th>
+                                        <th className="p-4">Parent / Guardian</th>
+                                        <th className="p-4 pr-6 text-center">Export</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-white/5">
+                                <tbody className="divide-y divide-slate-100 text-sm">
                                     {filteredReport.map((item) => (
-                                        <tr key={item.studentId} className="hover:bg-white/[0.02] transition-colors group">
-                                            <td className="p-5">
-                                                <div className="font-bold text-white group-hover:text-yellow-400 transition-colors">{item.name}</div>
-                                                <div className="text-[10px] text-gray-500 font-mono mt-0.5">{item.studentId}</div>
+                                        <tr key={item.studentId} className="hover:bg-slate-50/70 transition-colors group">
+                                            <td className="p-4 pl-6">
+                                                <div className="font-semibold text-slate-900 group-hover:text-amber-700 transition-colors">{item.name}</div>
+                                                <div className="text-[11px] text-slate-400 font-mono mt-0.5">{item.studentId}</div>
                                             </td>
-                                            <td className="p-5 text-center">
-                                                <div className="text-green-400 font-black">{item.stats.present}</div>
-                                                <div className="text-[10px] text-gray-600 uppercase">Days</div>
+                                            <td className="p-4 text-center">
+                                                <div className="text-emerald-600 font-extrabold">{item.stats?.present || 0}</div>
+                                                <div className="text-[10px] text-slate-400 uppercase font-medium">Days</div>
                                             </td>
-                                            <td className="p-5 text-center">
-                                                <div className={`font-black ${item.stats.late > 2 ? 'text-yellow-500 scale-110' : 'text-gray-400'}`}>
-                                                    {item.stats.late}
+                                            <td className="p-4 text-center">
+                                                <div className={`font-extrabold ${(item.stats?.late || 0) > 2 ? 'text-amber-600' : 'text-slate-600'}`}>
+                                                    {item.stats?.late || 0}
                                                 </div>
-                                                <div className="text-[10px] text-gray-600 uppercase">Entries</div>
+                                                <div className="text-[10px] text-slate-400 uppercase font-medium">Entries</div>
                                             </td>
-                                            <td className="p-5 text-center">
-                                                <div className={`font-black ${item.stats.absent > 3 ? 'text-red-500' : 'text-gray-400'}`}>
-                                                    {item.stats.absent}
+                                            <td className="p-4 text-center">
+                                                <div className={`font-extrabold ${(item.stats?.absent || 0) > 3 ? 'text-rose-600' : 'text-slate-600'}`}>
+                                                    {item.stats?.absent || 0}
                                                 </div>
-                                                <div className="text-[10px] text-gray-600 uppercase">Days</div>
+                                                <div className="text-[10px] text-slate-400 uppercase font-medium">Days</div>
                                             </td>
-                                            <td className="p-5 text-center">
-                                                <div className={`font-black ${item.stats.daysWithNoTask > 0 ? 'text-orange-400' : 'text-gray-500'}`}>
-                                                    {item.stats.daysWithNoTask}
+                                            <td className="p-4 text-center">
+                                                <div className={`font-extrabold ${(item.stats?.daysWithNoTask || 0) > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+                                                    {item.stats?.daysWithNoTask || 0}
                                                 </div>
-                                                <div className="text-[10px] text-gray-600 uppercase">Untracked</div>
+                                                <div className="text-[10px] text-slate-400 uppercase font-medium">Untracked</div>
                                             </td>
-                                            <td className="p-5">
-                                                {item.parentContact.name ? (
-                                                    <div className="space-y-1">
-                                                        <div className="text-xs font-bold text-gray-300">{item.parentContact.name}</div>
-                                                        <div className="text-xs text-gray-500">{item.parentContact.mobile}</div>
+                                            <td className="p-4">
+                                                {item.parentContact?.name ? (
+                                                    <div>
+                                                        <div className="text-xs font-semibold text-slate-800">{item.parentContact.name}</div>
+                                                        <div className="text-xs text-slate-400 font-mono">{item.parentContact.mobile}</div>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[10px] text-red-500/50 italic">Missing Info</span>
+                                                    <span className="text-[11px] text-slate-400 italic">Not on file</span>
                                                 )}
                                             </td>
-                                            <td className="p-5">
-                                                <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-all">
+                                            <td className="p-4 pr-6 text-center">
+                                                <button 
+                                                    className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition-colors"
+                                                    title="Download student attendance report"
+                                                >
                                                     <Download size={16} />
                                                 </button>
                                             </td>
@@ -170,14 +206,16 @@ export default function AttendanceReportsPage() {
     );
 }
 
-function SummaryCard({ title, value, icon }: { title: string, value: any, icon: any }) {
+function SummaryCard({ title, value, icon, bgIcon }: { title: string, value: any, icon: any, bgIcon: string }) {
     return (
-        <div className="bg-[#1a1a1a] border border-white/10 p-6 rounded-2xl shadow-lg hover:border-white/20 transition-all">
-            <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-white/5 rounded-lg">{icon}</div>
-                <div className="text-2xl font-black text-white">{value}</div>
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{title}</p>
+                <div className="text-2xl font-extrabold text-slate-900 mt-1">{value}</div>
             </div>
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">{title}</h3>
+            <div className={`w-11 h-11 rounded-xl ${bgIcon} flex items-center justify-center`}>
+                {icon}
+            </div>
         </div>
     );
 }

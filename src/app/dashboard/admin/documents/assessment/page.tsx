@@ -87,108 +87,110 @@ export default function AdminAssessmentPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-black text-foreground">
-                    Assessment Submissions
-                </h1>
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                        Assessment Submissions
+                    </h1>
+                    <p className="text-xs text-slate-500 mt-0.5">Review, verify, and approve candidate assessment documents</p>
+                </div>
                 <button
                     onClick={fetchDocuments}
-                    className="flex items-center gap-2 bg-theme/10 hover:bg-gold-500/10 text-gold-500 px-4 py-2 rounded-lg transition-colors border border-theme"
+                    className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors border border-slate-200 shadow-2xs"
                 >
-                    <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     Refresh List
                 </button>
-            </div>
+            </header>
 
             {/* Filters */}
-            <div className="flex items-center gap-4 bg-card border border-theme p-4 rounded-xl backdrop-blur-md">
-                <Search className="text-muted-foreground" size={20} />
+            <div className="flex items-center gap-3 bg-white border border-slate-200/80 p-3 rounded-xl shadow-xs">
+                <Search className="text-slate-400 ml-1" size={18} />
                 <input
                     type="text"
-                    placeholder="Search by name, mobile or course..."
+                    placeholder="Search by candidate name, mobile or course..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="bg-transparent border-none outline-none text-foreground w-full placeholder-muted-foreground"
+                    className="bg-transparent border-none outline-hidden text-slate-900 w-full placeholder-slate-400 text-xs sm:text-sm"
                 />
             </div>
 
             {/* Table (Desktop) */}
-            <div className="hidden md:block bg-card border border-theme rounded-xl overflow-hidden shadow-2xl">
+            <div className="hidden md:block bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-muted/50 text-gold-500 uppercase text-xs font-bold tracking-wider">
+                        <thead className="bg-slate-50 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
                             <tr>
-                                <th className="p-6">Student</th>
-                                <th className="p-6">Course</th>
-                                <th className="p-6">Submission Date</th>
-                                <th className="p-6">Document</th>
-                                <th className="p-6 text-center">Status</th>
-                                <th className="p-6 text-right">Actions</th>
+                                <th className="p-4 pl-6">Student</th>
+                                <th className="p-4">Course</th>
+                                <th className="p-4">Submission Date</th>
+                                <th className="p-4">Document</th>
+                                <th className="p-4 text-center">Status</th>
+                                <th className="p-4 pr-6 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border">
+                        <tbody className="divide-y divide-slate-100 text-xs">
                             {loading ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading submissions...</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-400">Loading submissions...</td></tr>
                             ) : filteredDocs.length === 0 ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No submissions found.</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-400">No submissions found.</td></tr>
                             ) : (
                                 filteredDocs.map((doc) => (
-                                    <tr key={doc.id} className="hover:bg-muted/50 transition-colors group">
-                                        <td className="p-6">
-                                            <div className="font-bold text-foreground">{doc.user.name}</div>
-                                            <div className="text-xs text-muted-foreground">{doc.user.mobile}</div>
-                                            <div className="text-xs text-blue-500">{doc.user.email}</div>
+                                    <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors group">
+                                        <td className="p-4 pl-6">
+                                            <div className="font-semibold text-slate-900 text-sm">{doc.user.name}</div>
+                                            <div className="text-[11px] text-slate-500 mt-0.5">{doc.user.mobile}</div>
+                                            <div className="text-[11px] text-blue-600">{doc.user.email}</div>
                                         </td>
-                                        <td className="p-6 text-muted-foreground font-medium">
+                                        <td className="p-4 text-slate-600 font-medium">
                                             {doc.user.course || "N/A"}
                                         </td>
-                                        <td className="p-6 text-muted-foreground text-sm">
+                                        <td className="p-4 text-slate-500">
                                             {new Date(doc.createdAt).toLocaleDateString()}
-                                            <br />
-                                            <span className="text-[10px] text-muted-foreground/70">{new Date(doc.createdAt).toLocaleTimeString()}</span>
+                                            <div className="text-[10px] text-slate-400">{new Date(doc.createdAt).toLocaleTimeString()}</div>
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-4">
                                             <button
                                                 onClick={() => viewDocument(doc.fileUrl)}
-                                                className="flex items-center gap-2 text-gold-500 hover:text-gold-400 hover:underline transition-all bg-transparent border-0 cursor-pointer"
+                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
                                             >
-                                                <FileText size={16} />
-                                                <span className="text-sm font-bold truncate max-w-[150px]">{doc.fileName || "View PDF"}</span>
+                                                <FileText size={14} />
+                                                <span className="truncate max-w-[150px]">{doc.fileName || "View PDF"}</span>
                                             </button>
                                         </td>
-                                        <td className="p-6 text-center">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${doc.status === 'APPROVED' ? 'bg-green-500/10 text-green-500 border-green-500/30' :
-                                                doc.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
-                                                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'
+                                        <td className="p-4 text-center">
+                                            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${doc.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                doc.status === 'REJECTED' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                                    'bg-amber-50 text-amber-700 border-amber-200'
                                                 }`}>
                                                 {doc.status}
                                             </span>
                                         </td>
-                                        <td className="p-6 text-right space-x-2">
+                                        <td className="p-4 pr-6 text-right space-x-1.5">
                                             {doc.status === 'PENDING' || editingId === doc.id ? (
                                                 <>
                                                     <button
                                                         onClick={() => handleStatusUpdate(doc.id, 'APPROVED')}
-                                                        className="p-2 rounded hover:bg-green-500/20 text-green-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-600 transition-colors"
                                                         title="Approve"
                                                     >
-                                                        <CheckCircle size={20} />
+                                                        <CheckCircle size={18} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleStatusUpdate(doc.id, 'REJECTED')}
-                                                        className="p-2 rounded hover:bg-red-500/20 text-red-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-600 transition-colors"
                                                         title="Reject"
                                                     >
-                                                        <XCircle size={20} />
+                                                        <XCircle size={18} />
                                                     </button>
                                                 </>
                                             ) : (
                                                 <button
                                                     onClick={() => setEditingId(doc.id)}
-                                                    className="p-2 rounded hover:bg-theme/10 text-muted-foreground hover:text-foreground transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
                                                     title="Edit Status"
                                                 >
-                                                    <Edit2 size={18} />
+                                                    <Edit2 size={16} />
                                                 </button>
                                             )}
                                         </td>
@@ -201,54 +203,54 @@ export default function AdminAssessmentPage() {
             </div>
 
             {/* Mobile Cards (Visible only on mobile) */}
-            <div className="md:hidden space-y-4">
+            <div className="md:hidden space-y-3">
                 {loading ? (
-                    <div className="text-center text-muted-foreground py-8">Loading...</div>
+                    <div className="text-center text-slate-400 py-8 text-xs">Loading...</div>
                 ) : filteredDocs.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-8">No submissions found.</div>
+                    <div className="text-center text-slate-400 py-8 text-xs">No submissions found.</div>
                 ) : (
                     filteredDocs.map((doc) => (
-                        <div key={doc.id} className="bg-card border border-theme rounded-xl p-4 shadow-lg flex flex-col gap-3">
+                        <div key={doc.id} className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-xs flex flex-col gap-3">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h3 className="font-bold text-foreground text-lg">{doc.user.name}</h3>
-                                    <p className="text-xs text-muted-foreground">{doc.user.course || "N/A"}</p>
+                                    <h3 className="font-bold text-slate-900 text-base">{doc.user.name}</h3>
+                                    <p className="text-xs text-slate-500">{doc.user.course || "N/A"}</p>
                                 </div>
-                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${doc.status === 'APPROVED' ? 'bg-green-500/10 text-green-500 border-green-500/30' :
-                                    doc.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
-                                        'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${doc.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                    doc.status === 'REJECTED' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                        'bg-amber-50 text-amber-700 border-amber-200'
                                     }`}>
                                     {doc.status}
                                 </span>
                             </div>
 
-                            <div className="text-xs text-muted-foreground space-y-1">
+                            <div className="text-xs text-slate-500 space-y-0.5">
                                 <p>{doc.user.mobile}</p>
-                                <p className="text-blue-500">{doc.user.email}</p>
-                                <p className="opacity-70">{new Date(doc.createdAt).toLocaleDateString()} at {new Date(doc.createdAt).toLocaleTimeString()}</p>
+                                <p className="text-blue-600">{doc.user.email}</p>
+                                <p className="text-slate-400 text-[10px]">{new Date(doc.createdAt).toLocaleDateString()} at {new Date(doc.createdAt).toLocaleTimeString()}</p>
                             </div>
 
                             <button
                                 onClick={() => viewDocument(doc.fileUrl)}
-                                className="flex items-center gap-2 text-gold-500 bg-gold-500/5 p-2 rounded-lg border border-gold-500/20 active:bg-gold-500/10"
+                                className="flex items-center gap-2 text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200"
                             >
                                 <FileText size={16} />
-                                <span className="text-sm font-bold truncate flex-1">{doc.fileName || "View PDF"}</span>
+                                <span className="text-xs font-semibold truncate flex-1">{doc.fileName || "View PDF"}</span>
                             </button>
 
                             {(doc.status === 'PENDING' || editingId === doc.id) && (
-                                <div className="flex gap-2 pt-2 border-t border-border">
+                                <div className="flex gap-2 pt-2 border-t border-slate-100">
                                     <button
                                         onClick={() => handleStatusUpdate(doc.id, 'APPROVED')}
-                                        className="flex-1 bg-green-500/10 text-green-500 py-2 rounded-lg font-bold text-sm border border-green-500/30 active:bg-green-500/20 flex items-center justify-center gap-2"
+                                        className="flex-1 bg-emerald-50 text-emerald-700 py-2 rounded-lg font-bold text-xs border border-emerald-200 flex items-center justify-center gap-1.5"
                                     >
-                                        <CheckCircle size={16} /> Approve
+                                        <CheckCircle size={14} /> Approve
                                     </button>
                                     <button
                                         onClick={() => handleStatusUpdate(doc.id, 'REJECTED')}
-                                        className="flex-1 bg-red-500/10 text-red-500 py-2 rounded-lg font-bold text-sm border border-red-500/30 active:bg-red-500/20 flex items-center justify-center gap-2"
+                                        className="flex-1 bg-rose-50 text-rose-700 py-2 rounded-lg font-bold text-xs border border-rose-200 flex items-center justify-center gap-1.5"
                                     >
-                                        <XCircle size={16} /> Reject
+                                        <XCircle size={14} /> Reject
                                     </button>
                                 </div>
                             )}
@@ -256,18 +258,19 @@ export default function AdminAssessmentPage() {
                     ))
                 )}
             </div>
+
             {/* PDF Viewer Modal */}
             {viewingUrl && (
-                <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
-                    <div className="w-full max-w-5xl h-[85vh] bg-white rounded-lg overflow-hidden flex flex-col items-center relative">
+                <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex flex-col items-center justify-center p-4">
+                    <div className="w-full max-w-5xl h-[85vh] bg-white rounded-2xl overflow-hidden flex flex-col items-center relative shadow-2xl border border-slate-200">
                         <button
                             onClick={() => {
                                 setViewingUrl(null);
                                 if (viewingUrl.startsWith('blob:')) URL.revokeObjectURL(viewingUrl);
                             }}
-                            className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 z-10 shadow-lg"
+                            className="absolute top-4 right-4 bg-slate-900/80 text-white p-2 rounded-full hover:bg-slate-950 z-10 shadow-lg"
                         >
-                            <X size={24} />
+                            <X size={20} />
                         </button>
                         <iframe
                             src={viewingUrl}

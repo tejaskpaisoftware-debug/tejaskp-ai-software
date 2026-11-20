@@ -4,17 +4,19 @@
    1. ROOT VARIABLES (Defaults)
    ========================================= */
 :root {
-  --background: #050505;
-  --foreground: #ededed;
-  --card-bg: #121212;
-  --card-border: #333333;
-  --card-foreground: #ededed;
-  --muted: #9ca3af;
-  --muted-foreground: #9ca3af;
-  --gold-accent: #FFC107;
-
-  /* Fonts */
-  --font-orbitron: 'Orbitron', monospace;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --gold-accent: #d97706;
+  --sidebar-bg: #0f172a;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-text: #94a3b8;
+  --sidebar-text-active: #ffffff;
+  --sidebar-active-gold: #f59e0b;
 }
 
 /* =========================================

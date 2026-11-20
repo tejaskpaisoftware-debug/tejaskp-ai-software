@@ -2,15 +2,26 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { TextureLoader } from "three";
-import { useRef } from "react";
-import * as THREE from "three";
-
-import RevenueChart3D from "@/components/admin/RevenueChart3D";
-
-
+import Link from "next/link";
+import {
+    Users,
+    Activity,
+    DollarSign,
+    Clock,
+    ShieldCheck,
+    MessageCircle,
+    QrCode,
+    Smartphone,
+    RefreshCw,
+    AlertTriangle,
+    CheckCircle2,
+    TrendingUp,
+    ChevronRight,
+    Terminal,
+    Copy,
+    Check,
+    Server
+} from "lucide-react";
 
 export default function AdminDashboard() {
     const [year, setYear] = useState(new Date().getFullYear());
@@ -21,11 +32,20 @@ export default function AdminDashboard() {
         activeSessions: 0,
         revenueGrowth: "---",
         usersGrowth: "---",
-        graph: [] as number[] // Monthly revenue array
+        graph: [] as number[]
     });
     const [userRole, setUserRole] = useState<string>("ADMIN");
     const [pairingMobile, setPairingMobile] = useState("");
-    const [whatsappStatus, setWhatsappStatus] = useState<{ isReady: boolean, qrCode: string | null, pairingCode: string | null, cooldownUntil: number, initError: string | null, logs: string[] }>({
+    const [copiedCode, setCopiedCode] = useState(false);
+    const [showLogs, setShowLogs] = useState(false);
+    const [whatsappStatus, setWhatsappStatus] = useState<{
+        isReady: boolean;
+        qrCode: string | null;
+        pairingCode: string | null;
+        cooldownUntil: number;
+        initError: string | null;
+        logs: string[];
+    }>({
         isReady: false,
         qrCode: null,
         pairingCode: null,
@@ -42,23 +62,6 @@ export default function AdminDashboard() {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
-
-    // Format time: 14:39
-    const formattedTime = currentTime.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
-
-    // Format AM/PM
-    const amPm = currentTime.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }).slice(-2);
-
-    // Format date: Dec 25, 2025
-    const formattedDate = currentTime.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
 
     useEffect(() => {
         let isMounted = true;
@@ -104,24 +107,23 @@ export default function AdminDashboard() {
                     console.error("Failed to load dashboard stats", error);
                 }
             } finally {
-                // Schedule next fetch only if still mounted and not aborted
                 if (isMounted) {
-                    timeoutId = setTimeout(fetchStats, 5000);
+                    timeoutId = setTimeout(fetchStats, 20000);
                 }
             }
         };
 
-        // Initial Fetch
         fetchStats();
 
-        // Get User Role
         try {
             const userStr = sessionStorage.getItem("currentUser") || sessionStorage.getItem("user");
             if (userStr) {
                 const user = JSON.parse(userStr);
                 setUserRole(user.role || "ADMIN");
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+        }
 
         return () => {
             isMounted = false;
@@ -168,6 +170,12 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleCopyCode = (code: string) => {
+        navigator.clipboard.writeText(code);
+        setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 2000);
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
@@ -176,335 +184,306 @@ export default function AdminDashboard() {
         }).format(amount);
     };
 
+    const isCooldownActive = whatsappStatus.cooldownUntil > Date.now();
+
     return (
-        <div className="bg-background text-foreground font-sans transition-colors duration-500 relative z-10 w-full">
-
-            <main className="p-8 space-y-8">
-                {/* Header */}
-                {/* Header */}
-                <header className="flex justify-between items-end border-b border-white/10 pb-6 relative">
-                    {/* Glowing line at the bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
-
-                    <div>
-                        <h1 className="text-6xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-[#FFF5C3] via-[#FDB931] to-[#9F6900] pb-2 uppercase" style={{ filter: 'drop-shadow(0px 2px 0px #b46d0a) drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }}>
-                            DASHBOARD
-                        </h1>
-                        <p className="text-xl text-gray-500 font-bold mt-1 tracking-wide">
-                            Welcome back, <span className="text-[#FDB931] font-black">
-                                {userRole === 'TEAM_LEAD' ? 'Team Lead' :
-                                    userRole === 'DEVELOPMENT_MANAGER' ? 'Development Manager' :
-                                        'Administrator'}
-                            </span>
-                        </p>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                            {formattedTime} <span className="text-lg text-yellow-500 align-top mt-1 inline-block">{amPm}</span>
-                        </div>
-                        <div className="text-sm font-bold text-gray-500 tracking-widest uppercase mt-1">
-                            {formattedDate}
-                        </div>
-                    </div>
-                </header>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                    <StatsCard
-                        title="Total Users"
-                        value={stats.users.toLocaleString()}
-                        change={stats.usersGrowth || "+0%"}
-                        onClick={() => window.location.href = '/dashboard/admin/users'}
-                        isClickable
-                    />
-                    <StatsCard
-                        title="Active Today"
-                        value={stats.activeSessions.toLocaleString()}
-                        change="Daily"
-                        onClick={() => window.location.href = '/dashboard/admin/attendance'}
-                        isClickable
-                    />
-                    {/* Only show financial stats to Admin and Development Manager */}
-                    {(userRole === 'ADMIN' || userRole === 'DEVELOPMENT_MANAGER') && (
-
-                        <>
-                            <StatsCard
-                                title="Total Revenue"
-                                value={formatCurrency(stats.revenue)}
-                                change={stats.revenueGrowth}
-                                isGood
-                                onClick={() => window.location.href = '/dashboard/admin/revenue'}
-                                isClickable
-                                highlight
-                            />
-                            <StatsCard title="Pending Amount" value={formatCurrency(stats.pendingAmount || 0)} change="Uncollected" />
-                        </>
-                    )}
-                    <StatsCard title="System Health" value="99.9%" change="Stable" isGood />
+        <div className="space-y-8 animate-in fade-in duration-300">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Executive Dashboard
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Welcome back, <span className="font-semibold text-amber-600">
+                            {userRole === 'TEAM_LEAD' ? 'Team Lead' :
+                                userRole === 'DEVELOPMENT_MANAGER' ? 'Development Manager' :
+                                    'Super Administrator'}
+                        </span>. System overview and real-time operations.
+                    </p>
                 </div>
 
-                {/* WhatsApp Status Widget */}
-                <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 shadow-lg flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-2">WhatsApp Notification Server</h3>
-                        {whatsappStatus.isReady ? (
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                                <span className="text-green-400 font-semibold">Connected & Ready</span>
-                                <button
-                                    onClick={handleClearWhatsApp}
-                                    className="ml-4 text-[10px] text-gray-500 hover:text-red-400 border border-white/10 px-2 py-0.5 rounded transition-colors"
-                                >
-                                    Force Reset
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                    <span className="text-red-400 font-semibold text-sm md:text-base">Disconnected. Choose linking method:</span>
-                                    <button
-                                        onClick={handleClearWhatsApp}
-                                        className="ml-2 text-[10px] text-yellow-500/50 hover:text-yellow-500 border border-yellow-500/10 px-2 py-0.5 rounded transition-colors"
-                                    >
-                                        Hard Reset Server
-                                    </button>
-                                </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-xs"
+                    >
+                        <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Refresh</span>
+                    </button>
+                    <Link
+                        href="/dashboard/admin/users"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 rounded-lg transition-colors shadow-xs shadow-amber-500/20"
+                    >
+                        <span>Manage Users</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                </div>
+            </div>
 
-                                <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-3 relative overflow-hidden">
-                                    {whatsappStatus.cooldownUntil > Date.now() && (
-                                        <div className="absolute inset-0 bg-black/80 z-20 flex flex-col items-center justify-center p-4 text-center backdrop-blur-sm">
-                                            <div className="text-yellow-500 font-black text-xl mb-1">COOLDOWN ACTIVE</div>
-                                            <p className="text-xs text-gray-300 max-w-[200px] mb-3">WhatsApp security has blocked linking temporarily. Please wait:</p>
-                                            <div className="text-4xl font-black text-white tracking-widest tabular-nums">
-                                                {Math.ceil((whatsappStatus.cooldownUntil - currentTime.getTime()) / 60000)}m {Math.ceil(((whatsappStatus.cooldownUntil - currentTime.getTime()) / 1000) % 60)}s
-                                            </div>
-                                            <p className="text-[10px] text-gray-500 mt-4">This happens after too many failed attempts.</p>
-                                        </div>
-                                    )}
-                                    <p className="text-xs text-yellow-500/80 font-bold uppercase tracking-wider">Option A: Link with Phone Number (Recommended)</p>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="919876543210"
-                                            value={pairingMobile}
-                                            onChange={(e) => setPairingMobile(e.target.value)}
-                                            className="bg-[#222] border border-white/10 rounded-lg px-3 py-2 text-sm text-white flex-1 outline-none focus:border-yellow-500 transition-colors"
-                                        />
-                                        <button
-                                            onClick={handleRequestPairing}
-                                            className="bg-yellow-500 text-black px-4 py-2 rounded-lg text-sm font-black hover:bg-yellow-400 transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)]"
-                                        >
-                                            GET CODE
-                                        </button>
-                                    </div>
-                                    {whatsappStatus.pairingCode && (
-                                        <div className="mt-2 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center animate-in fade-in zoom-in duration-300">
-                                            <p className="text-[10px] text-yellow-500 uppercase font-bold mb-1">Your Pairing Code</p>
-                                            <div className="text-3xl font-black text-white tracking-[0.3em] font-mono">{whatsappStatus.pairingCode}</div>
-                                            <p className="text-[9px] text-gray-400 mt-2 leading-tight">
-                                                On your phone: <br />
-                                                Linked Devices {'>'} Link a Device {'>'} Link with phone number instead
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+            {/* Summary KPI Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
+                <KPICard
+                    title="Total Users"
+                    value={stats.users.toLocaleString()}
+                    badge={stats.usersGrowth || "+0%"}
+                    badgeType="neutral"
+                    icon={Users}
+                    href="/dashboard/admin/users"
+                />
+                
+                <KPICard
+                    title="Active Today"
+                    value={stats.activeSessions.toLocaleString()}
+                    badge="Live Daily"
+                    badgeType="success"
+                    icon={Activity}
+                    href="/dashboard/admin/attendance"
+                />
+
+                {(userRole === 'ADMIN' || userRole === 'DEVELOPMENT_MANAGER') && (
+                    <>
+                        <KPICard
+                            title="Total Revenue"
+                            value={formatCurrency(stats.revenue)}
+                            badge={stats.revenueGrowth}
+                            badgeType="gold"
+                            icon={DollarSign}
+                            highlight
+                            href="/dashboard/admin/revenue"
+                        />
+                        <KPICard
+                            title="Pending Dues"
+                            value={formatCurrency(stats.pendingAmount || 0)}
+                            badge="Uncollected"
+                            badgeType="warning"
+                            icon={Clock}
+                            href="/dashboard/admin/billing"
+                        />
+                    </>
+                )}
+
+                <KPICard
+                    title="System Health"
+                    value="99.9%"
+                    badge="Stable"
+                    badgeType="success"
+                    icon={ShieldCheck}
+                />
+            </div>
+
+            {/* WhatsApp Notification Server Panel */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                            whatsappStatus.isReady ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                        }`}>
+                            <MessageCircle className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-base font-bold text-slate-900">WhatsApp Notification Server</h2>
+                            <p className="text-xs text-slate-500">Automated student alerts, fee reminders, and attendance dispatch</p>
+                        </div>
                     </div>
 
-                    {!whatsappStatus.isReady && (
-                        <div className="flex-1 flex flex-col items-center justify-center border-l border-zinc-800/50 p-4">
-                            <h4 className="text-[10px] text-zinc-500 uppercase tracking-wider mb-4">Option B: Scan QR</h4>
-                            <div className="w-32 h-32 bg-zinc-900/50 rounded-lg flex items-center justify-center border border-dashed border-zinc-700 relative overflow-hidden">
-                                {whatsappStatus.isReady ? (
-                                    <div className="flex flex-col items-center">
-                                        <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mb-2">
-                                            <div className="w-6 h-6 bg-emerald-500 rounded-full animate-pulse" />
-                                        </div>
-                                        <span className="text-[10px] text-emerald-500 font-medium">Link Active</span>
+                    <div className="flex items-center gap-2.5">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+                            whatsappStatus.isReady
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-rose-50 text-rose-700 border-rose-200'
+                        }`}>
+                            <span className={`w-2 h-2 rounded-full ${whatsappStatus.isReady ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                            {whatsappStatus.isReady ? 'Connected & Active' : 'Disconnected'}
+                        </span>
+
+                        <button
+                            onClick={handleClearWhatsApp}
+                            className="px-3 py-1 text-xs font-medium text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors"
+                            title="Force clear session and restart Puppeteer"
+                        >
+                            Reset Server
+                        </button>
+                    </div>
+                </div>
+
+                {whatsappStatus.isReady ? (
+                    <div className="py-6 flex items-center gap-4 text-emerald-800 bg-emerald-50/50 rounded-xl px-4 mt-4 border border-emerald-100">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                        <div>
+                            <p className="text-sm font-semibold">WhatsApp Automation Service is operating normally</p>
+                            <p className="text-xs text-emerald-600/80">Ready to dispatch automated fee invoices, attendance slips, and notifications.</p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        
+                        {/* Option A: Link with Phone Number */}
+                        <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-5 relative overflow-hidden">
+                            {isCooldownActive && (
+                                <div className="absolute inset-0 bg-slate-900/90 z-20 flex flex-col items-center justify-center p-4 text-center backdrop-blur-xs text-white">
+                                    <AlertTriangle className="w-6 h-6 text-amber-400 mb-2" />
+                                    <div className="text-sm font-bold text-amber-400 uppercase tracking-wide">Cooldown Active</div>
+                                    <p className="text-xs text-slate-300 max-w-xs mt-1">Please wait before requesting a new code:</p>
+                                    <div className="text-3xl font-mono font-black text-white mt-2">
+                                        {Math.ceil((whatsappStatus.cooldownUntil - currentTime.getTime()) / 60000)}m {Math.ceil(((whatsappStatus.cooldownUntil - currentTime.getTime()) / 1000) % 60)}s
                                     </div>
-                                ) : whatsappStatus.qrCode ? (
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-2 mb-3">
+                                <Smartphone className="w-4 h-4 text-amber-600" />
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Option A: Link with Phone Number</h3>
+                            </div>
+                            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                Enter your phone number with country code to generate an 8-character pairing code directly on your mobile device.
+                            </p>
+
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="e.g. 919876543210"
+                                    value={pairingMobile}
+                                    onChange={(e) => setPairingMobile(e.target.value)}
+                                    className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-mono"
+                                />
+                                <button
+                                    onClick={handleRequestPairing}
+                                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition-colors shadow-xs"
+                                >
+                                    GET CODE
+                                </button>
+                            </div>
+
+                            {whatsappStatus.pairingCode && (
+                                <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-center">
+                                    <span className="text-[10px] font-bold text-amber-700 uppercase tracking-widest block mb-1">Pairing Code</span>
+                                    <div className="flex items-center justify-center gap-3">
+                                        <div className="text-3xl font-black font-mono tracking-widest text-slate-900">
+                                            {whatsappStatus.pairingCode}
+                                        </div>
+                                        <button
+                                            onClick={() => handleCopyCode(whatsappStatus.pairingCode!)}
+                                            className="p-1.5 text-slate-500 hover:text-slate-800 rounded bg-white border border-slate-200"
+                                            title="Copy code"
+                                        >
+                                            {copiedCode ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 mt-2">
+                                        WhatsApp &rarr; Linked Devices &rarr; Link a Device &rarr; <em>Link with phone number instead</em>
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Option B: Scan QR Code */}
+                        <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-5 flex flex-col items-center justify-center text-center">
+                            <div className="flex items-center gap-2 mb-3">
+                                <QrCode className="w-4 h-4 text-amber-600" />
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Option B: Scan QR Code</h3>
+                            </div>
+                            <p className="text-xs text-slate-500 mb-4">
+                                Scan the QR code using your WhatsApp camera on Linked Devices
+                            </p>
+
+                            <div className="w-36 h-36 bg-white rounded-xl p-2 border border-slate-200 shadow-xs flex items-center justify-center">
+                                {whatsappStatus.qrCode ? (
                                     <img src={whatsappStatus.qrCode} alt="WhatsApp QR" className="w-full h-full object-contain" />
                                 ) : (
-                                    <div className="flex flex-col items-center">
-                                        <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2" />
-                                        <span className="text-[8px] text-zinc-500">Generating QR...</span>
+                                    <div className="flex flex-col items-center text-slate-400">
+                                        <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mb-2" />
+                                        <span className="text-[11px]">Generating QR...</span>
                                     </div>
                                 )}
                             </div>
 
-                            {/* DIAGNOSTIC LOGS SECTION */}
-                            {whatsappStatus.logs && whatsappStatus.logs.length > 0 && (
-                                <div className="mt-4 w-full max-w-[200px]">
-                                    <div className="text-[8px] text-zinc-600 mb-1 flex justify-between uppercase">
-                                        <span>Diagnostic Logs</span>
-                                        <span className="text-emerald-500/50">Live</span>
-                                    </div>
-                                    <div className="bg-black/40 rounded border border-zinc-800/50 p-2 h-24 overflow-y-auto font-mono text-[7px] space-y-1 custom-scrollbar">
-                                        {whatsappStatus.logs.map((log, idx) => (
-                                            <div key={idx} className="text-zinc-400 break-words leading-tight border-b border-zinc-900/30 pb-1">
-                                                {log}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
                             {whatsappStatus.initError && (
-                                <p className="mt-2 text-[8px] text-red-500 font-medium max-w-[150px] text-center bg-red-500/10 p-1 rounded border border-red-500/20">
-                                    Error: {whatsappStatus.initError}
+                                <p className="mt-3 text-xs text-rose-600 bg-rose-50 border border-rose-200 p-2 rounded-lg max-w-sm">
+                                    {whatsappStatus.initError}
                                 </p>
                             )}
-                        </div>
-                    )}
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Main Chart Area (Real Data) */}
-                    {userRole !== 'TEAM_LEAD' ? (
-                        <div className="lg:col-span-2 bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -skew-x-12 translate-x-full group-hover:animate-shine"></div>
-                            <div className="flex justify-between items-center mb-6 relative z-10">
-                                <div className="flex items-center gap-4">
-                                    <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-wide drop-shadow-sm">REVENUE ANALYTICS ({year})</h3>
-                                    <select
-                                        value={year}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value);
-                                            setYear(isNaN(val) ? new Date().getFullYear() : val);
-                                        }}
-                                        className="bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-1 text-sm text-yellow-500 font-bold outline-none focus:border-yellow-500/50 shadow-inner"
+                            {/* Logs Accordion */}
+                            {whatsappStatus.logs && whatsappStatus.logs.length > 0 && (
+                                <div className="w-full mt-4 text-left">
+                                    <button
+                                        onClick={() => setShowLogs(!showLogs)}
+                                        className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium mx-auto"
                                     >
-                                        {[2025, 2026, 2027].map(y => (
-                                            <option key={y} value={y}>{y}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {/* Small total indicator to confirm data load */}
-                                <div className="text-xs text-yellow-500/70 font-mono bg-black/40 px-3 py-1 rounded-full border border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.1)]">
-                                    Total: {formatCurrency(stats.revenue)}
-                                </div>
-                            </div>
-                            <div className="h-64 mt-4 w-full relative z-10">
-                                <RevenueChart3D
-                                    data={stats.graph && stats.graph.length > 0 ? stats.graph : new Array(12).fill(0)}
-                                    year={year}
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="lg:col-span-2 bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] flex items-center justify-center">
-                            <div className="text-center">
-                                <div className="text-4xl mb-4">🛡️</div>
-                                <h3 className="text-xl font-bold text-white">Security & Operations</h3>
-                                <p className="text-gray-400 mt-2">Manage your teams and students from the sidebar.</p>
-                            </div>
-                        </div>
-                    )}
+                                        <Terminal className="w-3 h-3" />
+                                        <span>{showLogs ? "Hide server logs" : "View diagnostic logs"}</span>
+                                    </button>
 
-                    {/* Right Column: Stacked Widgets */}
-                    <div className="flex flex-col gap-6">
-                        {/* 1. Live Traffic */}
-                        <div className="bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-[0_8px_16px_rgba(0,0,0,0.5)] relative overflow-hidden h-[350px] group">
-                            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
-                            <div className="absolute top-6 left-6 z-10">
-                                <h3 className="text-lg font-bold text-white tracking-wide drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">LIVE TRAFFIC</h3>
-                                <p className="text-xs text-yellow-500/80 font-medium">Real-time Visualization</p>
-                            </div>
-                            <div className="h-full mt-4 relative z-0">
-                                <Canvas>
-                                    <ambientLight intensity={0.5} />
-                                    <directionalLight position={[10, 10, 5]} />
-                                    <Widget3D traffic={stats.activeSessions} />
-                                    <OrbitControls enableZoom={false} autoRotate={true} autoRotateSpeed={2} />
-                                </Canvas>
-                            </div>
+                                    {showLogs && (
+                                        <div className="mt-2 p-2 bg-slate-900 text-slate-300 rounded-lg font-mono text-[10px] max-h-28 overflow-y-auto space-y-1">
+                                            {whatsappStatus.logs.map((log, idx) => (
+                                                <div key={idx} className="border-b border-slate-800 pb-0.5">{log}</div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
+
                     </div>
-                </div >
+                )}
+            </div>
 
-            </main >
-        </div >
+
+        </div>
     );
 }
 
-function StatsCard({ title, value, change, isGood, onClick, isClickable, highlight, className }: any) {
-    return (
-        <motion.div
-            whileHover={isClickable ? { y: -5, scale: 1.02 } : {}}
-            onClick={onClick}
-            className={`
-                relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl transition-all duration-300
-                ${isClickable ? 'cursor-pointer' : ''}
-                ${highlight
-                    ? 'bg-gradient-to-br from-yellow-900/40 to-black border border-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.2)]'
-                    : 'bg-gradient-to-br from-[#1e1e1e] to-[#0a0a0a] border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.5)] hover:border-white/20'
-                }
-                ${className}
-            `}
-        >
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-                <div className={`w-16 h-16 rounded-full blur-2xl ${highlight ? 'bg-yellow-500' : 'bg-white'}`}></div>
+// KPI Card Component
+interface KPICardProps {
+    title: string;
+    value: string;
+    badge: string;
+    badgeType: 'success' | 'warning' | 'gold' | 'neutral';
+    icon: React.ComponentType<{ className?: string }>;
+    highlight?: boolean;
+    href?: string;
+}
+
+function KPICard({ title, value, badge, badgeType, icon: Icon, highlight, href }: KPICardProps) {
+    const badgeStyles = {
+        success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        warning: 'bg-rose-50 text-rose-700 border-rose-200',
+        gold: 'bg-amber-50 text-amber-800 border-amber-200 font-bold',
+        neutral: 'bg-slate-50 text-slate-600 border-slate-200',
+    };
+
+    const content = (
+        <div className={`p-5 rounded-2xl border transition-all duration-200 relative overflow-hidden ${
+            highlight
+                ? 'bg-gradient-to-br from-amber-50/70 via-white to-white border-amber-300 shadow-xs hover:shadow-md'
+                : 'bg-white border-slate-200/90 shadow-xs hover:shadow-md hover:border-slate-300'
+        } ${href ? 'cursor-pointer' : ''}`}>
+            <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{title}</span>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    highlight ? 'bg-amber-500/10 text-amber-600' : 'bg-slate-100 text-slate-600'
+                }`}>
+                    <Icon className="w-4 h-4" />
+                </div>
             </div>
 
-            <h3 className={`text-xs font-bold uppercase tracking-widest mb-3 ${highlight ? 'text-yellow-200' : 'text-gray-400'}`}>{title}</h3>
-
-            <div className={`text-3xl font-black mb-3 drop-shadow-md ${highlight ? 'text-yellow-400' : 'text-white'}`}>
+            <div className={`text-2xl sm:text-3xl font-black mt-3 tracking-tight ${highlight ? 'text-amber-900' : 'text-slate-900'}`}>
                 {value}
             </div>
 
-            <div className={`flex items-center text-sm font-bold ${change?.toString().includes('+') || isGood
-                ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]'
-                : change === 'Uncollected'
-                    ? 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]'
-                    : 'text-yellow-500'
-                }`}>
-                {change}
-                <span className={`ml-1 font-normal text-xs ${highlight ? 'text-yellow-200/60' : 'text-gray-500'}`}>
-                    {change === 'Daily' || change === 'Stable' || change === 'Uncollected' ? '' : 'from last month'}
+            <div className="mt-3 flex items-center gap-2">
+                <span className={`inline-block px-2 py-0.5 text-[10px] rounded-md font-semibold border ${badgeStyles[badgeType]}`}>
+                    {badge}
                 </span>
+                <span className="text-[11px] text-slate-400">vs last month</span>
             </div>
-        </motion.div>
-    )
-}
+        </div>
+    );
 
-function Widget3D({ traffic }: { traffic: number }) {
-    // Load texture (ensure logo_texture.jpg is in public folder)
-    const texture = useLoader(TextureLoader, "/logo.jpg"); // Fixed path to logo.jpg which we know exists
-    const meshRef = useRef<THREE.Mesh>(null);
-
-    // Dynamic animation based on traffic
-    useFrame((state, delta) => {
-        if (meshRef.current) {
-            // Base speed + traffic multiplier
-            // const speed = 0.5 + (traffic * 0.1); 
-            // meshRef.current.rotation.y += delta * speed; // OrbitControls handles rotation now for smoother drag
-
-            // Pulse effect
-            const scale = 1.8 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-            meshRef.current.scale.set(scale, scale, scale);
-        }
-    });
-
-    return (
-        <group>
-            {/* Bright Lights for clear visibility */}
-            <ambientLight intensity={1.5} />
-            <pointLight position={[5, 5, 5]} intensity={1.5} color="#ffd700" />
-            <spotLight position={[-5, 5, 5]} intensity={1} color="white" />
-
-            <mesh ref={meshRef} rotation={[0, 0, 0]}>
-                {/* Cube Geometry */}
-                <boxGeometry args={[1.5, 1.5, 0.2]} />
-                <meshStandardMaterial
-                    map={texture}
-                    metalness={0.6} // More metallic
-                    roughness={0.2} // Glossy look
-                    emissive="#b8860b" // Dark gold glow
-                    emissiveIntensity={0.2}
-                />
-            </mesh>
-        </group>
-    )
+    if (href) {
+        return <Link href={href} className="block">{content}</Link>;
+    }
+    return content;
 }

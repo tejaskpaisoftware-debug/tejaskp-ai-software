@@ -578,7 +578,7 @@ export default function UsersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] p-6 text-white font-sans selection:bg-gold-500/30">
+        <div className="space-y-6 text-slate-900 font-sans selection:bg-amber-500/30">
             {/* Hidden Input */}
             <input
                 type="file"
@@ -595,14 +595,14 @@ export default function UsersPage() {
                         initial={{ opacity: 0, y: -20, x: "-50%" }}
                         animate={{ opacity: 1, y: 0, x: "-50%" }}
                         exit={{ opacity: 0, y: -20, x: "-50%" }}
-                        className={`fixed top-10 left-1/2 px-6 py-3 rounded-xl shadow-2xl backdrop-blur-md z-50 border 
-                            ${uploadStatus === 'success' ? 'bg-green-500/20 border-green-500/50 text-green-300' :
-                                uploadStatus === 'error' ? 'bg-red-500/20 border-red-500/50 text-red-300' :
-                                    'bg-gold-500/20 border-gold-500/50 text-gold-300'}`}
+                        className={`fixed top-10 left-1/2 px-6 py-3 rounded-xl shadow-xl backdrop-blur-md z-50 border 
+                            ${uploadStatus === 'success' ? 'bg-white border-emerald-500 text-emerald-800' :
+                                uploadStatus === 'error' ? 'bg-white border-rose-500 text-rose-800' :
+                                    'bg-white border-amber-500 text-amber-900'}`}
                     >
                         <div className="flex items-center gap-3">
-                            {uploadStatus === 'uploading' && <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />}
-                            <span className="font-bold">{uploadMsg}</span>
+                            {uploadStatus === 'uploading' && <div className="w-4 h-4 rounded-full border-2 border-amber-600 border-t-transparent animate-spin" />}
+                            <span className="font-bold text-sm">{uploadMsg}</span>
                         </div>
                     </motion.div>
                 )}
@@ -615,33 +615,33 @@ export default function UsersPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+                        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4"
                     >
                         {/* SELECT STEP */}
                         {salarySlipModal.step === 'SELECT' && (
                             <motion.div
-                                initial={{ scale: 0.9 }}
+                                initial={{ scale: 0.95 }}
                                 animate={{ scale: 1 }}
-                                className="bg-gray-900 border border-gold-theme/30 p-8 rounded-2xl w-full max-w-md shadow-2xl relative"
+                                className="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md shadow-2xl relative"
                             >
-                                <button onClick={() => setSalarySlipModal(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
-                                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                <button onClick={() => setSalarySlipModal(null)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✕</button>
+                                <h2 className="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
                                     <span>📄</span> View Salary Slip
                                 </h2>
-                                <p className="text-gray-400 text-sm mb-6">Select the period to view for <span className="text-gold-400 font-bold">{salarySlipModal.userName}</span></p>
+                                <p className="text-slate-500 text-sm mb-6">Select the period to view for <span className="text-amber-600 font-bold">{salarySlipModal.userName}</span></p>
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs uppercase text-gray-500 mb-1">Month</label>
-                                        <select value={viewMonth} onChange={e => setViewMonth(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-gray-100 outline-none focus:border-gold-500">
+                                        <label className="block text-xs uppercase font-bold text-slate-500 mb-1">Month</label>
+                                        <select value={viewMonth} onChange={e => setViewMonth(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800 outline-hidden focus:border-amber-500 focus:bg-white text-sm">
                                             {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
                                                 <option key={m} value={m}>{m}</option>
                                             ))}
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs uppercase text-gray-500 mb-1">Year</label>
-                                        <select value={viewYear} onChange={e => setViewYear(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-gray-100 outline-none focus:border-gold-500">
+                                        <label className="block text-xs uppercase font-bold text-slate-500 mb-1">Year</label>
+                                        <select value={viewYear} onChange={e => setViewYear(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800 outline-hidden focus:border-amber-500 focus:bg-white text-sm">
                                             {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => (
                                                 <option key={y} value={String(y)}>{y}</option>
                                             ))}
@@ -650,7 +650,7 @@ export default function UsersPage() {
                                     <button
                                         onClick={handleFetchSalarySlip}
                                         disabled={viewLoading}
-                                        className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 transition-all mt-4 disabled:opacity-50"
+                                        className="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-lg hover:bg-amber-400 transition-all mt-4 disabled:opacity-50 text-sm shadow-xs"
                                     >
                                         {viewLoading ? "Searching..." : "View Salary Slip"}
                                     </button>
@@ -714,26 +714,26 @@ export default function UsersPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+                        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4"
                     >
                         <motion.div
-                            initial={{ scale: 0.9 }}
+                            initial={{ scale: 0.95 }}
                             animate={{ scale: 1 }}
-                            className="bg-[#0a0a0a] border border-green-500/30 p-8 rounded-2xl w-full max-w-md shadow-[0_0_50px_rgba(34,197,94,0.1)] relative"
+                            className="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md shadow-2xl relative"
                         >
-                            <button onClick={() => setReportModal({ isOpen: false, user: null })} className="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
-                            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                                <span className="text-green-500">📊</span> Send Student Report
+                            <button onClick={() => setReportModal({ isOpen: false, user: null })} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✕</button>
+                            <h2 className="text-xl font-bold text-slate-900 mb-1 flex items-center gap-2">
+                                <span className="text-emerald-600">📊</span> Send Student Report
                             </h2>
-                            <p className="text-gray-400 text-sm mb-6">Generate and send WhatsApp report for <span className="text-green-400 font-bold">{reportModal.user.name}</span></p>
+                            <p className="text-slate-500 text-sm mb-5">Generate and send WhatsApp report for <span className="text-slate-900 font-bold">{reportModal.user.name}</span></p>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs uppercase text-gray-500 mb-2 font-bold tracking-wider">Select Period</label>
+                                    <label className="block text-xs uppercase text-slate-500 mb-2 font-bold tracking-wider">Select Period</label>
                                     <select
                                         value={reportPeriod}
                                         onChange={e => setReportPeriod(e.target.value)}
-                                        className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-white outline-none focus:border-green-500 transition-colors"
+                                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 outline-hidden focus:border-amber-500 focus:bg-white transition-colors text-sm"
                                     >
                                         <option value="daily">Daily</option>
                                         <option value="weekly">Weekly</option>
@@ -742,15 +742,15 @@ export default function UsersPage() {
                                         <option value="all-time">All Time</option>
                                     </select>
                                 </div>
-                                <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl mt-4">
-                                    <p className="text-xs text-green-300">
+                                <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl">
+                                    <p className="text-xs text-emerald-800 leading-relaxed">
                                         This will immediately calculate the student's attendance metrics for the selected period and send a formatted message to their registered mobile (and parent's mobile if available) via WhatsApp.
                                     </p>
                                 </div>
                                 <button
                                     onClick={handleSendReport}
                                     disabled={isSendingReport}
-                                    className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_4px_15px_rgba(22,163,74,0.3)] mt-4 disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-xs mt-2 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
                                 >
                                     {isSendingReport ? (
                                         <>
@@ -1144,75 +1144,75 @@ export default function UsersPage() {
             </AnimatePresence >
 
             {/* Recent Users Widget Box */}
-            {/* Recent Users Widget Box */}
             <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mb-10 bg-gradient-to-br from-[#121212] to-black border border-white/10 rounded-2xl p-8 relative overflow-hidden shadow-2xl"
+                transition={{ duration: 0.3 }}
+                className="mb-8 bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs"
             >
-                {/* Background Decoration */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                        Recently Added Users
+                    </h2>
+                    <span className="text-xs font-medium text-slate-500">Last 5 registrations</span>
+                </div>
 
-                <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-6 flex items-center gap-3 relative z-10">
-                    <span className="bg-yellow-500/20 p-2 rounded-lg text-yellow-500 border border-yellow-500/20">✨</span>
-                    Recently Added Users <span className="text-sm font-normal text-gray-400 ml-auto block md:inline">(Last 5)</span>
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-5 relative z-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5">
                     {recentFiveUsers.map((u, i) => (
                         <motion.div
                             key={u.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.1 }}
+                            transition={{ delay: i * 0.05 }}
                             onClick={() => router.push(`/dashboard/admin/users/${u.id}`)}
-                            className="bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl p-4 hover:border-yellow-500/40 hover:bg-white/10 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] cursor-pointer"
+                            className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-lg p-3 transition-all duration-200 group cursor-pointer shadow-2xs hover:border-amber-400"
                         >
-                            <div className="flex justify-between items-start mb-3">
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${u.role === 'ADMIN' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                    u.role === 'EMPLOYEE' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                                        u.role === 'CLIENT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                            'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                            <div className="flex justify-between items-start mb-2">
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${u.role === 'ADMIN' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                                    u.role === 'EMPLOYEE' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                                        u.role === 'CLIENT' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                                            'bg-amber-50 text-amber-800 border border-amber-200'
                                     }`}>
                                     {u.role}
                                 </span>
-                                <span className="text-[10px] text-gray-400">{new Date(u.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                <span className="text-[10px] text-slate-400">{new Date(u.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                             </div>
-                            <div className="font-bold text-white text-sm truncate mb-1 group-hover:text-yellow-400 transition-colors">{u.name}</div>
-                            <div className="text-xs text-gray-400 truncate flex items-center gap-1">
-                                <span className="opacity-50">📱</span> {u.mobile}
+                            <div className="font-semibold text-slate-900 text-sm truncate mb-0.5 group-hover:text-amber-700 transition-colors">{u.name}</div>
+                            <div className="text-xs text-slate-500 truncate flex items-center gap-1">
+                                <span className="opacity-70">📱</span> {u.mobile}
                             </div>
                         </motion.div>
                     ))}
                     {recentFiveUsers.length === 0 && (
-                        <div className="col-span-5 text-center text-gray-500 py-8 border border-dashed border-white/10 rounded-xl bg-white/5">
+                        <div className="col-span-5 text-center text-slate-500 py-6 border border-dashed border-slate-200 rounded-lg bg-slate-50 text-xs">
                             No recent users found.
                         </div>
                     )}
                 </div>
             </motion.div>
 
-            <header className="flex justify-between items-center mb-10">
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
                 <div>
-                    <h1 className="text-5xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-[#FFF5C3] via-[#FDB931] to-[#9F6900] pb-2 uppercase" style={{ filter: 'drop-shadow(0px 2px 0px #b46d0a) drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }}>
-                        All Users
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        User Management
                     </h1>
-                    <p className="text-gray-400 mt-2 text-sm font-medium tracking-wide drop-shadow-md">Manage all registered users categorized by their role.</p>
+                    <p className="text-sm text-slate-500 mt-1">Manage all registered users, permissions, documents, and credentials.</p>
                 </div>
-                <div className="flex gap-4 items-center">
+                <div className="flex flex-wrap gap-2.5 items-center">
                     <div className="relative group">
                         <input
                             type="text"
-                            placeholder="Search students..."
+                            placeholder="Search users..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-[#1a1a1a] border border-white/10 text-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-yellow-500/50 w-64 placeholder-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] transition-all focus:shadow-[0_0_15px_rgba(234,179,8,0.1)]"
+                            className="bg-white border border-slate-200 text-slate-800 rounded-lg py-2 px-3 pl-8 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 w-52 sm:w-64 placeholder-slate-400 shadow-xs transition-all"
                         />
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                             >
                                 ✕
                             </button>
@@ -1221,17 +1221,15 @@ export default function UsersPage() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadStatus === 'uploading'}
-                        className="relative overflow-hidden bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border border-white/10 text-yellow-500 px-6 py-2.5 rounded-xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] group disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-xs disabled:opacity-50 flex items-center gap-1.5"
                     >
-                        <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                            <span>📂</span> Upload Excel
-                        </span>
+                        <span>📂</span> Upload Excel
                     </button>
                     <button
                         onClick={fetchUsers}
-                        className="relative overflow-hidden bg-gradient-to-b from-yellow-500 to-yellow-600 text-black px-6 py-2.5 rounded-xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_10px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"
+                        className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-xs shadow-amber-500/20"
                     >
-                        <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.3)]">Refresh List</span>
+                        Refresh List
                     </button>
                     <button
                         onClick={async () => {
@@ -1258,16 +1256,14 @@ export default function UsersPage() {
                                 }
                             }
                         }}
-                        className="relative overflow-hidden bg-gradient-to-b from-red-900/80 to-red-950 border border-red-500/30 text-red-400 px-6 py-2.5 rounded-xl font-bold hover:bg-red-900 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] active:scale-95"
+                        className="bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 px-3 py-2 rounded-lg text-xs font-semibold transition-all shadow-xs"
                     >
-                        <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] flex items-center gap-2">
-                            ⚠️ Clear All Data
-                        </span>
+                        ⚠️ Clear Data
                     </button>
                 </div>
             </header>
 
-            <div className="flex gap-3 mb-8 overflow-x-auto pb-4 border-b border-white/5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
                 {["ALL", "RECENT", "STUDENT", "TEAM_LEAD", "EMPLOYEE", "CLIENT", "ADMIN", "PENDING_FEES"].map((role) => {
                     const count = role === "ALL" ? filteredUsers.length :
                         role === "RECENT" ? filteredUsers.filter(u => new Date(u.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length :
@@ -1280,15 +1276,13 @@ export default function UsersPage() {
                         <button
                             key={role}
                             onClick={() => setActiveRole(role)}
-                            className={`
-                                relative flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all duration-300
-                                ${isActive
-                                    ? "bg-gradient-to-b from-yellow-500 to-yellow-600 text-black shadow-[0_5px_15px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] transform -translate-y-1"
-                                    : "bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border border-white/5 text-gray-400 hover:text-white hover:border-yellow-500/30 hover:shadow-[0_5px_15px_rgba(0,0,0,0.5)]"
-                                }
-                            `}
+                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border ${
+                                isActive
+                                    ? "bg-amber-500 text-slate-950 border-amber-500 shadow-xs shadow-amber-500/20"
+                                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
                         >
-                            <span className={`tracking-wide text-sm uppercase ${isActive ? "drop-shadow-[0_1px_0_rgba(255,255,255,0.3)]" : "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"}`}>
+                            <span>
                                 {role === "ALL" ? "All Users" :
                                     role === "RECENT" ? "Recently Added" :
                                         role === "STUDENT" ? "Students" :
@@ -1297,13 +1291,9 @@ export default function UsersPage() {
                                                     role === "CLIENT" ? "Clients" :
                                                         role === "PENDING_FEES" ? "Pending Fees" : "Admins"}
                             </span>
-                            <span className={`
-                                text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-inner
-                                ${isActive
-                                    ? "bg-black/20 text-black"
-                                    : "bg-black/40 text-gray-500"
-                                }
-                            `}>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                isActive ? "bg-slate-950/20 text-slate-950" : "bg-slate-100 text-slate-500"
+                            }`}>
                                 {count}
                             </span>
                         </button>
@@ -1366,24 +1356,24 @@ export default function UsersPage() {
             {/* PROFILE APPROVAL MODAL */}
             <AnimatePresence>
                 {approvalUser && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4 animate-in fade-in duration-300">
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
+                            initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-[#0a0a0a] border border-yellow-500/30 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-[0_0_50px_rgba(234,179,8,0.1)]"
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl text-slate-800"
                         >
-                            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-yellow-500/10 to-transparent flex justify-between items-center">
+                            <div className="p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                                 <div>
-                                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                        <span className="text-yellow-500">🔔</span> Profile Update Request
+                                    <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                        <span className="text-amber-500">🔔</span> Profile Update Request
                                     </h2>
-                                    <p className="text-xs text-gray-400 mt-1">Review changes requested by {approvalUser.name}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">Review changes requested by <span className="font-semibold text-slate-700">{approvalUser.name}</span></p>
                                 </div>
-                                <button onClick={() => setApprovalUser(null)} className="text-gray-500 hover:text-white transition-colors">✕</button>
+                                <button onClick={() => setApprovalUser(null)} className="text-slate-400 hover:text-slate-600 rounded-lg p-1 hover:bg-slate-200 transition-colors">✕</button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            <div className="flex-1 overflow-y-auto p-6 space-y-5">
                                 {(() => {
                                     const requested = JSON.parse(approvalUser.pendingUpdate || '{}');
                                     const fields = [
@@ -1399,37 +1389,37 @@ export default function UsersPage() {
                                     ];
 
                                     return (
-                                        <div className="space-y-4">
-                                            <div className="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest px-2">
+                                        <div className="space-y-3">
+                                            <div className="grid grid-cols-2 gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2">
                                                 <span>Current Value</span>
-                                                <span className="text-yellow-500/80">Requested Value</span>
+                                                <span className="text-amber-700">Requested Value</span>
                                             </div>
                                             {fields.map(f => {
                                                 const hasChanged = f.current !== f.requested && f.requested !== undefined;
                                                 if (!hasChanged) return null;
                                                 return (
-                                                    <div key={f.key} className="bg-white/5 border border-white/5 rounded-xl p-4 transition-all hover:bg-white/10">
-                                                        <label className="text-[10px] font-bold text-purple-400 uppercase block mb-2">{f.label}</label>
+                                                    <div key={f.key} className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 transition-all">
+                                                        <label className="text-[10px] font-bold text-slate-600 uppercase block mb-1.5">{f.label}</label>
                                                         <div className="grid grid-cols-2 gap-4">
-                                                            <div className="text-sm text-gray-500 line-through truncate">{f.current || 'Empty'}</div>
-                                                            <div className="text-sm text-white font-medium break-words">{f.requested || 'Empty'}</div>
+                                                            <div className="text-xs text-slate-400 line-through truncate">{f.current || 'Empty'}</div>
+                                                            <div className="text-xs text-slate-900 font-semibold break-words">{f.requested || 'Empty'}</div>
                                                         </div>
                                                     </div>
                                                 );
                                             })}
 
                                             {requested.photoUrl && requested.photoUrl !== approvalUser.photoUrl && (
-                                                <div className="bg-white/5 border border-white/5 rounded-xl p-4">
-                                                    <label className="text-[10px] font-bold text-purple-400 uppercase block mb-4">Profile Photo Update</label>
-                                                    <div className="flex items-center gap-8">
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <span className="text-[10px] text-gray-500">OLD</span>
-                                                            <img src={approvalUser.photoUrl || '/placeholder.png'} className="w-20 h-20 rounded-full border border-white/10 object-cover opacity-50" />
+                                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                                    <label className="text-[10px] font-bold text-slate-600 uppercase block mb-3">Profile Photo Update</label>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="flex flex-col items-center gap-1.5">
+                                                            <span className="text-[10px] font-bold text-slate-400">OLD</span>
+                                                            <img src={approvalUser.photoUrl || '/placeholder.png'} className="w-16 h-16 rounded-full border border-slate-200 object-cover opacity-60" />
                                                         </div>
-                                                        <div className="text-2xl text-yellow-500">→</div>
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <span className="text-[10px] text-yellow-500">NEW</span>
-                                                            <img src={requested.photoUrl} className="w-20 h-20 rounded-full border-2 border-yellow-500 object-cover shadow-[0_0_20px_rgba(234,179,8,0.2)]" />
+                                                        <div className="text-xl text-amber-500">→</div>
+                                                        <div className="flex flex-col items-center gap-1.5">
+                                                            <span className="text-[10px] font-bold text-amber-600">NEW</span>
+                                                            <img src={requested.photoUrl} className="w-16 h-16 rounded-full border-2 border-amber-500 object-cover shadow-xs" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1439,16 +1429,16 @@ export default function UsersPage() {
                                 })()}
                             </div>
 
-                            <div className="p-6 border-t border-white/10 bg-white/5 flex gap-4">
+                            <div className="p-4 border-t border-slate-200 bg-slate-50 flex gap-3">
                                 <button
                                     onClick={() => handleApprovalAction(approvalUser.id, 'APPROVE')}
-                                    className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_4px_15px_rgba(22,163,74,0.3)] active:scale-95"
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg transition-all shadow-xs text-sm"
                                 >
                                     Approve & Update
                                 </button>
                                 <button
                                     onClick={() => handleApprovalAction(approvalUser.id, 'REJECT')}
-                                    className="flex-1 bg-red-600/20 hover:bg-red-600/30 text-red-500 border border-red-500/30 font-bold py-3 rounded-xl transition-all active:scale-95"
+                                    className="flex-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-300 font-semibold py-2.5 rounded-lg transition-all text-sm"
                                 >
                                     Reject Request
                                 </button>

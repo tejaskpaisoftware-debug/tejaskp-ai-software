@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { UserPlus, CheckCircle2, AlertCircle, Building2, MapPin, Calendar, Mail, Phone, User, Briefcase } from "lucide-react";
 
 type Role = "STUDENT" | "EMPLOYEE" | "CLIENT" | "TEAM_LEAD" | "DEVELOPMENT_MANAGER";
 
@@ -23,7 +24,7 @@ export default function RegisterUserPage() {
     const [collegeSearch, setCollegeSearch] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
 
-    // Fallback Data - Comprehensive List of Gujarat Colleges & Universities
+    // Fallback Data
     const FALLBACK_COLLEGES = [
         "Gujarat University", "GTU", "Nirma University", "PDEU", "DA-IICT", "SVNIT", "Parul University", "Marwadi University", "RK University", "AU", "MSU"
     ];
@@ -92,100 +93,128 @@ export default function RegisterUserPage() {
                     joiningDate: new Date().toISOString().split('T')[0],
                 });
                 setCollegeSearch("");
-                setTimeout(() => setStatus("IDLE"), 3000);
+                setTimeout(() => setStatus("IDLE"), 4000);
             } else {
                 const data = await res.json();
                 setErrorMessage(data.message || "Registration Failed");
                 setStatus("ERROR");
             }
         } catch (err) {
-            setErrorMessage("Network Error");
+            setErrorMessage("Network error during registration");
             setStatus("ERROR");
         }
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans w-full p-8 md:p-12">
-            <main className="max-w-4xl mx-auto">
-                <header className="mb-10 text-center md:text-left">
-                    <h1 className="text-4xl font-extrabold text-foreground tracking-tighter uppercase">Register New Account</h1>
-                    <p className="text-gold-theme/70 mt-2 font-medium">Create system access for Students, Staff, and Managers.</p>
-                </header>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <UserPlus className="w-3.5 h-3.5" /> Identity & Access Management
+                        </span>
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Provision User Account</h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Create credentials and assign domain responsibilities for Students, Employees, and Leads.
+                    </p>
+                </div>
+            </div>
 
-                <div className="bg-card/30 border border-gold-theme/20 rounded-3xl p-6 md:p-10 backdrop-blur-md shadow-2xl">
-                    <form onSubmit={handleSubmit} className="space-y-8">
+            <main className="max-w-4xl mx-auto">
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Role Selection */}
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                            {["STUDENT", "EMPLOYEE", "TEAM_LEAD", "CLIENT", "DEVELOPMENT_MANAGER"].map((role) => (
-                                <button
-                                    key={role}
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, role: role as Role })}
-                                    className={`py-3 rounded-xl text-[10px] md:text-xs font-black tracking-widest transition-all border-2 ${formData.role === role
-                                        ? "bg-gold-theme text-black border-gold-theme shadow-lg scale-105"
-                                        : "bg-transparent text-muted-foreground border-white/5 hover:border-gold-theme/30"
+                        <div>
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 block">
+                                Target Account Role
+                            </label>
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                                {(["STUDENT", "EMPLOYEE", "TEAM_LEAD", "CLIENT", "DEVELOPMENT_MANAGER"] as const).map((role) => (
+                                    <button
+                                        key={role}
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, role })}
+                                        className={`py-2.5 px-3 rounded-xl text-xs font-bold tracking-wider transition-all border ${
+                                            formData.role === role
+                                                ? "bg-amber-500 text-slate-950 border-amber-500 shadow-sm"
+                                                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                                         }`}
-                                >
-                                    {role.replace('_', ' ')}
-                                </button>
-                            ))}
+                                    >
+                                        {role.replace('_', ' ')}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-gold-theme/80 uppercase tracking-widest block ml-1">Full Name</label>
+                        {/* Full Name & Mobile */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+                                    <User className="w-3.5 h-3.5 text-slate-400" /> Full Name
+                                </label>
                                 <input
                                     required
                                     type="text"
                                     value={formData.fullName}
                                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:border-gold-theme/50 transition-all font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors"
                                     placeholder="e.g. Aryan Sharma"
                                 />
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-gold-theme/80 uppercase tracking-widest block ml-1">Connect Mobile</label>
+                            <div>
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+                                    <Phone className="w-3.5 h-3.5 text-slate-400" /> Mobile Number
+                                </label>
                                 <input
                                     required
                                     type="tel"
                                     value={formData.mobile}
                                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:border-gold-theme/50 transition-all font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors"
                                     placeholder="e.g. 98250XXXXX"
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gold-theme/80 uppercase tracking-widest block ml-1">Email Address</label>
+                        {/* Email */}
+                        <div>
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+                                <Mail className="w-3.5 h-3.5 text-slate-400" /> Official Email Address
+                            </label>
                             <input
                                 required
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:border-gold-theme/50 transition-all font-medium"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors"
                                 placeholder="official@company.com"
                             />
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-gold-theme/80 uppercase tracking-widest block ml-1">Date of Joining</label>
+                        {/* Joining Date & Domain */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-slate-400" /> Date of Joining
+                                </label>
                                 <input
                                     type="date"
                                     value={formData.joiningDate}
                                     onChange={(e) => setFormData({ ...formData, joiningDate: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:border-gold-theme/50 transition-all font-medium"
-                                    style={{ colorScheme: 'dark' }}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors"
                                 />
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-gold-theme/80 uppercase tracking-widest block ml-1">Assigned Domain</label>
+                            <div>
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+                                    <Briefcase className="w-3.5 h-3.5 text-slate-400" /> Assigned Department / Domain
+                                </label>
                                 <select
                                     required
                                     value={formData.department}
                                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:border-gold-theme/50 transition-all font-medium appearance-none"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
                                 >
                                     <option value="">Select Domain</option>
                                     <option value="Web Development">Web Development</option>
@@ -199,9 +228,18 @@ export default function RegisterUserPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-3 relative">
-                            <label className="text-[10px] font-black text-gold-theme/80 uppercase tracking-widest block ml-1">
-                                {formData.role === "STUDENT" ? "Academic Institution" : "Physical Address / KYC"}
+                        {/* College / Address */}
+                        <div className="relative">
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+                                {formData.role === "STUDENT" ? (
+                                    <>
+                                        <Building2 className="w-3.5 h-3.5 text-slate-400" /> Academic University / College
+                                    </>
+                                ) : (
+                                    <>
+                                        <MapPin className="w-3.5 h-3.5 text-slate-400" /> Residential Address / Location
+                                    </>
+                                )}
                             </label>
 
                             {formData.role === "STUDENT" ? (
@@ -216,15 +254,15 @@ export default function RegisterUserPage() {
                                         }}
                                         onFocus={() => setShowDropdown(true)}
                                         onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:border-gold-theme/50 transition-all font-medium"
-                                        placeholder="Type to search colleges..."
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                                        placeholder="Type to search university or college..."
                                     />
                                     {showDropdown && filteredColleges.length > 0 && (
-                                        <div className="absolute top-full left-0 right-0 border border-white/10 bg-[#0a0a0a] rounded-2xl mt-2 max-h-52 overflow-y-auto z-50 shadow-2xl p-2 space-y-1">
+                                        <div className="absolute top-full left-0 right-0 border border-slate-200 bg-white rounded-xl mt-1.5 max-h-52 overflow-y-auto z-50 shadow-xl p-1.5 space-y-0.5">
                                             {filteredColleges.map((college, i) => (
                                                 <div
                                                     key={i}
-                                                    className="px-4 py-3 hover:bg-gold-theme/10 rounded-xl text-sm cursor-pointer transition-colors text-white font-semibold"
+                                                    className="px-3.5 py-2 hover:bg-amber-50 rounded-lg text-xs cursor-pointer transition-colors text-slate-800 font-semibold"
                                                     onMouseDown={() => {
                                                         setFormData({ ...formData, address: college });
                                                         setCollegeSearch(college);
@@ -242,26 +280,31 @@ export default function RegisterUserPage() {
                                     rows={2}
                                     value={formData.address}
                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:border-gold-theme/50 transition-all font-medium resize-none"
-                                    placeholder="Enter full residential address or department details..."
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors resize-none"
+                                    placeholder="Enter complete residential address or department location..."
                                 />
                             )}
                         </div>
 
                         {status === "SUCCESS" && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-green-500/10 border border-green-500/30 text-green-400 p-5 rounded-2xl text-center font-bold text-sm tracking-wide">
-                                Account Created Successfully! Approval Pending.
+                            <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl text-center font-semibold text-xs tracking-wide flex items-center justify-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                Account Created Successfully! Approval pending by administrator.
                             </motion.div>
                         )}
 
                         {status === "ERROR" && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-500/10 border border-red-500/30 text-red-400 p-5 rounded-2xl text-center font-bold text-sm tracking-wide">
-                                ⚠ {errorMessage}
+                            <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-center font-semibold text-xs tracking-wide flex items-center justify-center gap-2">
+                                <AlertCircle className="w-4 h-4 text-rose-600" />
+                                {errorMessage}
                             </motion.div>
                         )}
 
-                        <button className="w-full bg-gradient-to-r from-gold-theme to-gold-theme/70 text-black font-black py-5 rounded-2xl shadow-xl hover:shadow-gold-theme/20 hover:scale-[1.02] active:scale-95 transition-all text-sm tracking-[0.2em] uppercase">
-                            Initialize User Account
+                        <button 
+                            type="submit"
+                            className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 rounded-xl shadow-sm hover:shadow transition-all text-xs tracking-wider uppercase flex items-center justify-center gap-2"
+                        >
+                            <UserPlus className="w-4 h-4" /> Provision Account
                         </button>
                     </form>
                 </div>

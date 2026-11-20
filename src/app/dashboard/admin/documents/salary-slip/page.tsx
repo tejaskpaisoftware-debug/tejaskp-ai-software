@@ -296,23 +296,23 @@ export default function SalarySlipGenerator() {
     } : null;
 
     return (
-        <div className="min-h-screen bg-background text-foreground p-8 pl-72">
-            <header className="mb-8 border-b border-theme pb-4">
-                <h1 className="text-3xl font-bold text-foreground tracking-widest">GENERATE SALARY SLIP</h1>
-                <p className="text-gold-theme/60">Professional Payroll Document Generation</p>
+        <div className="space-y-6">
+            <header className="border-b border-slate-200 pb-4">
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Generate Salary Slip</h1>
+                <p className="text-xs text-slate-500 mt-0.5">Professional Payroll Document Generation & Dispatch</p>
             </header>
 
             <div className="grid lg:grid-cols-[400px_1fr] gap-8">
                 {/* LEFT: CONTROLS */}
                 <div className="space-y-6">
-                    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="bg-card/40 border border-theme p-6 rounded-xl">
-                        <h3 className="text-xl font-bold text-foreground mb-4 border-b border-gray-700 pb-2">Employee Details</h3>
+                    <motion.div initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="bg-white border border-slate-200/80 p-5 rounded-xl shadow-xs">
+                        <h3 className="text-base font-bold text-slate-900 mb-3 border-b border-slate-100 pb-2">Employee Details</h3>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3.5">
                             <div>
-                                <label className="block text-xs uppercase text-gray-500 mb-1">Select Employee</label>
+                                <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Select Employee</label>
                                 <select
-                                    className="w-full bg-background border border-gray-700 rounded p-2 text-foreground outline-none focus:border-gold-500"
+                                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 outline-hidden focus:border-amber-500 focus:bg-white transition-colors"
                                     onChange={handleEmployeeChange}
                                     defaultValue=""
                                 >
@@ -321,21 +321,21 @@ export default function SalarySlipGenerator() {
                                         <option key={emp.id} value={emp.id}>{emp.name} (Mobile: {emp.mobile})</option>
                                     ))}
                                 </select>
-                                {employees.length === 0 && <p className="text-xs text-red-400 mt-1">No employees found. Register users with role 'EMPLOYEE'.</p>}
+                                {employees.length === 0 && <p className="text-[11px] text-rose-500 mt-1">No employees found. Register users with role 'EMPLOYEE'.</p>}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs uppercase text-gray-500 mb-1">Month</label>
-                                    <select value={month} onChange={e => setMonth(e.target.value)} className="w-full bg-background border border-gray-700 rounded p-2 text-foreground outline-none focus:border-gold-500">
+                                    <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Month</label>
+                                    <select value={month} onChange={e => setMonth(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 outline-hidden focus:border-amber-500 focus:bg-white transition-colors">
                                         {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
                                             <option key={m} value={m}>{m}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs uppercase text-gray-500 mb-1">Year</label>
-                                    <select value={year} onChange={e => setYear(e.target.value)} className="w-full bg-background border border-gray-700 rounded p-2 text-foreground outline-none focus:border-gold-500">
+                                    <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Year</label>
+                                    <select value={year} onChange={e => setYear(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 outline-hidden focus:border-amber-500 focus:bg-white transition-colors">
                                         {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => (
                                             <option key={y} value={y}>{y}</option>
                                         ))}
@@ -526,29 +526,29 @@ export default function SalarySlipGenerator() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2 pt-2">
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => handleAction('save')}
                                         disabled={isDownloading}
-                                        className="flex-1 bg-green-600/20 text-green-400 border border-green-500/50 font-bold py-3 rounded-lg hover:bg-green-600 hover:text-foreground transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg transition-colors shadow-xs text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                                     >
-                                        {isDownloading ? "..." : "💾 SAVE ONLY"}
+                                        {isDownloading ? "..." : "💾 Save Record"}
                                     </button>
                                     <button
                                         onClick={() => handleAction('email')}
                                         disabled={isDownloading}
-                                        className="flex-1 bg-blue-600/20 text-blue-400 border border-blue-500/50 font-bold py-3 rounded-lg hover:bg-blue-600 hover:text-foreground transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                        className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-lg transition-colors shadow-xs text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                                     >
-                                        {isDownloading ? "..." : "📧 SEND EMAIL"}
+                                        {isDownloading ? "..." : "📧 Send Email"}
                                     </button>
                                 </div>
                                 <button
                                     onClick={handleDownload}
                                     disabled={isDownloading}
-                                    className="w-full bg-gray-800 text-gray-300 font-bold py-2 rounded-lg hover:bg-gray-700 transition-all text-sm"
+                                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2 rounded-lg text-xs transition-colors border border-slate-200 shadow-2xs"
                                 >
-                                    Downloads PDF (No Save)
+                                    Download PDF (No Save)
                                 </button>
                             </div>
 
@@ -557,13 +557,13 @@ export default function SalarySlipGenerator() {
                 </div>
 
                 {/* RIGHT: PREVIEW */}
-                <div className="bg-checkered flex items-center justify-center p-8 bg-gray-900 rounded-xl overflow-hidden relative min-h-[800px]">
-                    <div className="absolute top-4 right-4 text-xs text-gray-500 font-mono">LIVE PREVIEW</div>
+                <div className="flex items-center justify-center p-8 bg-slate-200/80 rounded-xl border border-slate-200 shadow-inner overflow-hidden relative min-h-[800px]">
+                    <div className="absolute top-4 right-4 text-xs text-slate-500 font-mono font-bold tracking-wider">LIVE PREVIEW</div>
 
                     {!selectedEmployee ? (
-                        <div className="text-center text-gray-500">
-                            <div className="text-6xl mb-4 opacity-20">💳</div>
-                            <p>Select an employee to generate salary slip</p>
+                        <div className="text-center text-slate-400">
+                            <div className="text-6xl mb-4 opacity-40">💳</div>
+                            <p className="text-sm font-medium">Select an employee from the left panel to generate salary slip</p>
                         </div>
                     ) : (
                         <div className="transform scale-90 origin-top shadow-2xl">
@@ -580,15 +580,15 @@ export default function SalarySlipGenerator() {
 function InputGroup({ label, value, onChange }: { label: string, value: number, onChange: (v: number) => void }) {
     return (
         <div className="flex items-center justify-between gap-4">
-            <label className="text-sm text-gray-400 font-medium">{label}</label>
+            <label className="text-xs text-slate-600 font-medium">{label}</label>
             <div className="relative w-32">
-                <span className="absolute left-2 top-1.5 text-gray-500 text-xs">₹</span>
+                <span className="absolute left-2 top-2 text-slate-400 text-xs">₹</span>
                 <input
                     type="number"
                     value={value}
                     onChange={e => onChange(Number(e.target.value))}
                     onWheel={(e) => e.currentTarget.blur()}
-                    className="w-full bg-background border border-gray-700 rounded py-1 pl-6 pr-2 text-right text-foreground text-sm outline-none focus:border-gold-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg py-1 pl-5 pr-2 text-right text-slate-900 text-xs outline-hidden focus:border-amber-500 focus:bg-white"
                 />
             </div>
         </div>

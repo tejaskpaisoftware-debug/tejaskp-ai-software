@@ -2,11 +2,24 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-// AdminSidebar removed (handled by layout)
 import { motion } from "framer-motion";
 import SalarySlipTemplate from "@/components/documents/SalarySlipTemplate";
 import { toPng, toJpeg } from "html-to-image";
 import jsPDF from "jspdf";
+import { 
+    CreditCard, 
+    Users, 
+    CheckCircle2, 
+    AlertCircle, 
+    RefreshCw, 
+    Play, 
+    Calendar, 
+    FileText, 
+    Check, 
+    X, 
+    Clock, 
+    Sparkles 
+} from "lucide-react";
 
 export default function PayrollPage() {
     const router = useRouter();
@@ -18,7 +31,7 @@ export default function PayrollPage() {
     // Process State
     const [currentProcessingId, setCurrentProcessingId] = useState<string | null>(null);
     const hiddenRef = useRef<HTMLDivElement>(null);
-    const [tempData, setTempData] = useState<any>(null); // Data for the hidden template to render
+    const [tempData, setTempData] = useState<any>(null);
 
     const [month, setMonth] = useState("January");
     const [year, setYear] = useState("2026");
@@ -44,7 +57,7 @@ export default function PayrollPage() {
 
     useEffect(() => {
         fetchEmployees();
-    }, []);
+    }, [month, year]);
 
     const fetchEmployees = async () => {
         setLoading(true);
@@ -52,36 +65,26 @@ export default function PayrollPage() {
             const res = await fetch('/api/admin/users?role=EMPLOYEE');
             const data = await res.json();
             if (data.users) {
-                // Filter Active Employees
                 const staff = data.users.filter((u: any) => u.role === 'EMPLOYEE' && u.status === 'ACTIVE');
 
-                // Process Staff with Deductions
                 const processedStaff = staff.map((u: any) => {
                     const hasSlip = u.salarySlips?.some((s: any) => s.month === month && s.year === year);
 
-                    // --- ADVANCED LEAVE ACCRUAL & DEDUCTION LOGIC ---
-
                     // 1. Calculate Total Accrued Leaves based on Accrual Date (End of Selected Month)
                     const accrualTargetDate = new Date(Number(year), ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].indexOf(month) + 1, 0);
-
-                    // Default to Jan 1st of SELECTED YEAR if no joining date (for testing)
                     const joiningDate = u.joiningDate ? new Date(u.joiningDate) : new Date(Number(year), 0, 1);
 
                     let monthsWorked = 0;
-                    // Calculate: (TargetYear - JoiningYear) * 12 + (TargetMonth - JoiningMonth) + 1
                     monthsWorked = (accrualTargetDate.getFullYear() - joiningDate.getFullYear()) * 12;
                     monthsWorked += accrualTargetDate.getMonth() - joiningDate.getMonth();
-                    monthsWorked += 1; // Include current month in accrual
+                    monthsWorked += 1;
                     monthsWorked = Math.max(0, monthsWorked);
 
                     const totalCLAccrued = monthsWorked * 1.0;
                     const totalSLAccrued = monthsWorked * 0.5;
 
-                    // 2. Calculate Used Leaves (ALL TIME except current month being processed)
                     let usedCL = 0;
                     let usedSL = 0;
-
-                    // 3. Current Month Leaves (to be processed)
                     let currentMonthLeaves: any[] = [];
 
                     if (u.leaves) {
@@ -92,168 +95,144 @@ export default function PayrollPage() {
                                 const diffTime = Math.abs(end.getTime() - start.getTime());
                                 let days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-                                // Check for Half Day
                                 if (leave.type && leave.type.includes('_HALF')) {
                                     days = 0.5;
                                 }
 
-                                // Check if this leave belongs to the CURRENT processing month
-                                const currentMonthIdx = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].indexOf(month);
+                                const leaveMonth = start.toLocaleString('default', { month: 'long' });
+                                const leaveYear = start.getFullYear().toString();
 
-                                const isCurrentMonth = start.getMonth() === currentMonthIdx && start.getFullYear() === Number(year);
-
-                                if (isCurrentMonth) {
-                                    currentMonthLeaves.push({ ...leave, days });
-                                } else if (start < new Date(Number(year), currentMonthIdx, 1)) {
-                                    // Past leave: Add to used 
-                                    if (leave.type && leave.type.includes('SL')) usedSL += days;
-                                    else usedCL += days; // Default to CL
+                                if (leaveMonth === month && leaveYear === year) {
+                                    currentMonthLeaves.push({ ...leave, calculatedDays: days });
+                                } else if (start <= accrualTargetDate) {
+                                    if (leave.type && leave.type.startsWith('SL')) {
+                                        usedSL += days;
+                                    } else {
+                                        usedCL += days;
+                                    }
                                 }
                             }
                         });
                     }
 
-                    // 4. Calculate Available Balance BEFORE this month
-                    let balanceCL = totalCLAccrued - usedCL;
-                    let balanceSL = totalSLAccrued - usedSL;
+                    let availableCL = Math.max(0, totalCLAccrued - usedCL);
+                    let availableSL = Math.max(0, totalSLAccrued - usedSL);
 
-                    // 5. Process Current Month Deductions
-                    let deductionDays = 0;
-                    let leavesTakenThisMonth = 0;
-
+                    let extraLeaveDays = 0;
                     currentMonthLeaves.forEach(leave => {
-                        leavesTakenThisMonth += leave.days;
-                        if (leave.type && leave.type.includes('SL')) {
-                            if (balanceSL >= leave.days) {
-                                balanceSL -= leave.days; // Paid
+                        const days = leave.calculatedDays;
+                        const isSL = leave.type && leave.type.startsWith('SL');
+
+                        if (isSL) {
+                            if (availableSL >= days) {
+                                availableSL -= days;
                             } else {
-                                const paidPart = Math.max(0, balanceSL);
-                                const unpaidPart = leave.days - paidPart;
-                                balanceSL = 0;
-                                deductionDays += unpaidPart;
+                                const remaining = days - availableSL;
+                                availableSL = 0;
+                                if (availableCL >= remaining) {
+                                    availableCL -= remaining;
+                                } else {
+                                    extraLeaveDays += (remaining - availableCL);
+                                    availableCL = 0;
+                                }
                             }
                         } else {
-                            // Default to CL
-                            if (balanceCL >= leave.days) {
-                                balanceCL -= leave.days; // Paid
+                            if (availableCL >= days) {
+                                availableCL -= days;
                             } else {
-                                const paidPart = Math.max(0, balanceCL);
-                                const unpaidPart = leave.days - paidPart;
-                                balanceCL = 0;
-                                deductionDays += unpaidPart;
+                                extraLeaveDays += (days - availableCL);
+                                availableCL = 0;
                             }
                         }
                     });
 
-                    const extraLeaveDays = deductionDays;
+                    let leaveDeduction = 0;
+                    let baseDailyRate = 0;
+                    if (u.salaryDetails?.basicSalary) {
+                        const monthlyBase = Number(u.salaryDetails.basicSalary);
+                        baseDailyRate = monthlyBase / 30;
+                        leaveDeduction = Math.round(extraLeaveDays * baseDailyRate);
+                    }
 
-                    // Salary Details
-                    const details = u.salaryDetails ? JSON.parse(u.salaryDetails) : { basic: 15000, hra: 6000, special: 4000 };
-                    const totalMonthlySalary = (details.basic || 0) + (details.hra || 0) + (details.special || 0);
-
-                    // Deduction Formula
-                    const daysInMonth = new Date(Number(year), ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].indexOf(month) + 1, 0).getDate();
-                    const perDaySalary = totalMonthlySalary / daysInMonth;
-                    const leaveDeduction = Math.round(extraLeaveDays * perDaySalary);
+                    const hasPendingLeaves = u.leaves?.some((l: any) => {
+                        const lDate = new Date(l.startDate);
+                        return lDate.toLocaleString('default', { month: 'long' }) === month &&
+                            lDate.getFullYear().toString() === year &&
+                            l.status === 'PENDING';
+                    });
 
                     return {
                         ...u,
                         paymentStatus: hasSlip ? 'PAID' : 'PENDING',
-                        leavesTaken: leavesTakenThisMonth,
+                        leavesTaken: currentMonthLeaves.reduce((acc, curr) => acc + curr.calculatedDays, 0),
                         extraLeaveDays,
                         leaveDeduction,
-                        salaryConfig: details,
-                        balances: { cl: balanceCL.toFixed(1), sl: balanceSL.toFixed(1) },
-                        hasPendingLeaves: u.leaves?.some((l: any) => l.status === 'PENDING')
+                        balances: { cl: availableCL, sl: availableSL },
+                        hasPendingLeaves
                     };
                 });
 
                 setEmployees(processedStaff);
             }
-        } catch (e) {
-            console.error(e);
+        } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
     const runBatchProcess = async () => {
-        if (!confirm(`Are you sure you want to process payroll for ${month} ${year}? This will email all pending employees.`)) return;
+        const pendingEmployees = employees.filter(e => e.paymentStatus === 'PENDING');
+        if (pendingEmployees.length === 0) return alert("No pending employees to process!");
+
+        if (!confirm(`Are you sure you want to process payroll for ${pendingEmployees.length} employees? This will generate PDF slips, record the payments, and send emails.`)) return;
 
         setProcessing(true);
-        setProcessStatus("Starting Batch Process...");
-
-        const pendingEmployees = employees.filter(e => e.paymentStatus === 'PENDING');
-
-        if (pendingEmployees.length === 0) {
-            alert("No pending payments for this month.");
-            setProcessing(false);
-            return;
-        }
 
         for (let i = 0; i < pendingEmployees.length; i++) {
             const emp = pendingEmployees[i];
-            setProcessStatus(`Processing ${i + 1}/${pendingEmployees.length}: ${emp.name}...`);
+            setProcessStatus(`Processing ${i + 1}/${pendingEmployees.length}: ${emp.name}`);
             setCurrentProcessingId(emp.id);
 
-            // 1. Prepare Data
-            const details = emp.salaryConfig || { basic: 15000, hra: 6000, special: 4000, pf: 1800, pt: 200 };
-
-            // Build full slip data object
-            const slipData = {
-                month,
-                year,
-                employeeName: emp.name,
-                designation: "Employee", // Default
-                employeeId: "EMP-" + emp.mobile.slice(-4),
-                joiningDate: emp.createdAt ? new Date(emp.createdAt).toLocaleDateString() : "-",
-                bankName: "HDFC Bank", // Default if not stored
-                bankBranch: "",
-                ifscCode: "",
-                accountNumber: "XXXXXXXX" + emp.mobile.slice(-4),
-                panNumber: "ABCDE1234F",
-
-                basicSalary: details.basic || 0,
-                hra: details.hra || 0,
-                specialAllowance: details.special || 0,
-                conveyance: 0,
-                medical: 0,
-                bonus: 0,
-
-                pf: details.pf || 0,
-                professionalTax: details.pt || 0,
-                tds: 0,
-                loan: 0,
-                otherDeductions: 0,
-                leaveDeduction: emp.leaveDeduction || 0 // Correct prop
-            };
-
-            // 2. Render Template (Update State and wait a bit for React to render)
-            setTempData(slipData);
-            await new Promise(r => setTimeout(r, 500)); // Wait for render
-
             try {
+                const calculatedDeductions = [
+                    ...(emp.salaryDetails?.deductions || []),
+                    ...(emp.leaveDeduction > 0 ? [{ name: `Unpaid Leave (${emp.extraLeaveDays} Days)`, amount: emp.leaveDeduction }] : [])
+                ];
+
+                const totalEarnings = (emp.salaryDetails?.earnings || []).reduce((sum: number, item: any) => sum + Number(item.amount), 0) + Number(emp.salaryDetails?.basicSalary || 0);
+                const totalDeductions = calculatedDeductions.reduce((sum: number, item: any) => sum + Number(item.amount), 0);
+                const netSalary = Math.max(0, totalEarnings - totalDeductions);
+
+                const slipData = {
+                    employeeName: emp.name,
+                    designation: emp.designation || "Employee",
+                    month,
+                    year,
+                    basicSalary: Number(emp.salaryDetails?.basicSalary || 0),
+                    earnings: emp.salaryDetails?.earnings || [],
+                    deductions: calculatedDeductions,
+                    totalEarnings,
+                    totalDeductions,
+                    netSalary,
+                    bankDetails: emp.bankDetails || { bankName: 'N/A', accountNumber: 'N/A', ifscCode: 'N/A' },
+                    extraLeaveDays: emp.extraLeaveDays,
+                    balances: emp.balances
+                };
+
+                setTempData(slipData);
+                await new Promise(r => setTimeout(r, 800));
+
                 if (hiddenRef.current) {
-                    // 3. Generate PDF
-                    const dataUrl = await toJpeg(hiddenRef.current, { quality: 0.8, pixelRatio: 1.5 });
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    const imgProps = pdf.getImageProperties(dataUrl);
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                    pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-                    const pdfBase64 = pdf.output('datauristring');
+                    const canvas = await toPng(hiddenRef.current, { quality: 0.95 });
+                    const pdf = new jsPDF("p", "mm", "a4");
+                    pdf.addImage(canvas, "PNG", 0, 0, 210, 297);
+                    const pdfBase64 = pdf.output('datauristring').split(',')[1];
 
-                    // 4. Send Email & Save via API
-                    // We reuse the 'email' route which sends email. 
-                    // Ideally we should have a route that SAVES + EMAILS. 
-                    // The 'salary-slip' POST saves. The 'email' POST emails.
-                    // We need to do BOTH.
-
-                    // Step A: Save to DB
                     const savePayload = {
                         userId: emp.id,
-                        ...slipData, // Contains month, year already
-                        sendEmail: false // We will call email API manually to rely on our PDF
+                        ...slipData,
+                        sendEmail: false
                     };
 
                     await fetch('/api/admin/documents/salary-slip', {
@@ -262,7 +241,6 @@ export default function PayrollPage() {
                         body: JSON.stringify(savePayload)
                     });
 
-                    // Step B: Send Email
                     if (emp.email) {
                         await fetch('/api/admin/documents/salary-slip/email', {
                             method: 'POST',
@@ -277,7 +255,6 @@ export default function PayrollPage() {
                         });
                     }
 
-                    // Update UI
                     setEmployees(prev => prev.map(p => p.id === emp.id ? { ...p, paymentStatus: 'PAID' } : p));
                 }
             } catch (err) {
@@ -307,7 +284,6 @@ export default function PayrollPage() {
             });
 
             if (res.ok) {
-                // Refresh Data
                 fetchEmployees();
                 setIsLeaveModalOpen(false);
             }
@@ -317,109 +293,186 @@ export default function PayrollPage() {
         }
     };
 
-    return (
-        <>
-            <header className="flex justify-between items-center mb-8 border-b border-theme pb-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-wider">PAYROLL AUTOMATION</h1>
-                    <p className="text-gold-theme/60">Batch Process Salary Slips</p>
-                </div>
-                <div className="flex gap-4">
-                    <select value={month} onChange={e => setMonth(e.target.value)} className="bg-card border border-gold-500/30 rounded p-2 text-foreground outline-none">
-                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
-                            <option key={m} value={m}>{m}</option>
-                        ))}
-                    </select>
-                    <select value={year} onChange={e => setYear(e.target.value)} className="bg-card border border-gold-500/30 rounded p-2 text-foreground outline-none">
-                        {[2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
-                    </select>
-                    <button onClick={fetchEmployees} className="text-sm bg-gray-800 px-4 py-2 rounded text-foreground">Refresh</button>
-                </div>
-            </header>
+    const pendingCount = employees.filter(e => e.paymentStatus === 'PENDING').length;
+    const paidCount = employees.filter(e => e.paymentStatus === 'PAID').length;
 
-            {/* STATS */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-                <div className="bg-card/50 border border-theme p-6 rounded-xl">
-                    <h3 className="text-muted-foreground text-xs uppercase">Total Active Employees</h3>
-                    <p className="text-3xl font-bold text-foreground">{employees.length}</p>
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <CreditCard className="w-3.5 h-3.5" /> Staff Compensation
+                        </span>
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Payroll Automation</h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Automated leave deductions, batch salary slip generation, and employee email disbursement.
+                    </p>
                 </div>
-                <div className="bg-card/50 border border-green-500/20 p-6 rounded-xl">
-                    <h3 className="text-muted-foreground text-xs uppercase">Paid This Month</h3>
-                    <p className="text-3xl font-bold text-green-400">{employees.filter(e => e.paymentStatus === 'PAID').length}</p>
-                </div>
-                <div className="bg-card/50 border border-red-500/20 p-6 rounded-xl">
-                    <h3 className="text-muted-foreground text-xs uppercase">Pending Payment</h3>
-                    <p className="text-3xl font-bold text-red-400">{employees.filter(e => e.paymentStatus === 'PENDING').length}</p>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                        <Calendar className="w-4 h-4 text-slate-400" />
+                        <select 
+                            value={month} 
+                            onChange={e => setMonth(e.target.value)} 
+                            className="bg-transparent text-sm font-semibold text-slate-800 outline-none cursor-pointer"
+                        >
+                            {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                                <option key={m} value={m}>{m}</option>
+                            ))}
+                        </select>
+                        <select 
+                            value={year} 
+                            onChange={e => setYear(e.target.value)} 
+                            className="bg-transparent text-sm font-semibold text-slate-800 outline-none cursor-pointer border-l border-slate-200 pl-2"
+                        >
+                            {[2025, 2026, 2027].map(y => <option key={y} value={y.toString()}>{y}</option>)}
+                        </select>
+                    </div>
+
+                    <button 
+                        onClick={fetchEmployees} 
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2.5 rounded-xl transition-colors"
+                    >
+                        <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                    </button>
                 </div>
             </div>
 
-            <div className="bg-card/30 border border-gold-500/10 rounded-xl overflow-hidden p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold flex items-center gap-2">
-                        <span>📋</span> Disbursement List
-                    </h3>
+            {/* KPI Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Active Staff</p>
+                        <p className="text-2xl font-extrabold text-slate-900 mt-1">{employees.length}</p>
+                    </div>
+                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
+                        <Users className="w-5 h-5" />
+                    </div>
+                </div>
+
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Paid This Month</p>
+                        <p className="text-2xl font-extrabold text-emerald-600 mt-1">{paidCount}</p>
+                    </div>
+                    <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                </div>
+
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Disbursement</p>
+                        <p className="text-2xl font-extrabold text-amber-600 mt-1">{pendingCount}</p>
+                    </div>
+                    <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                        <AlertCircle className="w-5 h-5" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Disbursement List & Batch Action */}
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+                <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-amber-600" /> Employee Payroll Roster
+                        </h2>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Click on any employee row to review and approve their pending leave applications.
+                        </p>
+                    </div>
                     <button
                         onClick={runBatchProcess}
-                        disabled={processing || employees.filter(e => e.paymentStatus === 'PENDING').length === 0}
-                        className={`px-8 py-3 rounded-lg font-bold shadow-lg transition-all ${processing ? 'bg-gray-600 text-gray-300 cursor-not-allowed' :
-                            employees.filter(e => e.paymentStatus === 'PENDING').length === 0 ? 'bg-gray-700 text-gray-500' :
-                                'bg-gold-500 hover:bg-gold-400 text-obsidian hover:scale-105'
-                            }`}
+                        disabled={processing || pendingCount === 0}
+                        className={`inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-sm ${
+                            processing 
+                                ? 'bg-slate-200 text-slate-500 cursor-not-allowed' 
+                                : pendingCount === 0 
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                                    : 'bg-amber-500 hover:bg-amber-600 text-slate-950 hover:shadow'
+                        }`}
                     >
-                        {processing ? processStatus : "🚀 Process All Pending Slips"}
+                        <Play className="w-4 h-4 fill-current" />
+                        {processing ? processStatus : `Process ${pendingCount} Pending Slips`}
                     </button>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="text-xs uppercase text-gray-500 border-b border-gray-700">
-                                <th className="p-4">Employee</th>
-                                <th className="p-4">Role</th>
+                            <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500 bg-slate-50/80 border-b border-slate-200">
+                                <th className="p-4 pl-6">Employee</th>
+                                <th className="p-4">Designation</th>
                                 <th className="p-4">Salary Config</th>
                                 <th className="p-4">Leaves (Excess)</th>
                                 <th className="p-4">Balance Rem.</th>
-                                <th className="p-4">Deduction</th>
-                                <th className="p-4">Email</th>
-                                <th className="p-4 text-center">Payment Status</th>
+                                <th className="p-4">Leave Deduct</th>
+                                <th className="p-4">Email Address</th>
+                                <th className="p-4 pr-6 text-center">Payment Status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-theme/20">
+                        <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground animate-pulse">Loading payroll data...</td></tr>
+                                <tr>
+                                    <td colSpan={8} className="p-12 text-center text-slate-400 font-medium animate-pulse">
+                                        Loading staff payroll data...
+                                    </td>
+                                </tr>
+                            ) : employees.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="p-12 text-center text-slate-400">
+                                        No active employees found.
+                                    </td>
+                                </tr>
                             ) : (
                                 employees.map((emp) => (
-                                    <tr key={emp.id} className={`hover:bg-foreground/5 transition-colors cursor-pointer group ${emp.hasPendingLeaves ? 'animate-pulse bg-red-900/10' : ''}`} onClick={() => handleManageLeaves(emp)}>
-                                        <td className="p-4 font-bold text-foreground group-hover:text-gold-400 transition-colors flex items-center gap-3">
-                                            <div className={`w-2 h-2 rounded-full ${emp.hasPendingLeaves ? 'bg-red-500 animate-ping' : 'bg-green-500/50'}`}></div>
-                                            <div>
-                                                {emp.name}
-                                                <span className="block text-[10px] text-gray-600 font-normal">Click to Manage Leaves</span>
+                                    <tr 
+                                        key={emp.id} 
+                                        className={`hover:bg-amber-50/30 transition-colors cursor-pointer group ${emp.hasPendingLeaves ? 'bg-amber-50/40' : ''}`} 
+                                        onClick={() => handleManageLeaves(emp)}
+                                    >
+                                        <td className="p-4 pl-6 font-semibold text-slate-900 group-hover:text-amber-700 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-2 h-2 rounded-full ${emp.hasPendingLeaves ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'}`} />
+                                                <div>
+                                                    <div>{emp.name}</div>
+                                                    <span className="block text-[10px] text-slate-400 font-normal">Click to review leaves</span>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-sm text-muted-foreground">{emp.designation || 'Employee'}</td>
+                                        <td className="p-4 text-sm text-slate-600">{emp.designation || 'Employee'}</td>
                                         <td className="p-4">
                                             {emp.salaryDetails ? (
-                                                <span className="text-xs bg-green-900/30 text-green-400 px-2 py-1 rounded">Configured</span>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                    Configured
+                                                </span>
                                             ) : (
-                                                <span className="text-xs bg-red-900/30 text-red-400 px-2 py-1 rounded">Missing</span>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                    Missing
+                                                </span>
                                             )}
                                         </td>
-                                        <td className="p-4">
-                                            <div className="text-sm text-gray-300">
-                                                {emp.leavesTaken} <span className="text-gray-500">({emp.extraLeaveDays > 0 ? `+${emp.extraLeaveDays}` : '0'})</span>
-                                            </div>
+                                        <td className="p-4 text-sm text-slate-700">
+                                            {emp.leavesTaken} <span className="text-slate-400">({emp.extraLeaveDays > 0 ? `+${emp.extraLeaveDays}` : '0'})</span>
                                         </td>
-                                        <td className="p-4 text-xs text-gray-400">
+                                        <td className="p-4 text-xs font-mono text-slate-600">
                                             CL: {emp.balances?.cl} | SL: {emp.balances?.sl}
                                         </td>
-                                        <td className="p-4 text-red-400 font-bold">
-                                            {emp.leaveDeduction > 0 ? `-₹${emp.leaveDeduction}` : '-'}
+                                        <td className="p-4 text-sm font-semibold text-rose-600">
+                                            {emp.leaveDeduction > 0 ? `-₹${emp.leaveDeduction.toLocaleString('en-IN')}` : '-'}
                                         </td>
-                                        <td className="p-4 text-sm text-gray-400">{emp.email || '-'}</td>
-                                        <td className="p-4 text-center">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${emp.paymentStatus === 'PAID' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                                                }`}>
+                                        <td className="p-4 text-sm text-slate-500">{emp.email || '-'}</td>
+                                        <td className="p-4 pr-6 text-center">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                                                emp.paymentStatus === 'PAID' 
+                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                                                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                            }`}>
                                                 {emp.paymentStatus}
                                             </span>
                                         </td>
@@ -439,80 +492,87 @@ export default function PayrollPage() {
                     </div>
                 )}
             </div>
+
             {/* Leave Management Modal */}
-            {
-                isLeaveModalOpen && selectedEmployeeLeaves && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-card border border-gold-500/30 p-8 rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-hidden flex flex-col"
-                        >
-                            <div className="flex justify-between items-center mb-6 shrink-0">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-foreground mb-1">Manage Leaves</h2>
-                                    <p className="text-gray-400 text-sm">Reviewing leaves for <span className="text-gold-400">{selectedEmployeeLeaves.name}</span></p>
-                                </div>
-                                <button onClick={() => setIsLeaveModalOpen(false)} className="text-gray-500 hover:text-foreground text-xl">✕</button>
+            {isLeaveModalOpen && selectedEmployeeLeaves && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col"
+                    >
+                        <div className="flex justify-between items-center p-6 border-b border-slate-100">
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-900">Manage Employee Leaves</h2>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                    Reviewing leaves for <span className="font-semibold text-amber-600">{selectedEmployeeLeaves.name}</span>
+                                </p>
                             </div>
+                            <button 
+                                onClick={() => setIsLeaveModalOpen(false)} 
+                                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
 
-                            <div className="overflow-y-auto flex-1 space-y-4 pr-2">
-                                {selectedEmployeeLeaves.leaves && selectedEmployeeLeaves.leaves.length > 0 ? (
-                                    selectedEmployeeLeaves.leaves
-                                        .sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-                                        .map((leave: any) => (
-                                            <div key={leave.id} className="bg-background/50 border border-gray-700 p-4 rounded-xl flex justify-between items-center md:flex-row flex-col gap-4">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${leave.type?.includes('SL') ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'}`}>
-                                                            {leave.type?.replace(/_HALF.*/, '') || 'CL'}
-                                                            {leave.type?.includes('_HALF') && (
-                                                                <span className="text-[8px] bg-white/20 px-1 rounded ml-1">
-                                                                    {leave.type.includes('_1') ? '1st HALF' : leave.type.includes('_2') ? '2nd HALF' : 'HALF'}
-                                                                </span>
-                                                            )}
-                                                        </span>
-                                                        <span className={`text-[10px] px-2 py-0.5 rounded border ${leave.status === 'APPROVED' ? 'text-green-500 border-green-500' :
-                                                            leave.status === 'REJECTED' ? 'text-red-500 border-red-500' :
-                                                                'text-yellow-500 border-yellow-500'
-                                                            }`}>
-                                                            {leave.status}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-foreground font-bold text-sm">
-                                                        {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
-                                                    </p>
-                                                    <p className="text-gray-400 text-xs italic mt-1">"{leave.reason}"</p>
+                        <div className="overflow-y-auto flex-1 p-6 space-y-3">
+                            {selectedEmployeeLeaves.leaves && selectedEmployeeLeaves.leaves.length > 0 ? (
+                                selectedEmployeeLeaves.leaves
+                                    .sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                                    .map((leave: any) => (
+                                        <div key={leave.id} className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1.5">
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${leave.type?.includes('SL') ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-sky-50 text-sky-700 border border-sky-200'}`}>
+                                                        {leave.type?.replace(/_HALF.*/, '') || 'CL'}
+                                                        {leave.type?.includes('_HALF') && (
+                                                            <span className="ml-1 opacity-70">HALF</span>
+                                                        )}
+                                                    </span>
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                                        leave.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                        leave.status === 'REJECTED' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                                        'bg-amber-50 text-amber-700 border-amber-200'
+                                                    }`}>
+                                                        {leave.status}
+                                                    </span>
                                                 </div>
-
-                                                <div className="flex gap-2">
-                                                    {leave.status !== 'APPROVED' && (
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'APPROVED'); }}
-                                                            className="px-4 py-2 bg-green-600 hover:bg-green-500 text-foreground text-xs font-bold rounded shadow"
-                                                        >
-                                                            {leave.status === 'REJECTED' ? 'Re-Approve' : 'Approve'}
-                                                        </button>
-                                                    )}
-                                                    {leave.status !== 'REJECTED' && (
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'REJECTED'); }}
-                                                            className="px-4 py-2 bg-red-600 hover:bg-red-500 text-foreground text-xs font-bold rounded shadow"
-                                                        >
-                                                            {leave.status === 'APPROVED' ? 'Revoke (Reject)' : 'Reject'}
-                                                        </button>
-                                                    )}
-                                                </div>
+                                                <p className="text-slate-900 font-semibold text-sm">
+                                                    {new Date(leave.startDate).toLocaleDateString()} — {new Date(leave.endDate).toLocaleDateString()}
+                                                </p>
+                                                <p className="text-slate-500 text-xs italic mt-0.5">"{leave.reason}"</p>
                                             </div>
-                                        ))
-                                ) : (
-                                    <p className="text-center text-gray-500 italic py-8">No leave history found.</p>
-                                )}
-                            </div>
-                        </motion.div>
-                    </div>
-                )
-            }
-        </>
+
+                                            <div className="flex gap-2">
+                                                {leave.status !== 'APPROVED' && (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'APPROVED'); }}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
+                                                    >
+                                                        <Check className="w-3.5 h-3.5" />
+                                                        {leave.status === 'REJECTED' ? 'Re-Approve' : 'Approve'}
+                                                    </button>
+                                                )}
+                                                {leave.status !== 'REJECTED' && (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleLeaveAction(leave.id, 'REJECTED'); }}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
+                                                    >
+                                                        <X className="w-3.5 h-3.5" />
+                                                        {leave.status === 'APPROVED' ? 'Revoke' : 'Reject'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                            ) : (
+                                <p className="text-center text-slate-400 italic py-10">No leave requests found for this employee.</p>
+                            )}
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </div>
     );
 }

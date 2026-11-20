@@ -2,62 +2,35 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import {
+    Pencil,
+    Eye,
+    History,
+    FileText,
+    CreditCard,
+    Award,
+    Clock,
+    HeartPulse,
+    Calendar,
+    BarChart2,
+    Sparkles,
+    Trash2,
+    ChevronDown,
+    ChevronUp,
+    Shield,
+    CheckCircle,
+    XCircle,
+    DollarSign,
+    Phone,
+    CalendarDays
+} from "lucide-react";
 
-console.log("UserCard.tsx LOADED");
-
-function LeaveBalanceSection({ user }: { user: UserProp }) {
-    const [balance, setBalance] = useState<any>(null);
-    const currentYear = new Date().getFullYear();
-
-    useEffect(() => {
-        // If passed in props (e.g. after server restart), use it
-        if (user.leaveBalances && user.leaveBalances.length > 0) {
-            const b = user.leaveBalances.find((b: any) => b.year === currentYear);
-            if (b) {
-                setBalance(b);
-                return;
-            }
-        }
-
-        // Otherwise fetch client-side
-        fetch(`/api/user/leave-balance?userId=${user.id}&year=${currentYear}`)
-            .then(res => res.json())
-            .then(data => setBalance(data))
-            .catch(e => console.error(e));
-    }, [user, currentYear]);
-
-    if (!balance && (!user.leaveBalances || user.leaveBalances.length === 0)) return null;
-
-    // Use fetched balance or default 0s
-    const displayBalance = balance || { cl: 0, sl: 0, pl: 0 };
-
-    return (
-        <div className="bg-white/5 rounded-lg p-3 border border-white/5">
-            <div className="text-[10px] text-gray-400 uppercase mb-2">Leave Balance ({currentYear})</div>
-            <div className="grid grid-cols-3 gap-2 text-center">
-                <div>
-                    <div className="text-[10px] text-gold-500/70">CL</div>
-                    <div className="text-sm font-bold text-gold-400">{displayBalance.cl || 0}</div>
-                </div>
-                <div>
-                    <div className="text-[10px] text-blue-500/70">SL</div>
-                    <div className="text-sm font-bold text-blue-400">{displayBalance.sl || 0}</div>
-                </div>
-                <div>
-                    <div className="text-[10px] text-green-500/70">PL</div>
-                    <div className="text-sm font-bold text-green-400">{displayBalance.pl || 0}</div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// Define interface locally to avoid circular dependency with page.tsx
 export interface UserProp {
     id: string;
     name: string;
     email: string;
     mobile: string;
+    parentMobile?: string;
     role: string;
     status: string;
     createdAt: string;
@@ -89,236 +62,320 @@ interface UserCardProps {
     onViewAttendanceChart: (user: UserProp) => void;
 }
 
-export default function UserCard({ user, onEdit, onStatusUpdate, onDelete, onSalarySlip, onProfileApproval, onMarkLate, onMarkSickLeave, onMarkCasualLeave, onSendReport, onViewAttendanceChart }: UserCardProps) {
+function LeaveBalanceSection({ user }: { user: UserProp }) {
+    const [balance, setBalance] = useState<any>(null);
+    const currentYear = new Date().getFullYear();
+
+    useEffect(() => {
+        if (user.leaveBalances && user.leaveBalances.length > 0) {
+            const b = user.leaveBalances.find((b: any) => b.year === currentYear);
+            if (b) {
+                setBalance(b);
+                return;
+            }
+        }
+
+        fetch(`/api/user/leave-balance?userId=${user.id}&year=${currentYear}`)
+            .then(res => res.json())
+            .then(data => setBalance(data))
+            .catch(e => console.error(e));
+    }, [user, currentYear]);
+
+    if (!balance && (!user.leaveBalances || user.leaveBalances.length === 0)) return null;
+
+    const displayBalance = balance || { cl: 0, sl: 0, pl: 0 };
+
+    return (
+        <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Leave Balance ({currentYear})
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-white p-1.5 rounded-lg border border-slate-200/80">
+                    <div className="text-[10px] text-amber-600 font-semibold">Casual (CL)</div>
+                    <div className="text-sm font-bold text-slate-800">{displayBalance.cl || 0}</div>
+                </div>
+                <div className="bg-white p-1.5 rounded-lg border border-slate-200/80">
+                    <div className="text-[10px] text-blue-600 font-semibold">Sick (SL)</div>
+                    <div className="text-sm font-bold text-slate-800">{displayBalance.sl || 0}</div>
+                </div>
+                <div className="bg-white p-1.5 rounded-lg border border-slate-200/80">
+                    <div className="text-[10px] text-emerald-600 font-semibold">Paid (PL)</div>
+                    <div className="text-sm font-bold text-slate-800">{displayBalance.pl || 0}</div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function UserCard({
+    user,
+    onEdit,
+    onStatusUpdate,
+    onDelete,
+    onSalarySlip,
+    onProfileApproval,
+    onMarkLate,
+    onMarkSickLeave,
+    onMarkCasualLeave,
+    onSendReport,
+    onViewAttendanceChart
+}: UserCardProps) {
     const [isExpanded, setIsExpanded] = useState(true);
 
-    // Helper to get course name
     const getCourseName = () => {
         if (user.course) return user.course;
         if (user.joiningLetters && user.joiningLetters.length > 0) {
-            // User requested to take Designation (e.g. "Python Developer") instead of Type (e.g. "Offline")
             return user.joiningLetters[0].designation || user.joiningLetters[0].internshipType;
         }
         return '-';
     };
 
+    const roleBadges: Record<string, string> = {
+        ADMIN: 'bg-rose-50 text-rose-700 border-rose-200',
+        EMPLOYEE: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        TEAM_LEAD: 'bg-blue-50 text-blue-700 border-blue-200',
+        CLIENT: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        STUDENT: 'bg-amber-50 text-amber-800 border-amber-200',
+    };
+
+    const isBlocked = user.status === 'BLOCKED';
+
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={`
-                relative overflow-hidden rounded-2xl border transition-all duration-300
-                ${user.status === 'BLOCKED' ? 'border-red-500/30 bg-red-950/20' : 'border-white/10 bg-gradient-to-br from-[#121212] to-[#0a0a0a]'}
-                hover:border-yellow-500/50 hover:shadow-[0_0_30px_rgba(234,179,8,0.1)]
-                group
-            `}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`bg-white rounded-2xl border transition-all duration-200 shadow-xs hover:shadow-md ${
+                isBlocked ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200/90'
+            }`}
         >
-            {/* Top Bar (Always Visible) */}
-            <div className="p-5 flex justify-between items-start">
-                <div className="flex items-center gap-4">
-                    {/* Avatar / Icon */}
-                    <div className={`
-                        w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold shadow-inner overflow-hidden
-                        ${user.role === 'ADMIN' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
-                            user.role === 'EMPLOYEE' ? 'bg-purple-500/20 text-purple-500 border border-purple-500/30' :
-                                user.role === 'CLIENT' ? 'bg-blue-500/20 text-blue-500 border border-blue-500/30' :
-                                    'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30'}
-                    `}>
+            {/* Card Header */}
+            <div className="p-5 flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3.5 min-w-0">
+                    {/* User Avatar */}
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-base overflow-hidden shrink-0 shadow-xs">
                         {user.photoUrl ? (
                             <img src={user.photoUrl} alt={user.name} className="w-full h-full object-cover" />
                         ) : (
-                            user.name.charAt(0).toUpperCase()
+                            user.name ? user.name.slice(0, 2).toUpperCase() : 'U'
                         )}
                     </div>
 
-                    <div>
-                        <h3 className="font-bold text-white text-lg leading-tight flex items-center gap-2">
-                            {user.name}
-                            <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse ring-4 ring-yellow-400/20" title="Code Updated" />
+                    <div className="min-w-0">
+                        <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight truncate flex items-center gap-1.5">
+                            <span>{user.name}</span>
                         </h3>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className={`text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold border ${user.role === 'ADMIN' ? 'border-red-500/30 text-red-400' :
-                                user.role === 'EMPLOYEE' ? 'border-purple-500/30 text-purple-400' :
-                                    user.role === 'CLIENT' ? 'border-blue-500/30 text-blue-400' :
-                                        'border-yellow-500/30 text-yellow-400'
-                                }`}>
-                                {user.role}
+                        
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border ${roleBadges[user.role] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                                {user.role.replace('_', ' ')}
                             </span>
-                            <span className="text-gray-400 text-xs">{user.mobile}</span>
+                            <span className="text-slate-500 text-xs font-mono">{user.mobile}</span>
                         </div>
+
                         {user.pendingUpdate && (
-                            <div className="mt-2 flex items-center gap-1 text-[10px] text-yellow-500 font-bold animate-pulse">
-                                <span>🔔</span> PROFILE UPDATE REQUESTED
+                            <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-semibold animate-pulse">
+                                <span>Update Requested</span>
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="flex gap-2">
-                    {/* Status Toggle */}
+                {/* Status Toggle & Expand */}
+                <div className="flex items-center gap-2 shrink-0">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            const newStatus = user.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
+                            const newStatus = isBlocked ? 'ACTIVE' : 'BLOCKED';
                             if (confirm(`Are you sure you want to ${newStatus === 'ACTIVE' ? 'ACTIVATE' : 'BLOCK'} this user?`)) {
                                 onStatusUpdate(user.id, newStatus);
                             }
                         }}
-                        className={`text-[10px] font-bold px-2 py-1 rounded border transition-all ${user.status === 'ACTIVE' ? 'text-green-500 border-green-500/30 bg-green-500/10 hover:bg-green-500/20' :
-                            'text-red-500 border-red-500/30 bg-red-500/10 hover:bg-red-500/20'
-                            }`}
+                        className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-colors ${
+                            !isBlocked
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                        }`}
+                        title="Click to toggle status"
                     >
-                        {user.status === 'ACTIVE' ? 'ACTIVE' : 'BLOCKED'}
+                        {user.status}
                     </button>
 
-                    {/* Expand/Collapse Toggle */}
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                        title={isExpanded ? "Collapse" : "Expand"}
                     >
-                        {isExpanded ? '−' : '+'}
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </button>
                 </div>
             </div>
 
-            {/* Expanded Details */}
+            {/* Collapsible Details */}
             <AnimatePresence>
                 {isExpanded && (
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-white/5 bg-black/20"
+                        className="border-t border-slate-100 overflow-hidden"
                     >
-                        <div className="p-5 space-y-4">
-                            {/* Course / Fees Grid */}
-                            <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div className="p-5 space-y-4 bg-slate-50/50">
+                            
+                            {/* Joining & Course Grid */}
+                            <div className="grid grid-cols-2 gap-3 text-xs bg-white p-3 rounded-xl border border-slate-200/80">
                                 <div>
-                                    <div className="text-gray-400 mb-1">Joined</div>
-                                    <div className="text-gray-300 font-mono">
+                                    <div className="text-slate-400 text-[11px] font-medium mb-0.5">Joined</div>
+                                    <div className="text-slate-700 font-mono font-semibold">
                                         {user.joiningDate ? new Date(user.joiningDate).toLocaleDateString() : new Date(user.createdAt).toLocaleDateString()}
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="text-gray-400 mb-1">Course</div>
-                                    <div className="text-gray-300">{getCourseName()}</div>
+                                    <div className="text-slate-400 text-[11px] font-medium mb-0.5">Course / Domain</div>
+                                    <div className="text-slate-800 font-medium truncate">{getCourseName()}</div>
                                 </div>
                             </div>
 
-                            {/* Leave Balances (New) */}
+                            {/* Employee Leave Balance Component */}
                             {user.role === 'EMPLOYEE' && (
                                 <LeaveBalanceSection user={user} />
                             )}
 
-                            {/* Financials (If Applicable) */}
+                            {/* Fees Breakdown for Students */}
                             {((user.totalFees || 0) > 0 || (user.paidAmount || 0) > 0) && (
-                                <div className="bg-white/5 rounded-lg p-3 grid grid-cols-3 gap-2 text-center border border-white/5">
+                                <div className="bg-white rounded-xl p-3 grid grid-cols-3 gap-2 text-center border border-slate-200/80">
                                     <div>
-                                        <div className="text-[10px] text-gray-400 uppercase">Fees</div>
-                                        <div className="text-sm font-bold text-white">₹{user.totalFees || 0}</div>
+                                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Total Fees</div>
+                                        <div className="text-xs sm:text-sm font-bold text-slate-900 font-mono">₹{user.totalFees || 0}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[10px] text-gray-400 uppercase">Paid</div>
-                                        <div className="text-sm font-bold text-green-400">₹{user.paidAmount || 0}</div>
+                                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Paid</div>
+                                        <div className="text-xs sm:text-sm font-bold text-emerald-600 font-mono">₹{user.paidAmount || 0}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[10px] text-gray-400 uppercase">Pending</div>
-                                        <div className="text-sm font-bold text-red-400">₹{Math.max(0, (user.totalFees || 0) - (user.paidAmount || 0))}</div>
+                                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Pending</div>
+                                        <div className="text-xs sm:text-sm font-bold text-rose-600 font-mono">
+                                            ₹{Math.max(0, (user.totalFees || 0) - (user.paidAmount || 0))}
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
                             {/* Action Buttons Grid */}
-                            <div className="grid grid-cols-2 gap-2 pt-2">
+                            <div className="grid grid-cols-2 gap-2 pt-1">
                                 <button
                                     onClick={() => onEdit(user)}
-                                    className="bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-500/30 py-2 rounded text-xs font-bold transition-all"
+                                    className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
                                 >
-                                    ✏️ Edit
+                                    <Pencil className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>Edit</span>
                                 </button>
+
                                 {user.pendingUpdate ? (
                                     <button
                                         onClick={() => onProfileApproval(user)}
-                                        className="bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 border border-yellow-500/30 py-2 rounded text-xs font-bold transition-all animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.2)]"
+                                        className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 rounded-lg hover:bg-amber-100 transition-colors"
                                     >
-                                        👀 Approval
+                                        <Eye className="w-3.5 h-3.5" />
+                                        <span>Review</span>
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => window.location.href = `/dashboard/admin/users/${user.id}`}
-                                        className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 py-2 rounded text-xs font-bold transition-all"
+                                        className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
                                     >
-                                        📜 History
+                                        <History className="w-3.5 h-3.5 text-slate-500" />
+                                        <span>History</span>
                                     </button>
                                 )}
+
                                 <button
                                     onClick={() => window.location.href = `/dashboard/admin/documents/joining-letter?userId=${user.id}`}
-                                    className="bg-orange-600/20 hover:bg-orange-600/30 text-orange-400 border border-orange-500/30 py-2 rounded text-xs font-bold transition-all"
+                                    className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
                                 >
-                                    📄 Letter
+                                    <FileText className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>Joining Letter</span>
                                 </button>
 
                                 {user.role === 'EMPLOYEE' ? (
                                     <button
                                         onClick={() => onSalarySlip(user)}
-                                        className="bg-green-600/20 hover:bg-green-600/30 text-green-400 border border-green-500/30 py-2 rounded text-xs font-bold transition-all"
+                                        className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
                                     >
-                                        💰 Salary Slip
+                                        <CreditCard className="w-3.5 h-3.5" />
+                                        <span>Salary Slip</span>
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => window.location.href = `/dashboard/admin/documents/certificate?userId=${user.id}`}
-                                        className="bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 border border-yellow-500/30 py-2 rounded text-xs font-bold transition-all"
+                                        className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
                                     >
-                                        🏆 Certificate
+                                        <Award className="w-3.5 h-3.5" />
+                                        <span>Certificate</span>
                                     </button>
                                 )}
                             </div>
 
-                            {/* Action Buttons: Mark Late & Mark Sick Leave (Full Width) */}
+                            {/* Student Attendance Actions */}
                             {user.role === 'STUDENT' && (
-                                <div className="space-y-2 mt-2">
-                                    <button
-                                        onClick={() => onMarkLate(user.id)}
-                                        className="w-full bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 border border-orange-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
-                                    >
-                                        ⏰ Mark Late Today
-                                    </button>
-                                    <button
-                                        onClick={() => onMarkSickLeave(user.id)}
-                                        className="w-full bg-teal-600/10 hover:bg-teal-600/20 text-teal-400 border border-teal-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
-                                    >
-                                        🤒 Mark Sick Leave
-                                    </button>
-                                    <button
-                                        onClick={() => onMarkCasualLeave(user.id)}
-                                        className="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
-                                    >
-                                        🏖️ Mark Casual Leave
-                                    </button>
-                                    <button
-                                        onClick={() => onSendReport(user)}
-                                        className="w-full bg-green-600/10 hover:bg-green-600/20 text-green-400 border border-green-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
-                                    >
-                                        📊 Send Report
-                                    </button>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); console.log('BUTTON CLICKED IN USER CARD FOR:', user.name); onViewAttendanceChart(user); }}
-                                        className="w-full bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 py-2 rounded text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-[0_0_15px_rgba(79,70,229,0.15)]"
-                                    >
-                                        ✨ AI Attendance Chart
-                                    </button>
+                                <div className="space-y-1.5 pt-1">
+                                    <div className="grid grid-cols-3 gap-1.5">
+                                        <button
+                                            onClick={() => onMarkLate(user.id)}
+                                            className="py-1.5 px-2 text-[11px] font-semibold text-amber-700 bg-white border border-slate-200 rounded-lg hover:bg-amber-50 transition-colors flex items-center justify-center gap-1"
+                                            title="Mark Late Today"
+                                        >
+                                            <Clock className="w-3 h-3 text-amber-600" />
+                                            <span>Late</span>
+                                        </button>
+                                        <button
+                                            onClick={() => onMarkSickLeave(user.id)}
+                                            className="py-1.5 px-2 text-[11px] font-semibold text-blue-700 bg-white border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-1"
+                                            title="Mark Sick Leave"
+                                        >
+                                            <HeartPulse className="w-3 h-3 text-blue-600" />
+                                            <span>Sick</span>
+                                        </button>
+                                        <button
+                                            onClick={() => onMarkCasualLeave(user.id)}
+                                            className="py-1.5 px-2 text-[11px] font-semibold text-indigo-700 bg-white border border-slate-200 rounded-lg hover:bg-indigo-50 transition-colors flex items-center justify-center gap-1"
+                                            title="Mark Casual Leave"
+                                        >
+                                            <Calendar className="w-3 h-3 text-indigo-600" />
+                                            <span>Leave</span>
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={() => onSendReport(user)}
+                                            className="py-2 px-3 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors flex items-center justify-center gap-1.5"
+                                        >
+                                            <BarChart2 className="w-3.5 h-3.5 text-emerald-600" />
+                                            <span>Send Report</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => onViewAttendanceChart(user)}
+                                            className="py-2 px-3 text-xs font-semibold text-amber-900 bg-amber-50 border border-amber-300 rounded-lg hover:bg-amber-100 transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                                        >
+                                            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                                            <span>Attendance AI</span>
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Delete Button (Full Width) */}
+                            {/* Delete Button */}
                             <button
                                 onClick={() => onDelete(user.id)}
-                                className="w-full bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-500/20 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
+                                className="w-full py-2 px-3 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors flex items-center justify-center gap-1.5"
                             >
-                                🗑️ Delete User
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete User</span>
                             </button>
+
                         </div>
                     </motion.div>
                 )}
