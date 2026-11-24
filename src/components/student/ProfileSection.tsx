@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, Phone, Mail, Save, ShieldCheck } from "lucide-react";
+import { User, Phone, Mail, Save, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 interface ProfileSectionProps {
     userId: string;
@@ -12,6 +11,7 @@ interface ProfileSectionProps {
 export default function ProfileSection({ userId }: ProfileSectionProps) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
     const [profile, setProfile] = useState({
         name: "",
         mobile: "",
@@ -47,6 +47,7 @@ export default function ProfileSection({ userId }: ProfileSectionProps) {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
+        setSaveSuccess(false);
         try {
             const res = await fetch(`/api/user/profile`, {
                 method: "PUT",
@@ -54,7 +55,8 @@ export default function ProfileSection({ userId }: ProfileSectionProps) {
                 body: JSON.stringify({ userId, ...profile })
             });
             if (res.ok) {
-                alert("Profile updated successfully!");
+                setSaveSuccess(true);
+                setTimeout(() => setSaveSuccess(false), 4000);
             } else {
                 alert("Failed to update profile.");
             }
@@ -65,48 +67,77 @@ export default function ProfileSection({ userId }: ProfileSectionProps) {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500 animate-pulse font-bold">Loading Profile...</div>;
+    if (loading) {
+        return (
+            <div className="max-w-4xl mx-auto bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-xs">
+                <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-sm font-bold text-slate-600">Loading Profile Details...</p>
+            </div>
+        );
+    }
 
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"></div>
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
+                {/* Accent Top Border */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600" />
 
-                <header className="mb-8 border-b border-white/5 pb-6">
-                    <h2 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-yellow-600 flex items-center gap-3">
-                        <User className="text-yellow-500" size={32} /> PERSONAL PROFILE
-                    </h2>
-                    <p className="text-gray-500 text-sm mt-2 font-medium tracking-wide">Manage your personal and parent/guardian contact information for automated alerts.</p>
+                {/* Header */}
+                <header className="mb-8 border-b border-slate-100 pb-6 flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0 shadow-2xs">
+                            <User className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                                PERSONAL PROFILE
+                            </h2>
+                            <p className="text-slate-500 text-xs sm:text-sm mt-1 font-medium">
+                                Manage your personal and parent/guardian contact information for automated alerts.
+                            </p>
+                        </div>
+                    </div>
+
+                    {saveSuccess && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shrink-0 animate-fade-in">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            <span>Saved Successfully</span>
+                        </div>
+                    )}
                 </header>
 
                 <form onSubmit={handleSave} className="space-y-8">
                     {/* Student Info */}
                     <section>
-                        <h3 className="text-xs font-black text-yellow-500/50 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <h3 className="text-xs font-black text-amber-700 uppercase tracking-widest mb-4 flex items-center gap-2">
                             Student Information
                         </h3>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Full Name</label>
+                        <div className="grid md:grid-cols-2 gap-5">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                    Full Name
+                                </label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                     <input
                                         type="text"
                                         value={profile.name}
                                         disabled
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-gray-400 cursor-not-allowed font-medium"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-600 cursor-not-allowed font-medium text-sm"
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Mobile Number</label>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                    Mobile Number
+                                </label>
                                 <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                     <input
                                         type="text"
                                         value={profile.mobile}
                                         disabled
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-gray-400 cursor-not-allowed font-medium"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-600 cursor-not-allowed font-medium text-sm font-mono"
                                     />
                                 </div>
                             </div>
@@ -114,56 +145,62 @@ export default function ProfileSection({ userId }: ProfileSectionProps) {
                     </section>
 
                     {/* Parent Info - UPDATABLE */}
-                    <section className="bg-white/5 border border-white/5 rounded-2xl p-6 relative group border-dashed">
-                        <div className="absolute -top-3 left-6 px-3 bg-[#111] text-yellow-500 text-[10px] font-black uppercase tracking-widest border border-white/10 rounded-full">
+                    <section className="bg-amber-50/40 border border-amber-200/80 rounded-2xl p-6 relative group">
+                        <div className="absolute -top-3 left-6 px-3 py-0.5 bg-amber-500 text-slate-950 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-2xs">
                             Guardian / Parent Details
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-6 mt-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-200 uppercase tracking-wider">Parent/Guardian Name</label>
+                        <div className="grid md:grid-cols-2 gap-5 mt-2">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                    Parent/Guardian Name
+                                </label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500/50" size={18} />
+                                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                     <input
                                         type="text"
                                         value={profile.parentName}
                                         onChange={(e) => setProfile({ ...profile, parentName: e.target.value })}
                                         placeholder="Enter Parent Name"
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:border-yellow-500/50 outline-none transition-all placeholder:text-gray-700 font-medium"
+                                        className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all placeholder:text-slate-400 font-medium text-sm shadow-2xs"
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-200 uppercase tracking-wider">Parent Mobile (For Alerts)</label>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                    Parent Mobile (For Alerts)
+                                </label>
                                 <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500/50" size={18} />
+                                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                     <input
                                         type="text"
                                         value={profile.parentMobile}
                                         onChange={(e) => setProfile({ ...profile, parentMobile: e.target.value })}
                                         placeholder="Enter Parent Mobile"
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:border-yellow-500/50 outline-none transition-all placeholder:text-gray-700 font-medium font-mono"
+                                        className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all placeholder:text-slate-400 font-medium text-sm font-mono shadow-2xs"
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-2 md:col-span-2">
-                                <label className="text-xs font-bold text-gray-200 uppercase tracking-wider">Parent Email (Optional)</label>
+                            <div className="space-y-1.5 md:col-span-2">
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                    Parent Email (Optional)
+                                </label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500/50" size={18} />
+                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                     <input
                                         type="email"
                                         value={profile.parentEmail}
                                         onChange={(e) => setProfile({ ...profile, parentEmail: e.target.value })}
                                         placeholder="Enter Parent Email"
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:border-yellow-500/50 outline-none transition-all placeholder:text-gray-700 font-medium"
+                                        className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all placeholder:text-slate-400 font-medium text-sm shadow-2xs"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-xl flex items-start gap-3">
-                            <ShieldCheck className="text-yellow-500 shrink-0" size={20} />
-                            <p className="text-[10px] text-yellow-500/70 leading-relaxed font-medium">
+                        <div className="mt-5 p-3.5 bg-white border border-amber-200/90 rounded-xl flex items-start gap-3 shadow-2xs">
+                            <ShieldCheck className="text-amber-600 shrink-0 mt-0.5" size={18} />
+                            <p className="text-xs text-amber-900 leading-relaxed font-medium">
                                 <strong>Privacy Note:</strong> These details are used strictly for automated attendance warnings and emergency communications. Ensure the mobile number is active to receive SMS/WhatsApp alerts.
                             </p>
                         </div>
@@ -172,10 +209,10 @@ export default function ProfileSection({ userId }: ProfileSectionProps) {
                     <button
                         type="submit"
                         disabled={saving}
-                        className="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-300 hover:to-yellow-500 text-black font-black py-4 rounded-xl shadow-[0_10px_20px_rgba(234,179,8,0.2)] flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
+                        className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold py-3.5 rounded-xl shadow-xs hover:shadow flex items-center justify-center gap-2.5 transition-all active:scale-[0.99] cursor-pointer text-sm disabled:opacity-50"
                     >
-                        <Save size={20} />
-                        {saving ? "SAVING CHANGES..." : "UPDATE PROFILE"}
+                        <Save size={18} />
+                        <span>{saving ? "SAVING CHANGES..." : "UPDATE PROFILE"}</span>
                     </button>
                 </form>
             </div>
