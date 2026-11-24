@@ -59,6 +59,7 @@ const menuItems: MenuItem[] = [
         icon: Users,
         subItems: [
             { name: "All Users", href: "/dashboard/admin/users", icon: Users },
+            { name: "Register New User", href: "/dashboard/admin/register", icon: UserPlus },
             { name: "Attendance", href: "/dashboard/admin/attendance", icon: Clock },
             { name: "Leaves", href: "/dashboard/admin/leaves", icon: CalendarOff },
             { name: "Tasks", href: "/dashboard/admin/tasks", icon: CheckSquare },
@@ -78,7 +79,6 @@ const menuItems: MenuItem[] = [
             { name: "Assessment Submissions", href: "/dashboard/admin/documents/assessment", icon: FileCode },
         ]
     },
-    { name: "Register New", href: "/dashboard/admin/register", icon: UserPlus },
     { name: "Payroll Automation", href: "/dashboard/admin/payroll", icon: DollarSign },
     { name: "Billing", href: "/dashboard/admin/billing", icon: Receipt },
     { name: "Invoices", href: "/dashboard/admin/invoices", icon: FileSpreadsheet },

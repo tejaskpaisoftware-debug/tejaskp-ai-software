@@ -139,6 +139,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
             pendingAmount = Number(totalFees) - Number(paidAmount);
         }
 
+        // Sync course and department for students
+        const finalCourse = course || (role === 'STUDENT' || target?.role === 'STUDENT' ? department : undefined);
+        const finalDepartment = department || (role === 'STUDENT' || target?.role === 'STUDENT' ? course : undefined);
+
         const result = await prisma.$transaction(async (tx) => {
             console.log("Updating User:", id, "With Salary:", body.salaryDetails);
             const updated = await tx.user.update({
@@ -148,7 +152,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                     email,
                     mobile,
                     parentMobile,
-                    course,
+                    course: finalCourse,
                     role,
                     status,
                     totalFees: totalFees !== undefined ? Number(totalFees) : undefined,
@@ -157,7 +161,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                     salaryDetails: body.salaryDetails, // Save JSON string
 
                     // Extended Profile Fields
-                    department,
+                    department: finalDepartment,
                     designation,
                     employeeId,
                     photoUrl,

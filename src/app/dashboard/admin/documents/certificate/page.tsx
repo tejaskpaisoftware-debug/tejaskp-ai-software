@@ -81,7 +81,7 @@ export default function CertificatePage() {
                     email: data.user.email || "",
                     startDate: data.user.startDate || prev.startDate,
                     endDate: data.user.endDate || prev.endDate,
-                    course: data.user.course || "",
+                    course: data.user.course || data.user.department || "",
                 }));
                 if (data.user.mobile) setVerificationMobile(data.user.mobile);
                 setStep('create');
@@ -113,7 +113,7 @@ export default function CertificatePage() {
                     email: data.user.email || "",
                     startDate: data.user.startDate || prev.startDate,
                     endDate: data.user.endDate || prev.endDate,
-                    course: data.user.course || "",
+                    course: data.user.course || data.user.department || "",
                 }));
                 setStep('create');
             } else {

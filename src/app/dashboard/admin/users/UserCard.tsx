@@ -35,6 +35,7 @@ export interface UserProp {
     status: string;
     createdAt: string;
     course?: string;
+    department?: string;
     paymentMode?: string;
     totalFees?: number;
     paidAmount?: number;
@@ -124,7 +125,8 @@ export default function UserCard({
     const [isExpanded, setIsExpanded] = useState(true);
 
     const getCourseName = () => {
-        if (user.course) return user.course;
+        if (user.course && user.course.trim()) return user.course;
+        if (user.department && user.department.trim()) return user.department;
         if (user.joiningLetters && user.joiningLetters.length > 0) {
             return user.joiningLetters[0].designation || user.joiningLetters[0].internshipType;
         }
