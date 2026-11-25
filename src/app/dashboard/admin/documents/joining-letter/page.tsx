@@ -20,6 +20,7 @@ export default function JoiningLetterPage() {
         endDate: "",
         designation: "Intern - Web Development Intern",
         internshipType: "Offline (On-site)",
+        officeTiming: "10:30AM to 4:30PM",
         stipend: "Unpaid / Educational",
         location: "Vadodara, Gujarat",
         reportingManager: "Mr. Tejas Patel",
@@ -278,6 +279,7 @@ export default function JoiningLetterPage() {
                     startDate: data.user.startDate || prev.startDate,
                     endDate: data.user.endDate || prev.endDate,
                     internshipType: data.user.internshipType || prev.internshipType,
+                    officeTiming: data.user.officeTiming || prev.officeTiming,
                 }));
                 if (data.hasExistingLetter) {
                     if (confirm("A letter already exists. Create new?")) setStep('create');
@@ -438,6 +440,12 @@ export default function JoiningLetterPage() {
                         <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Internship Type</label>
                         <input type="text" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
                             value={formData.internshipType} onChange={e => setFormData({ ...formData, internshipType: e.target.value })} />
+                    </div>
+
+                    <div>
+                        <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Office Timing</label>
+                        <input type="text" className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:border-amber-500 focus:bg-white outline-hidden transition-colors"
+                            value={formData.officeTiming} onChange={e => setFormData({ ...formData, officeTiming: e.target.value })} placeholder="10:30AM to 4:30PM" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
