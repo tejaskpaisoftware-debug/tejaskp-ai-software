@@ -208,8 +208,27 @@ const JoiningLetterTemplate = forwardRef<HTMLDivElement, JoiningLetterProps>(({ 
                         {formData.university && (
                             <p className="text-[13px] text-slate-600 font-medium mt-0.5">{formData.university}</p>
                         )}
+                        {(formData.email || formData.mobile) && (
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11.5px] text-slate-600 font-medium mt-0.5">
+                                {formData.email && (
+                                    <span className="flex items-center gap-1">
+                                        <span className="font-bold text-[#0A192F]">Email:</span>
+                                        <span>{formData.email}</span>
+                                    </span>
+                                )}
+                                {formData.email && formData.mobile && (
+                                    <span className="text-slate-300 font-bold">•</span>
+                                )}
+                                {formData.mobile && (
+                                    <span className="flex items-center gap-1">
+                                        <span className="font-bold text-[#0A192F]">Mobile:</span>
+                                        <span className="font-mono">{formData.mobile}</span>
+                                    </span>
+                                )}
+                            </div>
+                        )}
                         {headerFields.map(field => (
-                            <p key={field.id} className="text-[12px] text-slate-600 font-medium">
+                            <p key={field.id} className="text-[12px] text-slate-600 font-medium mt-0.5">
                                 <span className="font-bold text-[#0A192F]">{field.label}:</span> {field.value}
                             </p>
                         ))}
