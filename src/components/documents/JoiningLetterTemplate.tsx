@@ -382,7 +382,7 @@ const JoiningLetterTemplate = forwardRef<HTMLDivElement, JoiningLetterProps>(({ 
                         </div>
 
                         {/* Row 6: Reporting Manager */}
-                        <div className="grid grid-cols-[180px_1fr] border-b border-slate-200">
+                        <div className="grid grid-cols-[180px_1fr] border-b border-slate-200 relative z-10">
                             <div
                                 className="text-white px-3.5 py-1.5 flex items-center gap-2.5 font-medium border-r border-slate-700/30"
                                 style={{ backgroundColor: t.primaryNavy }}
@@ -399,7 +399,7 @@ const JoiningLetterTemplate = forwardRef<HTMLDivElement, JoiningLetterProps>(({ 
                         </div>
 
                         {/* Row 7: Designation */}
-                        <div className="grid grid-cols-[180px_1fr] border-b border-slate-200">
+                        <div className="grid grid-cols-[180px_1fr] border-b border-t border-slate-200 -mt-px relative z-10">
                             <div
                                 className="text-white px-3.5 py-1.5 flex items-center gap-2.5 font-medium border-r border-slate-700/30"
                                 style={{ backgroundColor: t.primaryNavy }}
