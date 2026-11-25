@@ -382,9 +382,9 @@ const JoiningLetterTemplate = forwardRef<HTMLDivElement, JoiningLetterProps>(({ 
                         </div>
 
                         {/* Row 6: Reporting Manager */}
-                        <div className="grid grid-cols-[180px_1fr] border-b border-slate-200">
+                        <div className="grid grid-cols-[180px_1fr] border-b border-slate-300">
                             <div
-                                className="text-white px-3.5 py-1.5 flex items-center gap-2.5 font-medium border-r border-slate-700/30"
+                                className="text-white px-3.5 py-1.5 flex items-center gap-2.5 font-medium border-r border-slate-700/30 border-b border-slate-700/40"
                                 style={{ backgroundColor: t.primaryNavy }}
                             >
                                 <svg className="w-3.5 h-3.5 text-slate-200 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -393,13 +393,13 @@ const JoiningLetterTemplate = forwardRef<HTMLDivElement, JoiningLetterProps>(({ 
                                 </svg>
                                 <span>Reporting Manager:</span>
                             </div>
-                            <div className="px-3.5 py-1.5 font-semibold text-slate-800 bg-white">
+                            <div className="px-3.5 py-1.5 font-semibold text-slate-800 bg-white border-b border-slate-300">
                                 {formData.reportingManager || "Mr. Tejas Patel"}
                             </div>
                         </div>
 
                         {/* Row 7: Designation */}
-                        <div className="grid grid-cols-[180px_1fr] border-b border-slate-200">
+                        <div className="grid grid-cols-[180px_1fr] border-b border-slate-300 border-t border-slate-300">
                             <div
                                 className="text-white px-3.5 py-1.5 flex items-center gap-2.5 font-medium border-r border-slate-700/30"
                                 style={{ backgroundColor: t.primaryNavy }}
