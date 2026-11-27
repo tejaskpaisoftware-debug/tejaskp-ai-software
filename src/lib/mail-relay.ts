@@ -20,12 +20,13 @@ const transporter = nodemailer.createTransport({
  */
 export async function sendExternalEmail(to: string, subject: string, body: string, fromEmail: string, senderName: string) {
     try {
+        const senderEmail = process.env.SMTP_USER || "salesandmarketing@tejaskpaisoftware.com";
         const info = await transporter.sendMail({
-            from: `"${senderName} via Portal" <${process.env.SMTP_USER}>`,
+            from: `"${senderName} via Portal" <${senderEmail}>`,
             to: to,
             subject: subject,
             text: body,
-            replyTo: process.env.SMTP_USER, // Use real email to receive replies
+            replyTo: senderEmail, // Use real email to receive replies
         });
 
         console.log("External email sent: %s", info.messageId);

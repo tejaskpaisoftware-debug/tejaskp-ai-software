@@ -29,8 +29,9 @@ export async function POST(request: Request) {
 
         if (hasCredentials) {
             const transporter = nodemailer.createTransport(smtpConfig);
+            const fromIdentity = process.env.SMTP_FROM || `"TejasKP AI Software" <${process.env.SMTP_USER || "salesandmarketing@tejaskpaisoftware.com"}>`;
             await transporter.sendMail({
-                from: '"Tejas Patel - TEJASKP AI" <tejaspatel@tejaskpaisoftware.com>',
+                from: fromIdentity,
                 to,
                 subject,
                 html,
@@ -41,9 +42,10 @@ export async function POST(request: Request) {
             // We simulate a network delay and success
             await new Promise(resolve => setTimeout(resolve, 1500));
 
+            const simulatedFrom = process.env.SMTP_USER || "salesandmarketing@tejaskpaisoftware.com";
             console.log("---------------------------------------------------");
             console.log("SIMULATED EMAIL SENT (Missing SMTP Credentials)");
-            console.log(`FROM: tejaspatel@tejaskpaisoftware.com`);
+            console.log(`FROM: ${simulatedFrom}`);
             console.log(`TO: ${to}`);
             console.log("---------------------------------------------------");
 
