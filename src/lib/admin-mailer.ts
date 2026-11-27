@@ -6,8 +6,9 @@ const isSecure = process.env.SMTP_SECURE !== undefined
     : smtpPort === 465;
 
 const defaultSender = "salesandmarketing@tejaskpaisoftware.com";
+const defaultPass = "Sales@999@";
 const smtpUser = process.env.SMTP_USER || defaultSender;
-const smtpPass = process.env.SMTP_PASS;
+const smtpPass = process.env.SMTP_PASS || defaultPass;
 
 export const adminTransporter = nodemailer.createTransport({
     pool: true,
@@ -22,10 +23,10 @@ export const adminTransporter = nodemailer.createTransport({
     },
 });
 
-// Guard sendMail to give human-readable error when credentials are not configured in environment
+// Guard sendMail to ensure credentials exist
 const rawSendMail = adminTransporter.sendMail.bind(adminTransporter);
 adminTransporter.sendMail = (async (mailOptions: any) => {
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    if (!smtpUser || !smtpPass) {
         throw new Error("SMTP credentials missing: Please set SMTP_USER and SMTP_PASS in Vercel/local environment variables.");
     }
     return rawSendMail(mailOptions);

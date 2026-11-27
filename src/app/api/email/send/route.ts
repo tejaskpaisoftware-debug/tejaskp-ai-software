@@ -13,12 +13,12 @@ export async function POST(request: Request) {
 
         // Check for SMTP config
         const smtpConfig = {
-            host: process.env.SMTP_HOST || "smtp.titan.email",
+            host: process.env.SMTP_HOST || "smtpout.secureserver.net",
             port: Number(process.env.SMTP_PORT) || 465,
-            secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
+            secure: Number(process.env.SMTP_PORT) === 465 || process.env.SMTP_SECURE === "true",
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: process.env.SMTP_USER || "salesandmarketing@tejaskpaisoftware.com",
+                pass: process.env.SMTP_PASS || "Sales@999@",
             },
         };
 
