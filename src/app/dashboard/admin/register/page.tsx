@@ -233,21 +233,14 @@ export default function RegisterUserPage() {
                                 <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
                                     <Briefcase className="w-3.5 h-3.5 text-slate-400" /> Assigned Department / Domain
                                 </label>
-                                <select
+                                <input
+                                    type="text"
                                     required
+                                    placeholder="Enter Domain / Department (e.g. Web Development)"
                                     value={formData.department}
                                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
-                                >
-                                    <option value="">Select Domain</option>
-                                    <option value="Web Development">Web Development</option>
-                                    <option value="AI/ML – Python">AI/ML – Python</option>
-                                    <option value="Data Analytics">Data Analytics</option>
-                                    <option value="Cyber Security – AWS">Cyber Security – AWS</option>
-                                    <option value="Game Development">Game Development</option>
-                                    <option value="Development Manager">Development Manager</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white transition-colors"
+                                />
                             </div>
                         </div>
 

@@ -902,7 +902,9 @@ export default function UsersPage() {
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-xs uppercase tracking-wider text-slate-700 font-bold mb-1.5">Domain (Course / Department)</label>
-                                                <select
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter Domain / Department (e.g. Web Development)"
                                                     value={editingUser.department || editingUser.course || ''}
                                                     onChange={e => {
                                                         const val = e.target.value;
@@ -912,17 +914,8 @@ export default function UsersPage() {
                                                             course: editingUser.role === 'STUDENT' ? (val || editingUser.course) : editingUser.course
                                                         });
                                                     }}
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm cursor-pointer outline-none focus:border-amber-500 focus:bg-white transition-all shadow-2xs"
-                                                >
-                                                    <option value="">Select Domain</option>
-                                                    <option value="Web Development">Web Development</option>
-                                                    <option value="AI/ML – Python">AI/ML – Python</option>
-                                                    <option value="Data Analytics">Data Analytics</option>
-                                                    <option value="Cyber Security – AWS">Cyber Security – AWS</option>
-                                                    <option value="Game Development">Game Development</option>
-                                                    <option value="Development Manager">Development Manager</option>
-                                                    <option value="Other">Other</option>
-                                                </select>
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm outline-none focus:border-amber-500 focus:bg-white transition-all shadow-2xs"
+                                                />
                                             </div>
                                         </div>
                                     </div>
