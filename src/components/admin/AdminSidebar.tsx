@@ -15,6 +15,7 @@ import {
     FolderArchive,
     FileText,
     Award,
+    Briefcase,
     CreditCard,
     UploadCloud,
     FileCheck,
@@ -72,7 +73,8 @@ const menuItems: MenuItem[] = [
         icon: FolderArchive,
         subItems: [
             { name: "Joining Letter", href: "/dashboard/admin/documents/joining-letter", icon: FileText },
-            { name: "Experience Certificate", href: "/dashboard/admin/documents/certificate", icon: Award },
+            { name: "Completion Certificate", href: "/dashboard/admin/documents/certificate", icon: Award },
+            { name: "Experience Certificate", href: "/dashboard/admin/documents/experience-certificate", icon: Briefcase },
             { name: "Salary Slip", href: "/dashboard/admin/documents/salary-slip", icon: CreditCard },
             { name: "Weekly Submissions", href: "/dashboard/admin/submissions", icon: UploadCloud },
             { name: "NOC Submissions", href: "/dashboard/admin/documents/noc", icon: FileCheck },

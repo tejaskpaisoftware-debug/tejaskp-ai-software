@@ -227,7 +227,7 @@ export default function CertificatePage() {
                     <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-700 flex items-center justify-center mx-auto mb-4 text-xl">
                         🎓
                     </div>
-                    <h2 className="text-xl font-bold text-slate-900 mb-2">Generate Certificate</h2>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">Generate Completion Certificate</h2>
                     <p className="text-slate-500 mb-6 text-xs">Enter mobile number to fetch candidate and internship details.</p>
 
                     <input
@@ -260,7 +260,7 @@ export default function CertificatePage() {
             <div className="w-full lg:w-[380px] bg-white border border-slate-200/80 rounded-xl p-6 shadow-xs lg:sticky lg:top-6 shrink-0">
                 <div className="flex justify-between items-center mb-5 border-b border-slate-200 pb-3">
                     <div>
-                        <h2 className="text-lg font-bold text-slate-900">Certificate Details</h2>
+                        <h2 className="text-lg font-bold text-slate-900">Completion Certificate Details</h2>
                         <p className="text-xs text-slate-500">Configure certificate parameters</p>
                     </div>
                     <button onClick={() => setStep('verify')} className="text-xs font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
